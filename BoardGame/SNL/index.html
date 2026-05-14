@@ -6,6 +6,7 @@
     <title>Unity Web Player | CV Board Games</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
+  <script src="TemplateData/profiler.js"></script>
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
@@ -52,12 +53,12 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/8dbef0e48356dd32324e7956baf4d7d6.loader.js";
+      var loaderUrl = buildUrl + "/9e7cd0481cdbbf5d854ee1bdd76c237a.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/95b9ed1e28f9287a0c1d72203ebcb786.data.unityweb",
-        frameworkUrl: buildUrl + "/75e11fadf016c3eb895717b95763a989.framework.js.unityweb",
-        codeUrl: buildUrl + "/c7f843beddd04d6db63077084a6f57e8.wasm.unityweb",
+        dataUrl: buildUrl + "/a4cf4a7894be16f44ffb0ac66cf3e055.data",
+        frameworkUrl: buildUrl + "/90d420c4a32b41158d7c74f1b07d4e25.framework.js",
+        codeUrl: buildUrl + "/444f3676350ca7c00bfb88f60586f3a3.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "CV Games",
         productName: "CV Board Games",
@@ -121,6 +122,40 @@
                   unityInstance.SetFullscreen(1);
                 };
 
+                var profile = unityProfiler.createButton(unityInstance);
+                profile.style.marginLeft = '5px';
+                document.querySelector("#unity-build-title").appendChild(profile);
+
+                // Unloading web content from DOM so that browser GC can run can be tricky to get right.
+                // This code snippet shows how to correctly implement a Unity content Unload mechanism to a web page.
+
+                // Unloading Unity content enables a web page to reclaim the memory used by Unity, e.g. for
+                // the purpose of later loading another Unity content instance on the _same_ web page.
+
+                // When using this functionality, take caution to carefully make sure to clear all JavaScript code,
+                // DOM element and event handler references to the old content you may have retained, or
+                // otherwise the browser's garbage collector will be unable to reclaim the old page.
+
+                // N.b. Unity content does _not_ need to be manually unloaded when the user is navigating away from
+                // the current page to another web page. The browser will take care to clear memory of old visited
+                // pages automatically. This functionality is only needed if you want to switch between loading
+                // multiple Unity builds on a single web page.
+                var quit = document.createElement("button");
+                quit.style = "margin-left: 5px; background-color: lightgray; border: none; padding: 5px; cursor: pointer";
+                quit.innerHTML = "Unload";
+                document.querySelector("#unity-build-title").appendChild(quit);
+                quit.onclick = () => {
+                  // Quit Unity application execution
+                  unityInstance.Quit().then(() => {
+                    unityProfiler.shutDown();
+                    // Remove DOM elements from the page so GC can run
+                    document.querySelector("#unity-container").remove();
+                    canvas = null;
+                    // Remover script elements from the page so GC can run
+                    script.remove();
+                    script = null;
+                  });
+                };
               }).catch((message) => {
                 alert(message);
               });
