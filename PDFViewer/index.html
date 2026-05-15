@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>CloudReader · Cross‑Device PDF Memory (No Login)</title>
-    <!-- PDF.js -->
+    <title>CloudReader · Universal PDF (Drive/Dropbox/Upload)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -62,8 +60,10 @@
         }
         .library-header { padding: 18px 16px 10px; font-weight: 600; border-bottom: 1px solid #252c3f; display: flex; justify-content: space-between; }
         .add-book-form { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid #252c3f; }
-        .add-book-form input { background: #1e243b; border: 1px solid #333c5a; padding: 10px 12px; border-radius: 28px; color: white; outline: none; }
-        .book-list { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+        .add-book-form input, .add-book-form .upload-area { background: #1e243b; border: 1px solid #333c5a; padding: 10px 12px; border-radius: 28px; color: white; outline: none; width: 100%; }
+        .upload-area { display: flex; gap: 8px; align-items: center; background: #1e243b; padding: 6px 12px; }
+        .upload-area label { cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .book-list { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
         .book-card {
             background: #1a1f32;
             border-radius: 20px;
@@ -81,9 +81,10 @@
         .page-info { background: #00000030; padding: 6px 12px; border-radius: 32px; }
         .zoom-group, .rotate-group { display: flex; gap: 6px; }
         .canvas-container { flex: 1; overflow: auto; display: flex; justify-content: center; align-items: center; background: #1a1e2c; padding: 20px; position: relative; }
-        canvas { box-shadow: 0 12px 28px rgba(0,0,0,0.4); border-radius: 8px; background: white; transition: 0.1s; }
+        canvas { box-shadow: 0 12px 28px rgba(0,0,0,0.4); border-radius: 8px; background: white; max-width: 100%; height: auto; }
         .empty-viewer { text-align: center; color: #6f7a9e; }
         .loading-spinner { position: absolute; background: #000000aa; padding: 8px 20px; border-radius: 40px; font-size: 0.8rem; }
+        .error-message { color: #ff8888; font-size: 0.75rem; margin-top: 5px; }
         @media (max-width: 700px) { .library-panel { width: 260px; } }
     </style>
 </head>
@@ -103,9 +104,15 @@
     <div class="library-panel">
         <div class="library-header"><span><i class="fas fa-layer-group"></i> My Library</span><span id="bookCountBadge">0</span></div>
         <div class="add-book-form">
-            <input type="text" id="bookTitleInput" placeholder="Book name">
-            <input type="text" id="driveLinkInput" placeholder="Google Drive public link (PDF)">
-            <button id="addBookBtn" class="primary"><i class="fas fa-plus-circle"></i> Add to library</button>
+            <input type="text" id="bookTitleInput" placeholder="Book name (optional)">
+            <input type="text" id="driveLinkInput" placeholder="Google Drive / Dropbox / direct PDF link">
+            <button id="addBookBtn" class="primary"><i class="fas fa-plus-circle"></i> Add from link</button>
+            <div class="upload-area">
+                <label for="fileUpload"><i class="fas fa-upload"></i> Or upload PDF file:</label>
+                <input type="file" id="fileUpload" accept="application/pdf" style="display:none;">
+                <button id="uploadBookBtn"><i class="fas fa-file-pdf"></i> Add uploaded</button>
+            </div>
+            <div id="linkError" class="error-message"></div>
         </div>
         <div class="book-list" id="bookListContainer"><div style="padding:20px; text-align:center;">📚 Add a PDF to start</div></div>
     </div>
@@ -134,22 +141,69 @@
 </div>
 
 <script>
-    // ---------- CLOUD SYNC using JSONBin.io (free, no auth) ----------
-    // Each sync key creates a unique bin. All devices with same key share library & progress.
+    // ---------- MULTI-PROXY SYSTEM ----------
+    const PROXIES = [
+        (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+        (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        (url) => `https://cors-anywhere.herokuapp.com/${url}`
+    ];
+    
+    // Convert user link to raw PDF URL
+    function getRawPdfUrl(link) {
+        link = link.trim();
+        // Google Drive
+        let fileId = null;
+        const driveMatch = link.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || link.match(/id=([a-zA-Z0-9_-]+)/);
+        if (driveMatch) {
+            fileId = driveMatch[1];
+            return `https://drive.google.com/uc?export=download&id=${fileId}`;
+        }
+        // Dropbox
+        if (link.includes('dropbox.com')) {
+            let raw = link.replace('www.dropbox.com', 'dl.dropboxusercontent.com')
+                          .replace('dropbox.com', 'dl.dropboxusercontent.com');
+            if (!raw.includes('raw=1')) raw += (raw.includes('?') ? '&raw=1' : '?raw=1');
+            return raw;
+        }
+        // Any other HTTP link
+        if (link.startsWith('http')) return link;
+        return null;
+    }
+    
+    // Try to load PDF with multiple proxies
+    async function loadPdfWithProxy(rawUrl) {
+        for (let i = 0; i < PROXIES.length; i++) {
+            try {
+                const proxiedUrl = PROXIES[i](rawUrl);
+                console.log(`Trying proxy ${i+1}: ${proxiedUrl}`);
+                const loadingTask = pdfjsLib.getDocument(proxiedUrl);
+                const pdf = await loadingTask.promise;
+                return pdf; // success
+            } catch (err) {
+                console.warn(`Proxy ${i+1} failed:`, err);
+                if (i === PROXIES.length - 1) throw err;
+            }
+        }
+    }
+    
+    // ---------- CLOUD SYNC (JSONBin) ----------
     const JSONBIN_URL = "https://api.jsonbin.io/v3/b";
     let currentBinId = null;
     let currentAccessKey = null;
-    let libraryData = { books: [] };      // each book: { id, title, pdfUrl, currentPage, totalPages }
+    let libraryData = { books: [] };
     let currentUserKey = "myreading2025";
     
-    // UI elements
+    // DOM elements
     const syncKeyInput = document.getElementById('syncKeyInput');
     const loadSyncKeyBtn = document.getElementById('loadSyncKeyBtn');
     const syncStatusSpan = document.getElementById('syncStatus');
     const bookListContainer = document.getElementById('bookListContainer');
     const addBookBtn = document.getElementById('addBookBtn');
+    const uploadBookBtn = document.getElementById('uploadBookBtn');
+    const fileUpload = document.getElementById('fileUpload');
     const driveLinkInput = document.getElementById('driveLinkInput');
     const bookTitleInput = document.getElementById('bookTitleInput');
+    const linkError = document.getElementById('linkError');
     const prevPageBtn = document.getElementById('prevPageBtn');
     const nextPageBtn = document.getElementById('nextPageBtn');
     const pageNumInfo = document.getElementById('pageNumInfo');
@@ -172,28 +226,10 @@
     let currentRotation = 0;
     let rendering = false;
     
-    // Helper: extract direct Google Drive PDF link
-    function extractDirectDownloadUrl(driveUrl) {
-        let fileId = null;
-        const match1 = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-        if (match1) fileId = match1[1];
-        else {
-            const match2 = driveUrl.match(/id=([a-zA-Z0-9_-]+)/);
-            if (match2) fileId = match2[1];
-            else if (driveUrl.includes('uc?id=')) {
-                const urlParams = new URLSearchParams(driveUrl.split('?')[1]);
-                fileId = urlParams.get('id');
-            }
-        }
-        if (!fileId) return null;
-        return `https://drive.google.com/uc?export=download&id=${fileId}`;
-    }
-    
-    // Load from JSONBin
+    // ---- Cloud sync functions ----
     async function loadLibraryFromCloud(key) {
         syncStatusSpan.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> syncing...';
         try {
-            // Try to find existing bin by key (stored in localStorage mapping)
             let binId = localStorage.getItem(`jsonbin_id_${key}`);
             if (binId) {
                 const response = await fetch(`${JSONBIN_URL}/${binId}/latest`, { headers: { 'X-Bin-Meta': 'false' } });
@@ -207,7 +243,6 @@
                     return;
                 }
             }
-            // No existing bin, create new one
             const defaultData = { books: [] };
             const createResp = await fetch(JSONBIN_URL, {
                 method: 'POST',
@@ -225,8 +260,7 @@
             } else throw new Error("Bin creation failed");
         } catch (err) {
             console.error(err);
-            syncStatusSpan.innerHTML = '<i class="fas fa-exclamation-triangle"></i> offline mode (local only)';
-            // Fallback: keep existing libraryData or load from localStorage
+            syncStatusSpan.innerHTML = '<i class="fas fa-exclamation-triangle"></i> offline mode';
             const local = localStorage.getItem(`local_library_${key}`);
             if (local) libraryData = JSON.parse(local);
             else libraryData = { books: [] };
@@ -245,16 +279,15 @@
             syncStatusSpan.innerHTML = '<i class="fas fa-check-circle"></i> saved';
             setTimeout(() => { if (currentBinId) syncStatusSpan.innerHTML = '<i class="fas fa-cloud"></i> synced'; }, 1500);
         } catch(e) { console.warn("auto-save failed"); }
-        // also cache locally
         if (currentAccessKey) localStorage.setItem(`local_library_${currentAccessKey}`, JSON.stringify(libraryData));
     }
     
-    // UI: render library from libraryData.books
+    // ---- UI ----
     function renderBookList() {
         const books = libraryData.books || [];
         document.getElementById('bookCountBadge').innerText = books.length;
         if (!books.length) {
-            bookListContainer.innerHTML = '<div style="padding:20px; text-align:center;"><i class="fas fa-plus-circle"></i> Add your first PDF via Google Drive link</div>';
+            bookListContainer.innerHTML = '<div style="padding:20px; text-align:center;"><i class="fas fa-plus-circle"></i> Add a PDF via link or upload</div>';
             return;
         }
         bookListContainer.innerHTML = '';
@@ -285,7 +318,7 @@
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 const id = btn.getAttribute('data-id');
-                if (confirm('Remove this book from library? Progress lost.')) {
+                if (confirm('Remove this book?')) {
                     libraryData.books = libraryData.books.filter(b => b.id !== id);
                     await saveLibraryToCloud();
                     if (currentBookId === id) clearViewer();
@@ -297,34 +330,78 @@
     
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
     
+    // Add from link
     addBookBtn.onclick = async () => {
-        let driveUrl = driveLinkInput.value.trim();
+        linkError.innerText = '';
+        let userLink = driveLinkInput.value.trim();
         let title = bookTitleInput.value.trim();
-        if (!driveUrl) { alert("Enter Google Drive public PDF link"); return; }
-        const pdfDirect = extractDirectDownloadUrl(driveUrl);
-        if (!pdfDirect) { alert("Invalid Drive link. Use shareable link like: https://drive.google.com/file/d/.../view"); return; }
+        if (!userLink) { linkError.innerText = "Please enter a link."; return; }
+        const rawUrl = getRawPdfUrl(userLink);
+        if (!rawUrl) { linkError.innerText = "Could not parse link. Use a Google Drive/Dropbox share link or direct PDF URL."; return; }
         if (!title) title = "PDF " + new Date().toLocaleDateString();
-        // test PDF accessibility
+        
+        // Test with proxy
         try {
-            const testTask = pdfjsLib.getDocument(pdfDirect);
-            await testTask.promise;
-        } catch(e) { alert("Cannot load PDF. Make sure link is public and points to a PDF."); return; }
-        const bookId = btoa(pdfDirect).slice(0, 40).replace(/[^a-zA-Z0-9]/g, '_');
-        if (libraryData.books.some(b => b.id === bookId)) { alert("Book already in library"); return; }
-        libraryData.books.push({
-            id: bookId,
-            title: title,
-            pdfUrl: pdfDirect,
-            currentPage: 1,
-            totalPages: null
-        });
-        await saveLibraryToCloud();
-        renderBookList();
-        driveLinkInput.value = '';
-        bookTitleInput.value = '';
+            const pdf = await loadPdfWithProxy(rawUrl);
+            const total = pdf.numPages;
+            await pdf.destroy();
+            const bookId = "link_" + btoa(rawUrl).slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_');
+            if (libraryData.books.some(b => b.id === bookId)) { linkError.innerText = "Book already in library."; return; }
+            libraryData.books.push({
+                id: bookId,
+                title: title,
+                pdfUrl: rawUrl,  // store raw, we'll use proxy on open
+                originalLink: userLink,
+                currentPage: 1,
+                totalPages: total
+            });
+            await saveLibraryToCloud();
+            renderBookList();
+            driveLinkInput.value = '';
+            bookTitleInput.value = '';
+        } catch(e) {
+            console.error(e);
+            linkError.innerText = "Failed to load PDF. Check link or try uploading the file instead.";
+        }
     };
     
-    async function openBook(bookId, pdfUrl, title) {
+    // Upload PDF file
+    uploadBookBtn.onclick = () => fileUpload.click();
+    fileUpload.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file || file.type !== 'application/pdf') { alert("Please select a PDF file."); return; }
+        let title = bookTitleInput.value.trim() || file.name.replace('.pdf', '');
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            const arrayBuffer = ev.target.result;
+            // Store as data URL (base64) – works offline, but large. We'll store as object URL.
+            const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+            const objectUrl = URL.createObjectURL(blob);
+            try {
+                const loadingTask = pdfjsLib.getDocument(objectUrl);
+                const pdf = await loadingTask.promise;
+                const total = pdf.numPages;
+                const bookId = "upload_" + Date.now() + "_" + Math.random().toString(36);
+                libraryData.books.push({
+                    id: bookId,
+                    title: title,
+                    pdfUrl: objectUrl,  // object URL (valid only in this tab)
+                    isUpload: true,
+                    blobData: arrayBuffer, // store base64 for cross-device? Too large. We'll store as note: uploads are device-local.
+                    currentPage: 1,
+                    totalPages: total
+                });
+                await saveLibraryToCloud();
+                renderBookList();
+                alert("PDF added successfully! Note: Uploaded files are stored locally on this device only. For cross-device sync, use links instead.");
+            } catch(err) { alert("Invalid PDF file."); }
+        };
+        reader.readAsArrayBuffer(file);
+        fileUpload.value = '';
+    };
+    
+    // Open book
+    async function openBook(bookId, rawUrl, title) {
         currentBookId = bookId;
         emptyViewerMsg.style.display = 'none';
         pdfCanvas.style.display = 'block';
@@ -334,8 +411,15 @@
         loadingDiv.innerText = 'Loading PDF ...';
         container.appendChild(loadingDiv);
         try {
-            const loadingTask = pdfjsLib.getDocument(pdfUrl);
-            pdfDoc = await loadingTask.promise;
+            let pdf;
+            if (rawUrl.startsWith('blob:')) {
+                // uploaded file
+                const loadingTask = pdfjsLib.getDocument(rawUrl);
+                pdf = await loadingTask.promise;
+            } else {
+                pdf = await loadPdfWithProxy(rawUrl);
+            }
+            pdfDoc = pdf;
             totalPages = pdfDoc.numPages;
             const book = libraryData.books.find(b => b.id === bookId);
             let savedPage = (book && book.currentPage) ? book.currentPage : 1;
@@ -343,14 +427,14 @@
             currentPage = savedPage;
             currentRotation = 0;
             currentScale = 1.3;
-            // update total pages in library
-            if (book) { book.totalPages = totalPages; await saveLibraryToCloud(); }
+            if (book && !book.totalPages) { book.totalPages = totalPages; await saveLibraryToCloud(); }
             await renderPage();
             enableControls(true);
             updatePageInfo();
-            renderBookList(); // refresh active highlight
+            renderBookList();
         } catch(err) {
-            alert("Failed to load PDF. Check CORS / public access.");
+            console.error(err);
+            alert("Failed to load PDF. Try using a different link or upload the file directly.");
             clearViewer();
         } finally { loadingDiv.remove(); }
     }
@@ -372,7 +456,6 @@
         pageNumInfo.innerText = `${currentPage} / ${totalPages}`;
         prevPageBtn.disabled = currentPage <= 1;
         nextPageBtn.disabled = currentPage >= totalPages;
-        // save progress to cloud & library
         if (currentBookId && libraryData.books) {
             const book = libraryData.books.find(b => b.id === currentBookId);
             if (book && book.currentPage !== currentPage) {
@@ -387,6 +470,7 @@
     }
     
     function clearViewer() {
+        if (pdfDoc && typeof pdfDoc.destroy === 'function') pdfDoc.destroy();
         pdfDoc = null;
         currentBookId = null;
         pdfCanvas.style.display = 'none';
@@ -395,7 +479,7 @@
         pageNumInfo.innerText = '— / —';
     }
     
-    // Navigation & zoom
+    // Navigation
     prevPageBtn.onclick = async () => { if(pdfDoc && currentPage > 1) { currentPage--; await renderPage(); updatePageInfo(); } };
     nextPageBtn.onclick = async () => { if(pdfDoc && currentPage < totalPages) { currentPage++; await renderPage(); updatePageInfo(); } };
     zoomInBtn.onclick = async () => { if(pdfDoc) { currentScale = Math.min(3.0, currentScale + 0.15); await renderPage(); } };
@@ -411,7 +495,6 @@
         loadLibraryFromCloud(currentUserKey);
     };
     
-    // initial load
     loadLibraryFromCloud("myreading2025");
 </script>
 </body>
