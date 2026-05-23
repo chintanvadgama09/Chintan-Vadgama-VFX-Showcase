@@ -1,7 +1,7 @@
 [
   {
     "image": "images/moba.png",
-    "title": "MOBA VFX Demo",
+    "title": "MOBA VFX (Playable)",
     "description": "A real-time Unity WebGL showcase featuring stylized MOBA-inspired VFX, including elemental abilities, spell impacts, energy trails, and combat effects crafted for immersive gameplay visuals.",
     "tools": [
       "Unity",
@@ -12,7 +12,7 @@
   },
   {
     "image": "images/snl.png",
-    "title": "Snakes And Ladder",
+    "title": "Snakes And Ladder (Playable)",
     "description": "A cozy and visually polished 3D Snakes & Ladders experience built in Unity WebGL. Roll the dice, climb ladders, avoid sneaky snakes, and race to the finish in a relaxing tabletop-inspired world with smooth animations, warm lighting, and casual mobile-game aesthetics.",
     "tools": [
       "Unity",
