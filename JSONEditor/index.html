@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Sheet Editor</title>
+    <!-- Tailwind CSS for sleek, modern UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar for a polished look */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #474747; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .editable-cell {
+            outline: none;
+            min-height: 24px;
+            padding: 0.5rem;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            border-radius: 0.25rem;
+            word-break: break-all;
+        }
+        .editable-cell:focus {
+            border-color: #01cb5a;
+            background-color: #eff6ff;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        .editable-cell:hover:not(:focus) {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans h-screen flex flex-col">
+
+    <!-- Header / Toolbar -->
+    <header class="bg-white border-b border-slate-200 shadow-sm px-6 py-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 p-2 rounded-lg text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+            </div>
+            <h1 class="text-xl font-bold text-slate-800 tracking-tight">CV JSON Editor</h1>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <!-- Hidden File Input -->
+            <input type="file" id="fileInput" accept=".json" class="hidden">
+            
+            <button onclick="document.getElementById('fileInput').click()" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition shadow-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                Import JSON
+            </button>
+            <button onclick="exportJSON()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition shadow-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Export JSON
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-auto p-6">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col min-h-full">
+            
+            <!-- Table Toolbar -->
+            <div class="px-5 py-4 border-b border-slate-100 flex gap-2">
+                <button onclick="addRow()" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md hover:bg-emerald-100 font-medium text-sm transition flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Add Row
+                </button>
+                <button onclick="addColumn()" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-md hover:bg-indigo-100 font-medium text-sm transition flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Add Column
+                </button>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" id="jsonTable">
+                    <thead>
+                        <tr id="tableHead" class="bg-slate-50 border-b border-slate-200 text-slate-600 text-sm">
+                            <!-- Headers injected by JS -->
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
+                        <!-- Rows injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-slate-400">
+                <svg class="w-16 h-16 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <p class="text-lg font-medium text-slate-600">No data to display</p>
+                <p class="text-sm mt-1">Import a JSON file or add a row to get started.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Hidden anchor for downloading files -->
+    <a id="downloadAnchor" class="hidden"></a>
+
+    <script>
+        // Application State
+        let state = [
+            { id: 1, name: "Sample User", roles: ["admin", "editor"], active: true },
+            { id: 2, name: "Guest", roles: ["viewer"], active: false }
+        ];
+        let columns = [];
+
+        // Initialize App
+        function init() {
+            renderTable();
+            
+            // Setup File Importer
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        let importedData = JSON.parse(event.target.result);
+                        // Ensure data is an array of objects for sheet view
+                        if (!Array.isArray(importedData)) {
+                            importedData = [importedData];
+                        }
+                        state = importedData;
+                        renderTable();
+                    } catch (error) {
+                        alert("Error parsing JSON file. Please ensure it's a valid JSON format.");
+                    }
+                };
+                reader.readAsText(file);
+                e.target.value = ''; // Reset input
+            });
+        }
+
+        // Extract all unique keys from the state
+        function updateColumns() {
+            const keySet = new Set();
+            state.forEach(row => {
+                if (row && typeof row === 'object' && !Array.isArray(row)) {
+                    Object.keys(row).forEach(key => keySet.add(key));
+                }
+            });
+            columns = Array.from(keySet);
+        }
+
+        // Format cell content for display
+        function formatForDisplay(val) {
+            if (val === null) return "null";
+            if (typeof val === 'object') return JSON.stringify(val);
+            return val;
+        }
+
+        // Render the UI based on state
+        function renderTable() {
+            const tableHead = document.getElementById('tableHead');
+            const tableBody = document.getElementById('tableBody');
+            const emptyState = document.getElementById('emptyState');
+            const jsonTable = document.getElementById('jsonTable');
+
+            if (state.length === 0 && columns.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                jsonTable.classList.add('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+                jsonTable.classList.remove('hidden');
+            }
+
+            updateColumns();
+
+            // Render Header
+            let headHtml = `<th class="px-4 py-3 w-16 font-semibold">Row</th>`;
+            columns.forEach(col => {
+                headHtml += `<th class="px-4 py-3 font-semibold">${col}</th>`;
+            });
+            headHtml += `<th class="px-4 py-3 w-20 text-center font-semibold">Actions</th>`;
+            tableHead.innerHTML = headHtml;
+
+            // Render Body
+            let bodyHtml = '';
+            state.forEach((row, rowIndex) => {
+                bodyHtml += `<tr class="hover:bg-slate-50 transition">`;
+                bodyHtml += `<td class="px-4 py-2 border-r border-slate-100 text-slate-400 font-mono text-xs font-semibold text-center">${rowIndex + 1}</td>`;
+                
+                columns.forEach(col => {
+                    const val = row[col] !== undefined ? row[col] : "";
+                    const displayVal = formatForDisplay(val);
+                    // Encode HTML to prevent injection if string contains tags
+                    const safeVal = String(displayVal).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    
+                    bodyHtml += `
+                        <td class="border-r border-slate-100 align-top">
+                            <div class="editable-cell" 
+                                 contenteditable="true" 
+                                 onblur="handleCellEdit(${rowIndex}, '${col}', this)"
+                                 onkeydown="handleKeydown(event, this)">${safeVal}</div>
+                        </td>`;
+                });
+
+                bodyHtml += `
+                    <td class="px-4 py-2 text-center align-middle">
+                        <button onclick="deleteRow(${rowIndex})" class="text-slate-400 hover:text-red-500 transition" title="Delete Row">
+                            <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </td>`;
+                bodyHtml += `</tr>`;
+            });
+            tableBody.innerHTML = bodyHtml;
+        }
+
+        // Handle cell editing
+        function handleCellEdit(rowIndex, colKey, el) {
+            let text = el.innerText.trim();
+            
+            // Smart Parsing: Try to convert it back to actual datatypes (numbers, booleans, arrays, objects)
+            let parsedValue;
+            if (text === "") {
+                // If empty, delete the key entirely or set to empty string depending on preference
+                // For a cleaner JSON, setting to undefined removes it from stringify
+                parsedValue = undefined; 
+            } else if (text === "null") {
+                parsedValue = null;
+            } else if (text === "true") {
+                parsedValue = true;
+            } else if (text === "false") {
+                parsedValue = false;
+            } else {
+                try {
+                    // This allows users to type ["a", "b"] and it turns into a real Array
+                    parsedValue = JSON.parse(text); 
+                } catch (e) {
+                    // If it fails, treat it as a standard string
+                    parsedValue = text;
+                }
+            }
+
+            if (parsedValue === undefined) {
+                delete state[rowIndex][colKey];
+            } else {
+                state[rowIndex][colKey] = parsedValue;
+            }
+            
+            // Re-render to format the newly entered data properly
+            renderTable();
+        }
+
+        // Intercept 'Enter' key to blur cell instead of creating new lines
+        function handleKeydown(event, el) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                el.blur();
+            }
+        }
+
+        // Add a new row
+        function addRow() {
+            const newRow = {};
+            columns.forEach(col => newRow[col] = ""); // Pre-fill with empty string so cells render
+            state.push(newRow);
+            renderTable();
+        }
+
+        // Add a new column
+        function addColumn() {
+            const newColName = prompt("Enter new column name:");
+            if (newColName && newColName.trim() !== "") {
+                const key = newColName.trim();
+                if (!columns.includes(key)) {
+                    // Add property to all rows so the column exists everywhere
+                    state.forEach(row => row[key] = "");
+                    renderTable();
+                } else {
+                    alert("Column already exists!");
+                }
+            }
+        }
+
+        // Delete a row
+        function deleteRow(index) {
+            if(confirm("Are you sure you want to delete this row?")) {
+                state.splice(index, 1);
+                renderTable();
+            }
+        }
+
+        // Export JSON
+        function exportJSON() {
+            if (state.length === 0) {
+                alert("Nothing to export!");
+                return;
+            }
+            
+            // Clean up temporary undefined/empty fields before exporting if desired, 
+            // but JSON.stringify automatically omits `undefined` properties.
+            const dataStr = JSON.stringify(state, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const anchor = document.getElementById('downloadAnchor');
+            anchor.href = url;
+            anchor.download = "export.json";
+            anchor.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Run initialization on load
+        window.onload = init;
+    </script>
+</body>
+</html>
