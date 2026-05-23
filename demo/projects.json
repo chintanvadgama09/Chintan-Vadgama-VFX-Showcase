@@ -20,5 +20,16 @@
       "Shader Graph"
     ],
     "link": "https://chintanart.in/BoardGame/SNL/"
+  },
+  {
+    "image": "images/Cakeidle.png",
+    "title": "Cake Idle Game",
+    "description": "A casual mobile idle game featuring automated progression mechanics, engaging visual feedback, and optimized assets",
+    "link": "https://www.behance.net/gallery/242331857/Cake-Idle-Game",
+    "tools": [
+      "Unity",
+      "C#",
+      "Blender"
+    ]
   }
 ]
