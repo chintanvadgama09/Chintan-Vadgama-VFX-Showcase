@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chintan Vadgama | Technical Artist & VFX</title>
+    <style>
+        /* --- Local Fonts --- */
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-Light.ttf') format('truetype');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-SemiBold.ttf') format('truetype');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-ExtraBold.ttf') format('truetype');
+            font-weight: 800;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* --- Color Palette & Variables --- */
+        :root {
+            --bg-main: #060b0f;
+            --bg-secondary: #0b171e;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --accent-teal: rgb(95, 150, 189);
+            --accent-hover: #00d2d6;
+            --tile-color: #7eaed1;
+        }
+
+        /* --- Global Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden; /* Prevents horizontal scroll during animations */
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--text-main);
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--accent-teal);
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 5%;
+            background: rgba(10, 15, 20, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            color: var(--tile-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8rem;
+        }
+
+        .nav-links a {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 400;
+        }
+
+        /* --- Sections --- */
+        section {
+            padding: 100px 10%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 50px;
+            height: 3px;
+            background-color: var(--accent-teal);
+        }
+
+        /* --- Hero Section --- */
+        #hero {
+            align-items: flex-start;
+            background: radial-gradient(circle at center, var(--bg-secondary) 0%, var(--bg-main) 100%);
+        }
+
+        .hero-subtitle {
+            color: var(--accent-teal);
+            font-weight: 500;
+            letter-spacing: 1px;
+            font-size: 1.5rem;
+            //text-transform: uppercase;
+            margin-bottom: 0rem;
+        }
+
+        .hero-title {
+            font-size: 4.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-desc {
+            color: var(--text-muted);
+            max-width: 600px;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            border: 2px solid var(--accent-teal);
+            color: var(--accent-teal);
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-teal);
+            color: var(--bg-main);
+        }
+
+        /* --- About Section --- */
+        #about {
+            background-color: var(--bg-secondary);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .skill-tag {
+            background: rgba(0, 173, 181, 0.1);
+            color: var(--accent-teal);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(0, 173, 181, 0.2);
+        }
+
+        /* --- Projects Section --- */
+        #projects {
+            background-color: var(--bg-main);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .project-link-wrapper {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .project-card {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.05);
+            height: 100%;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-color: rgba(0, 173, 181, 0.3);
+        }
+
+        .project-link-wrapper:hover .project-title {
+            color: var(--accent-teal);
+        }
+
+        .project-image {
+            width: 100%;
+            height: 200px;
+            background-color: #1a252f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .project-info {
+            padding: 1.5rem;
+        }
+
+        .project-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .project-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .project-tools {
+            display: flex;
+            gap: 0.8rem;
+            font-size: 0.8rem;
+            color: var(--accent-teal);
+            font-weight: 600;
+        }
+
+        /* --- Contact Section --- */
+        #contact {
+            background-color: var(--bg-secondary);
+            text-align: center;
+            align-items: center;
+        }
+
+        #contact .section-title::after {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .contact-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact-content p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--bg-main);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* =========================================
+           ANIMATION CLASSES
+           ========================================= */
+        .fade-pop {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+            transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            will-change: opacity, transform;
+        }
+
+        .fade-pop.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Staggered delays for the hero section to load in sequence */
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+        .delay-4 { transition-delay: 0.4s; }
+        .delay-5 { transition-delay: 0.5s; }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 3rem; }
+            .about-content { grid-template-columns: 1fr; gap: 2rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">-</div>
+        <div class="nav-links">
+            <a href="#hero">Home</a>
+            <a href="#about">About</a>
+            <a href="#projects">Projects</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <section id="hero">
+        <p class="hero-subtitle fade-pop delay-1">Hello, I am</p>
+        <h1 class="hero-title fade-pop delay-2">Chintan Vadgama.</h1>
+        <h2 class="hero-title fade-pop delay-3" style="color: var(--text-muted); font-size: 3rem; margin-top: -1rem;">I bridge the gap between art and code.</h2>
+        <p class="hero-desc fade-pop delay-4">
+            I am a Technical Artist and Realtime VFX Artist specializing in Unity. I build dynamic shaders, craft immersive visual effects, and design tools that bring creative visions to life in realtime environments.
+        </p>
+        <div class="fade-pop delay-5">
+            <a href="#projects" class="btn">View My Work</a>
+        </div>
+    </section>
+
+    <section id="about">
+        <h2 class="section-title fade-pop">About Me</h2>
+        <div class="about-content">
+            <div class="about-text fade-pop">
+                <p>
+                    I have been working in the gaming industry since 2017, wearing multiple hats ranging from programming to art direction. My passion lies in solving complex visual problems and pushing the boundaries of what is possible in realtime engines.
+                </p>
+                <p>
+                    Whether I am writing custom HLSL shaders in Unity, developing toolkits in Blender, or integrating AI art workflows like ComfyUI into production pipelines, my focus is always on creating highly optimized and visually stunning results.
+                </p>
+                <div class="skills-list">
+                    <span class="skill-tag">Unity</span>
+                    <span class="skill-tag">Realtime VFX</span>
+                    <span class="skill-tag">Shader Programming</span>
+                    <span class="skill-tag">Blender</span>
+                    <span class="skill-tag">ComfyUI / Stable Diffusion</span>
+                    <span class="skill-tag">C#</span>
+                </div>
+            </div>
+            <div class="fade-pop delay-2" style="width: 100%; height: 350px; background: url('images/your-profile-pic.jpg') center/cover; border-radius: 8px; border: 2px solid var(--accent-teal);"></div>
+        </div>
+    </section>
+
+    <section id="projects">
+        <h2 class="section-title fade-pop">Selected Projects</h2>
+        <div class="projects-grid" id="projects-container">
+            </div>
+    </section>
+
+    <section id="contact">
+        <h2 class="section-title fade-pop">Get In Touch</h2>
+        <div class="contact-content fade-pop delay-1">
+            <p>I'm currently open to new opportunities and collaborations. Whether you have a question about my realtime workflows, need a technical artist for your next project, or just want to say hi, my inbox is always open!</p>
+            <p style="font-weight: 600; color: var(--accent-teal); margin-top: -1rem;">Based in Rajkot, Gujarat</p>
+            <a href="mailto:your.email@example.com" class="btn" style="margin-top: 2rem;">Say Hello</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>Designed & Built by Chintan Vadgama &copy; 2026</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // =========================================
+            // INTERSECTION OBSERVER FOR ANIMATIONS
+            // =========================================
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15 
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    } else {
+                        // Removing the class here resets the animation when scrolling past
+                        entry.target.classList.remove('is-visible');
+                    }
+                });
+            }, observerOptions);
+
+            const observeElements = () => {
+                const elements = document.querySelectorAll('.fade-pop');
+                elements.forEach(el => observer.observe(el));
+            };
+
+            // Observe static HTML elements immediately
+            observeElements();
+
+            // =========================================
+            // FETCH PROJECTS
+            // =========================================
+            fetch('projects.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(projects => {
+                    const container = document.getElementById('projects-container');
+                    
+                    projects.forEach((project, index) => {
+                        const toolsHtml = project.tools.map(tool => `<span>${tool}</span>`).join('');
+                        const staggerDelay = (index % 3) * 0.15; 
+
+                        const cardHtml = `
+                            <a href="${project.link || '#'}" target="_blank" rel="noopener noreferrer" class="project-link-wrapper fade-pop" style="transition-delay: ${staggerDelay}s">
+                                <div class="project-card">
+                                    <div class="project-image" style="background-image: url('${project.image}'); background-size: cover; background-position: center;">
+                                    </div>
+                                    <div class="project-info">
+                                        <h3 class="project-title">${project.title}</h3>
+                                        <p class="project-desc">${project.description}</p>
+                                        <div class="project-tools">
+                                            ${toolsHtml}
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                        
+                        container.innerHTML += cardHtml;
+                    });
+
+                    // Re-run observer to catch the dynamically added JSON elements
+                    observeElements();
+                })
+                .catch(error => {
+                    console.error('Error loading projects:', error);
+                    document.getElementById('projects-container').innerHTML = 
+                        '<p style="color: var(--text-muted);">Unable to load projects. Please ensure you are viewing this via a local server.</p>';
+                });
+        });
+    </script>
+</body>
+</html>
