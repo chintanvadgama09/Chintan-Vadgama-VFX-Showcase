@@ -1,30 +1,24 @@
 [
   {
-    "image": "images/demo.png",
-    "title": "Raju Unity HLSL Shaders",
-    "description": "A collection of highly optimized custom shaders written in HLSL for stylized water, energy shields, and weather systems.",
-    "tools": ["Unity", "HLSL", "Shader Graph"],
-    "link": "https://github.com/yourusername/shaders-repo"
+    "image": "images/moba.png",
+    "title": "MOBA VFX Demo",
+    "description": "A real-time Unity WebGL showcase featuring stylized MOBA-inspired VFX, including elemental abilities, spell impacts, energy trails, and combat effects crafted for immersive gameplay visuals.",
+    "tools": [
+      "Unity",
+      "HLSL",
+      "Shader Graph"
+    ],
+    "link": "https://chintanart.in/MobaVFX/"
   },
   {
-    "image": "https://via.placeholder.com/600x400/1a252f/47cbee?text=XonarBitstreamer",
-    "title": "XonarBitstreamer v1.0",
-    "description": "A custom Windows GUI application developed to efficiently manage audio encoding and seamlessly handle EAC3/AC3 bitstreaming.",
-    "tools": ["Python", "Windows GUI", "Batch"],
-    "link": "https://github.com/yourusername/xonarbitstreamer"
-  },
-  {
-    "image": "https://via.placeholder.com/600x400/1a252f/47cbee?text=Carrom+Cricket",
-    "title": "Carrom Cricket",
-    "description": "Led product management and technical art integration to deliver a highly polished and performant mobile gaming experience.",
-    "tools": ["Product Management", "Unity"],
-    "link": "https://play.google.com/store/apps/details?id=your.game.link"
-  },
-  {
-    "image": "https://via.placeholder.com/600x400/1a252f/47cbee?text=Blender+Tools",
-    "title": "Procedural Generation Tools",
-    "description": "Custom tools built to accelerate environment art generation and streamline the asset pipeline from 3D software to engine.",
-    "tools": ["Blender", "Python"],
-    "link": "https://artstation.com/yourprofile/blender-tools"
+    "image": "images/snl.png",
+    "title": "Snakes And Ladder",
+    "description": "A cozy and visually polished 3D Snakes & Ladders experience built in Unity WebGL. Roll the dice, climb ladders, avoid sneaky snakes, and race to the finish in a relaxing tabletop-inspired world with smooth animations, warm lighting, and casual mobile-game aesthetics.",
+    "tools": [
+      "Unity",
+      "HLSL",
+      "Shader Graph"
+    ],
+    "link": "https://chintanart.in/BoardGame/SNL/"
   }
 ]
