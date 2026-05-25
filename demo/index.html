@@ -47,6 +47,12 @@
             --accent-teal: rgb(95, 150, 189);
             --accent-hover: #00d2d6;
             --tile-color: #7eaed1;
+
+            /* --- Hero Video Background Controls --- */
+            /* Edit these to tweak the background look */
+            --video-tint: rgba(31, 71, 100, 0.5); /* The blue tint overlay (last number is opacity) */
+            --video-vignette-color: #060b0f; /* Vignette color (matches site bg for seamless edges) */
+            --video-vignette-spread: 90%; /* Lower % makes the dark edges thicker, higher % pushes it out */
         }
 
         /* --- Global Styles --- */
@@ -137,8 +143,39 @@
 
         /* --- Hero Section --- */
         #hero {
+            position: relative;
             align-items: flex-start;
-            background: radial-gradient(circle at center, var(--bg-secondary) 0%, var(--bg-main) 100%);
+            overflow: hidden; /* Ensures video stays inside bounds */
+        }
+
+        /* Elevates the text above the video and overlay */
+        #hero > *:not(.hero-video):not(.hero-overlay) {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            /* Combines the blue tint and vignette */
+            background-color: var(--video-tint);
+            background-image: radial-gradient(circle at center, transparent 10%, var(--video-vignette-color) var(--video-vignette-spread));
+            backdrop-filter: blur(10px);
         }
 
         .hero-subtitle {
@@ -146,7 +183,6 @@
             font-weight: 500;
             letter-spacing: 1px;
             font-size: 1.5rem;
-            /* text-transform: uppercase; */
             margin-bottom: 0rem;
         }
 
@@ -370,6 +406,11 @@
     </nav>
 
     <section id="hero">
+        <video class="hero-video" autoplay loop muted playsinline>
+            <source src="images/vid.mp4" type="video/mp4">
+        </video>
+        <div class="hero-overlay"></div>
+
         <p class="hero-subtitle fade-pop delay-1">Hello, I am</p>
         <h1 class="hero-title fade-pop delay-2">Chintan Vadgama.</h1>
         <h2 class="hero-title fade-pop delay-3" style="color: var(--text-muted); font-size: 3rem; margin-top: -1rem;">I bridge the gap between art and code.</h2>
