@@ -57,11 +57,11 @@
             /* Point this to your flow.png */
             --wipe-texture: url('images/flow.png'); 
             
-            /* Scale/size of the repeating texture (width height) */
-            --wipe-texture-scale: 500px 350%;
+            /* Scale/size of the repeating texture (width height) - Converted to Viewport Width (vw) for responsive scaling */
+            --wipe-texture-scale: 25vw 350%;
             
             /* Speed of the wipe traveling across the screen */
-            --wipe-speed: 15s;
+            --wipe-speed: 10s;
         }
 
         /* --- Global Styles --- */
@@ -469,11 +469,11 @@
             position: absolute;
             top: 0;
             left: -150%;
-            width: 150%; 
+            width: 220%; 
             height: 100%;
             pointer-events: none;
             z-index: 0; 
-            opacity: 0.8;
+            opacity: 0.6;
             transform: skewX(-30deg);
 
             /* 1. LAYER SETUP: Changed black to 'transparent' in the gradient */
@@ -513,8 +513,8 @@
             }
         100% { 
             left: 150%; 
-            /* Gradient stays at 0 0. Texture slides backward to -1000px */
-            background-position: 0 0, -6000px 0; 
+            /* Converted from rigid pixels to Viewport Width (vw) for exact scaling consistency across devices */
+            background-position: 0 0, -330vw 0; 
             }
         }
 
@@ -530,7 +530,7 @@
                 padding: 1rem 5%;
             }
             .nav-links {
-                display: flex; /* Overrides the previous hidden state */
+                display: flex;
                 gap: 1.5rem;
                 flex-wrap: wrap;
                 justify-content: center;
@@ -544,7 +544,7 @@
 <body>
 
     <nav>
-        <div class="logo">-</div>
+        <div class="logo">Chintan Vadgama</div>
         <div class="nav-links">
             <a href="#hero">Home</a>
             <a href="#about">About</a>
@@ -646,7 +646,7 @@
             // HEXTECH WIPE COOLDOWN CONTROLLER
             // =========================================
             // Adjust this to change how long it waits before wiping again (in milliseconds)
-            const wipeCooldown = 3500; 
+            const wipeCooldown = 3200; 
             const wipeNav = document.querySelector('nav');
 
             function fireHextechWipe() {
