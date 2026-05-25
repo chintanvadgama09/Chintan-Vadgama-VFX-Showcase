@@ -49,10 +49,19 @@
             --tile-color: #7eaed1;
 
             /* --- Hero Video Background Controls --- */
-            /* Edit these to tweak the background look */
-            --video-tint: rgba(31, 71, 100, 0.5); /* The blue tint overlay (last number is opacity) */
-            --video-vignette-color: #060b0f; /* Vignette color (matches site bg for seamless edges) */
-            --video-vignette-spread: 90%; /* Lower % makes the dark edges thicker, higher % pushes it out */
+            --video-tint: rgba(31, 71, 100, 0.5); 
+            --video-vignette-color: #060b0f; 
+            --video-vignette-spread: 90%; 
+
+            /* --- HEXTECH WIPE VFX PROPERTIES --- */
+            /* Point this to your flow.png */
+            --wipe-texture: url('images/flow.png'); 
+            
+            /* Scale/size of the repeating texture (width height) */
+            --wipe-texture-scale: 500px 350%;
+            
+            /* Speed of the wipe traveling across the screen */
+            --wipe-speed: 15s;
         }
 
         /* --- Global Styles --- */
@@ -68,7 +77,7 @@
             background-color: var(--bg-main);
             color: var(--text-main);
             line-height: 1.6;
-            overflow-x: hidden; /* Prevents horizontal scroll during animations */
+            overflow-x: hidden; 
         }
 
         a {
@@ -94,6 +103,12 @@
             align-items: center;
             z-index: 1000;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden; 
+        }
+
+        .logo, .nav-links {
+            position: relative;
+            z-index: 1; 
         }
 
         .logo {
@@ -145,10 +160,9 @@
         #hero {
             position: relative;
             align-items: flex-start;
-            overflow: hidden; /* Ensures video stays inside bounds */
+            overflow: hidden; 
         }
 
-        /* Elevates the text above the video and overlay */
         #hero > *:not(.hero-video):not(.hero-overlay) {
             position: relative;
             z-index: 1;
@@ -172,7 +186,6 @@
             height: 100%;
             z-index: -1;
             pointer-events: none;
-            /* Combines the blue tint and vignette */
             background-color: var(--video-tint);
             background-image: radial-gradient(circle at center, transparent 10%, var(--video-vignette-color) var(--video-vignette-spread));
             backdrop-filter: blur(10px);
@@ -314,7 +327,6 @@
             margin-bottom: 1rem;
         }
 
-        /* The container handles the layout */
         .project-tools {
             display: flex;
             flex-wrap: wrap; 
@@ -323,12 +335,11 @@
             font-weight: 600;
         }
 
-        /* The individual spans get the shape and color */
         .project-tools span {
             background-color: rgba(0, 144, 181, 0.1);
             color: var(--accent-teal);
-            padding: 0.3rem 0.8rem; /* Breathing room inside the rectangle */
-            border-radius: 05px;    /* Change this to 50px if you want fully rounded 'pill' shapes */
+            padding: 0.3rem 0.8rem; 
+            border-radius: 05px;    
         }
 
         /* --- Contact Section --- */
@@ -378,18 +389,155 @@
             transform: translateY(0) scale(1);
         }
 
-        /* Staggered delays for the hero section to load in sequence */
         .delay-1 { transition-delay: 0.1s; }
         .delay-2 { transition-delay: 0.2s; }
         .delay-3 { transition-delay: 0.3s; }
         .delay-4 { transition-delay: 0.4s; }
         .delay-5 { transition-delay: 0.5s; }
 
+        /* =========================================
+           VFX: LIGHTNING & ELECTRIC IDLE FX
+           ========================================= */
+        .hero-title.lightning-fx {
+            position: relative;
+            display: inline-block;
+            animation: electric-pulse 4s infinite;
+        }
+
+        .hero-title.lightning-fx::before,
+        .hero-title.lightning-fx::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0;
+        }
+
+        .hero-title.lightning-fx::before {
+            color: var(--accent-hover); 
+            animation: lightning-strike 4s infinite;
+        }
+
+        .hero-title.lightning-fx::after {
+            color: #ffffff; 
+            animation: lightning-strike 4s infinite reverse;
+            filter: blur(2px);
+        }
+
+        @keyframes electric-pulse {
+            0%, 100% { text-shadow: 0 0 8px rgba(0, 210, 214, 0.2); }
+            50% { text-shadow: 0 0 15px rgba(0, 210, 214, 0.5), 0 0 25px rgba(0, 210, 214, 0.2); }
+            89% { color: #ffffff; text-shadow: 0 0 8px rgba(0, 210, 214, 0.3); }
+            90% { color: var(--bg-main); text-shadow: none; } 
+            91% { color: #ffffff; text-shadow: 0 0 30px #ffffff, 0 0 50px var(--accent-hover), 0 0 80px var(--accent-teal); } 
+            92% { color: var(--bg-main); text-shadow: none; }
+            93% { color: #ffffff; text-shadow: 0 0 40px var(--accent-hover), 0 0 60px #ffffff; } 
+            94% { color: #ffffff; text-shadow: 0 0 8px rgba(0, 210, 214, 0.3); }
+        }
+
+        @keyframes lightning-strike {
+            0%, 89%, 95%, 100% {
+                opacity: 0;
+                clip-path: inset(0 0 0 0);
+                transform: translate(0, 0);
+            }
+            90% {
+                opacity: 1;
+                clip-path: inset(20% 0 60% 0);
+                transform: translate(-4px, 2px);
+            }
+            92% {
+                opacity: 0.9;
+                clip-path: inset(60% 0 10% 0);
+                transform: translate(4px, -2px) skewX(10deg);
+            }
+            94% {
+                opacity: 0.8;
+                clip-path: inset(10% 0 80% 0);
+                transform: translate(-2px, 1px);
+            }
+        }
+
+        /* =========================================
+           VFX: HEXTECH UI FLOW (True Shader Blending)
+           ========================================= */
+        nav::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 150%; 
+            height: 100%;
+            pointer-events: none;
+            z-index: 0; 
+            opacity: 0.8;
+            transform: skewX(-30deg);
+
+            /* 1. LAYER SETUP: Changed black to 'transparent' in the gradient */
+            background-image: 
+                linear-gradient(
+                    90deg, 
+                    transparent 0%, 
+                    transparent 35%, 
+                    rgba(0, 210, 214, 1) 50%, 
+                    transparent 65%, 
+                    transparent 100%
+                ),
+                var(--wipe-texture);
+            
+            background-size: 100% 100%, var(--wipe-texture-scale);
+            background-repeat: repeat-y, repeat-x;
+            
+            /* 2. TINTING: Overlay works better with transparent gradients */
+            background-blend-mode: overlay;
+            mix-blend-mode: color-dodge;
+
+            /* 3. THE MAGIC: An actual Alpha Mask to feather the edges flawlessly */
+            -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 35%, black 50%, transparent 65%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0%, transparent 35%, black 50%, transparent 65%, transparent 100%);
+        }
+
+        /* Triggered by JavaScript to separate Speed and Cooldown */
+        nav.run-wipe::before {
+            animation: hextech-wipe var(--wipe-speed) forwards cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        @keyframes hextech-wipe {
+            0% { 
+            left: -150%; 
+            /* Start both the gradient and the texture at X:0, Y:0 */
+            background-position: 0 0, 0 0; 
+            }
+        100% { 
+            left: 150%; 
+            /* Gradient stays at 0 0. Texture slides backward to -1000px */
+            background-position: 0 0, -6000px 0; 
+            }
+        }
+
         /* --- Responsive Design --- */
         @media (max-width: 768px) {
             .hero-title { font-size: 3rem; }
             .about-content { grid-template-columns: 1fr; gap: 2rem; }
-            .nav-links { display: none; }
+            
+            /* Show navigation on mobile and adjust layout to fit smaller screens */
+            nav {
+                flex-direction: column;
+                gap: 0.8rem;
+                padding: 1rem 5%;
+            }
+            .nav-links {
+                display: flex; /* Overrides the previous hidden state */
+                gap: 1.5rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .nav-links a {
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -412,7 +560,9 @@
         <div class="hero-overlay"></div>
 
         <p class="hero-subtitle fade-pop delay-1">Hello, I am</p>
-        <h1 class="hero-title fade-pop delay-2">Chintan Vadgama.</h1>
+        
+        <h1 class="hero-title fade-pop delay-2 lightning-fx" data-text="Chintan Vadgama.">Chintan Vadgama.</h1>
+        
         <h2 class="hero-title fade-pop delay-3" style="color: var(--text-muted); font-size: 3rem; margin-top: -1rem;">I bridge the gap between art and code.</h2>
         <p class="hero-desc fade-pop delay-4">
             I am a Technical Artist and Realtime VFX Artist specializing in Unity. I build dynamic shaders, craft immersive visual effects, and design tools that bring creative visions to life in realtime environments.
@@ -481,7 +631,6 @@
                     if (entry.isIntersecting) {
                         entry.target.classList.add('is-visible');
                     } else {
-                        // Removing the class here resets the animation when scrolling past
                         entry.target.classList.remove('is-visible');
                     }
                 });
@@ -491,9 +640,29 @@
                 const elements = document.querySelectorAll('.fade-pop');
                 elements.forEach(el => observer.observe(el));
             };
-
-            // Observe static HTML elements immediately
             observeElements();
+
+            // =========================================
+            // HEXTECH WIPE COOLDOWN CONTROLLER
+            // =========================================
+            // Adjust this to change how long it waits before wiping again (in milliseconds)
+            const wipeCooldown = 3500; 
+            const wipeNav = document.querySelector('nav');
+
+            function fireHextechWipe() {
+                // Strip the class
+                wipeNav.classList.remove('run-wipe');
+                // Force the browser to register the removal (Reflow)
+                void wipeNav.offsetWidth; 
+                // Re-add the class to fire the CSS animation
+                wipeNav.classList.add('run-wipe');
+            }
+
+            // Initial fire half a second after page load
+            setTimeout(fireHextechWipe, 500);
+            // Loop it based on your Cooldown variable
+            setInterval(fireHextechWipe, wipeCooldown);
+
 
             // =========================================
             // FETCH PROJECTS
@@ -530,8 +699,6 @@
                         
                         container.innerHTML += cardHtml;
                     });
-
-                    // Re-run observer to catch the dynamically added JSON elements
                     observeElements();
                 })
                 .catch(error => {
