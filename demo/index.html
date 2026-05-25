@@ -83,11 +83,13 @@
         a {
             text-decoration: none;
             color: var(--text-main);
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, text-shadow 0.4s ease, transform 0.3s ease;
         }
 
         a:hover {
-            color: var(--accent-teal);
+            color: rgb(250, 250, 250);
+            text-shadow: 0 0 10px rgba(58, 186, 255, 1), 0 0 30px rgba(58, 186, 255, 1);
+            transform: scale(1.2);
         }
 
         /* --- Navigation --- */
@@ -112,9 +114,9 @@
         }
 
         .logo {
-            font-weight: 600;
-            font-size: 1.8rem;
-            letter-spacing: 1px;
+            font-weight: 500;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
             color: var(--tile-color);
         }
 
@@ -226,6 +228,7 @@
         .btn:hover {
             background-color: var(--accent-teal);
             color: var(--bg-main);
+            box-shadow: 0 0px 15px rgba(126, 174, 209, 0.8);
         }
 
         /* --- About Section --- */
