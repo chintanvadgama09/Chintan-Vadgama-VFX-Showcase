@@ -469,11 +469,11 @@
             position: absolute;
             top: 0;
             left: -150%;
-            width: 220%; 
+            width: 180%; 
             height: 100%;
             pointer-events: none;
             z-index: 0; 
-            opacity: 0.6;
+            opacity: 0.4;
             transform: skewX(-30deg);
 
             /* 1. LAYER SETUP: Changed black to 'transparent' in the gradient */
@@ -482,7 +482,7 @@
                     90deg, 
                     transparent 0%, 
                     transparent 35%, 
-                    rgba(0, 210, 214, 1) 50%, 
+                    transparent 50%, 
                     transparent 65%, 
                     transparent 100%
                 ),
@@ -492,8 +492,8 @@
             background-repeat: repeat-y, repeat-x;
             
             /* 2. TINTING: Overlay works better with transparent gradients */
-            background-blend-mode: overlay;
-            mix-blend-mode: color-dodge;
+            background-blend-mode: additive;
+            /* background-blend-mode: overlay; */
 
             /* 3. THE MAGIC: An actual Alpha Mask to feather the edges flawlessly */
             -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 35%, black 50%, transparent 65%, transparent 100%);
@@ -502,7 +502,7 @@
 
         /* Triggered by JavaScript to separate Speed and Cooldown */
         nav.run-wipe::before {
-            animation: hextech-wipe var(--wipe-speed) forwards cubic-bezier(0.25, 1, 0.5, 1);
+            animation: hextech-wipe var(--wipe-speed) forwards cubic-bezier(0.25, 1, 1, 1);
         }
 
         @keyframes hextech-wipe {
