@@ -1,0 +1,35 @@
+[
+  {
+    "image": "images/moba.png",
+    "title": "MOBA VFX (Playable WIP)",
+    "description": "A real-time Unity WebGL showcase featuring stylized MOBA-inspired VFX, including elemental abilities, spell impacts, energy trails, and combat effects crafted for immersive gameplay visuals.",
+    "tools": [
+      "Unity",
+      "HLSL",
+      "Shader Graph"
+    ],
+    "link": "https://chintanart.in/MobaVFX/"
+  },
+  {
+    "image": "images/snl.png",
+    "title": "Snakes And Ladder (Playable WIP)",
+    "description": "A cozy and visually polished 3D Snakes & Ladders experience built in Unity WebGL. Roll the dice, climb ladders, avoid sneaky snakes, and race to the finish in a relaxing tabletop-inspired world with smooth animations, warm lighting, and casual mobile-game aesthetics.",
+    "tools": [
+      "Unity",
+      "HLSL",
+      "Shader Graph"
+    ],
+    "link": "https://chintanart.in/BoardGame/SNL/"
+  },
+  {
+    "image": "images/Cakeidle.png",
+    "title": "Cake Idle Game",
+    "description": "A casual mobile idle game featuring automated progression mechanics, engaging visual feedback, and optimized assets",
+    "link": "https://www.behance.net/gallery/242331857/Cake-Idle-Game",
+    "tools": [
+      "Unity",
+      "C#",
+      "Blender"
+    ]
+  }
+]
