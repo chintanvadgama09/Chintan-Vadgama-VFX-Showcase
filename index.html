@@ -124,8 +124,8 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 400;
-            display: flex; /* Changed from inline-block */
-            align-items: center; /* Centers the icons vertically */
+            display: flex; 
+            align-items: center; 
             transition: color 0.3s ease, text-shadow 0.4s ease, transform 0.3s ease;
         }
 
@@ -241,7 +241,7 @@
 
         .about-content {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.2fr 0.8fr; /* Adjusted slightly to give text a bit more room */
             gap: 4rem;
             align-items: center;
         }
@@ -267,6 +267,89 @@
             font-size: 0.9rem;
             font-weight: 600;
             border: 1px solid rgba(0, 173, 181, 0.2);
+        }
+
+        /* --- About Photo Collage --- */
+        .about-collage {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        .collage-img {
+            width: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 173, 181, 0.3);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            background-color: #1a252f; /* Fallback placeholder color */
+        }
+
+        /* Staggered heights for the collage aesthetic */
+        .collage-img:nth-child(1) { height: 280px; }
+        .collage-img:nth-child(2) { height: 380px; }
+        .collage-img:nth-child(3) { height: 240px; }
+
+        .collage-img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0px 20px rgba(58, 186, 255, 0.2);
+            border-color: var(--accent-teal);
+        }
+
+        /* --- Lightbox Modal --- */
+        .lightbox {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(6, 11, 15, 0.95); /* Matches var(--bg-main) with opacity */
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 8px;
+            border: 2px solid var(--accent-teal);
+            box-shadow: 0 0 30px rgba(0, 210, 214, 0.3);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            object-fit: contain;
+        }
+
+        .lightbox.show .lightbox-content {
+            transform: scale(1);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            color: var(--text-muted);
+            font-size: 45px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+            line-height: 1;
+        }
+
+        .lightbox-close:hover {
+            color: #ffffff;
+            text-shadow: 0 0 15px var(--accent-teal);
         }
 
         /* --- Projects Section --- */
@@ -499,7 +582,6 @@
             
             /* 2. TINTING: Overlay works better with transparent gradients */
             background-blend-mode: additive;
-            /* background-blend-mode: overlay; */
 
             /* 3. THE MAGIC: An actual Alpha Mask to feather the edges flawlessly */
             -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 35%, black 50%, transparent 65%, transparent 100%);
@@ -528,6 +610,11 @@
         @media (max-width: 768px) {
             .hero-title { font-size: 3rem; }
             .about-content { grid-template-columns: 1fr; gap: 2rem; }
+            
+            /* Adjust collage heights for mobile */
+            .collage-img:nth-child(1) { height: 220px; }
+            .collage-img:nth-child(2) { height: 260px; }
+            .collage-img:nth-child(3) { height: 220px; }
             
             /* Show navigation on mobile and adjust layout to fit smaller screens */
             nav {
@@ -629,7 +716,12 @@
                     <span class="skill-tag">C#</span>
                 </div>
             </div>
-            <div class="fade-pop delay-2" style="width: 100%; height: 350px; background: url('images/your-profile-pic.jpg') center/cover; border-radius: 8px; border: 1px solid var(--accent-teal);"></div>
+            
+            <div class="about-collage">
+                <img src="images/MeAbout1.jpg" alt="Chintan Vadgama" class="collage-img fade-pop delay-1" onclick="openLightbox(this)">
+                <img src="images/MeAbout2.jpg" alt="Chintan Working" class="collage-img fade-pop delay-2" onclick="openLightbox(this)">
+                <img src="images/MeAbout3.jpg" alt="Setup/VFX" class="collage-img fade-pop delay-3" onclick="openLightbox(this)">
+            </div>
         </div>
     </section>
 
@@ -645,6 +737,11 @@
     <footer>
         <p>Designed & Built by Chintan Vadgama &copy; 2026</p>
     </footer>
+
+    <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-img" class="lightbox-content">
+    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -677,24 +774,17 @@
             // =========================================
             // HEXTECH WIPE COOLDOWN CONTROLLER
             // =========================================
-            // Adjust this to change how long it waits before wiping again (in milliseconds)
             const wipeCooldown = 3200; 
             const wipeNav = document.querySelector('nav');
 
             function fireHextechWipe() {
-                // Strip the class
                 wipeNav.classList.remove('run-wipe');
-                // Force the browser to register the removal (Reflow)
                 void wipeNav.offsetWidth; 
-                // Re-add the class to fire the CSS animation
                 wipeNav.classList.add('run-wipe');
             }
 
-            // Initial fire half a second after page load
             setTimeout(fireHextechWipe, 500);
-            // Loop it based on your Cooldown variable
             setInterval(fireHextechWipe, wipeCooldown);
-
 
             // =========================================
             // FETCH PROJECTS
@@ -739,6 +829,32 @@
                         '<p style="color: var(--text-muted);">Unable to load projects. Please ensure you are viewing this via a local server.</p>';
                 });
         });
+
+        // =========================================
+        // LIGHTBOX CONTROLLER LOGIC
+        // =========================================
+        function openLightbox(element) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            
+            lightboxImg.src = element.src;
+            lightbox.classList.add('show');
+            
+            // Prevent background scrolling while modal is open
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeLightbox(event) {
+            const lightbox = document.getElementById('lightbox');
+            
+            // Close only if the user clicks outside the image or exactly on the close button
+            if (event.target === lightbox || event.target.className === 'lightbox-close') {
+                lightbox.classList.remove('show');
+                
+                // Restore background scrolling
+                document.body.style.overflow = 'auto';
+            }
+        }
     </script>
 </body>
 </html>
