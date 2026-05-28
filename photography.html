@@ -79,7 +79,7 @@
         }
 
         /* --- Sections --- */
-        section { padding: 120px 10% 100px; min-height: 100vh; display: flex; flex-direction: column; }
+        section { padding: 120px 5% 100px; min-height: 100vh; display: flex; flex-direction: column; }
         .section-title { font-size: 2.5rem; margin-bottom: 1rem; position: relative; display: inline-block; }
         .section-title::after {
             content: ''; position: absolute; left: 0; bottom: -10px;
@@ -107,8 +107,18 @@
             cursor: pointer;
             border-radius: 4px;
             overflow: hidden;
-            /* Flex properties are handled by the JS engine to maintain aspect ratio perfectly */
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+            outline: 2px solid rgba(250, 250, 250 ,0); /* Start with invisible outline for smooth transition */
+            /* We add !important here so .fade-pop cannot erase the box-shadow transition */
+            transition: outline 0.4 ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, opacity 0.8s ease-out !important;
+        }
+
+        /* By chaining the classes, we guarantee this wins the specificity war over .fade-pop */
+        .gallery-item.fade-pop.is-visible:hover {
+            transform: scale(1.03) !important; 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+            outline: 2px solid rgba(250, 250, 250, 255);
+            z-index: 10;
+            transition-delay: 0s !important; 
         }
         
         .gallery-item img {
@@ -121,9 +131,10 @@
         }
 
         .gallery-item:hover {
-            transform: scale(1.04); 
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 210, 214, 0.3);
+            transform: scale(1.03); 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 210, 214, 0.6);
             z-index: 10; /* Bring above adjacent items when zoomed */
+            transition-delay: 0s !important; /* Bypasses the JS entrance delay */
         }
 
         /* --- Lightbox Viewer --- */
@@ -281,12 +292,18 @@
             const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
             let observer;
             
-            function setupObserver() {
+           function setupObserver() {
                 if (observer) observer.disconnect();
                 observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             entry.target.classList.add('is-visible');
+                            
+                            // NEW: Erase the stagger delay after the 800ms entrance animation finishes.
+                            // This ensures your hover and un-hover react instantly.
+                            setTimeout(() => {
+                                entry.target.style.transitionDelay = '0s';
+                            }, 800);
                         }
                     });
                 }, observerOptions);
@@ -355,7 +372,7 @@
                 galleryContainer.innerHTML = ''; // Clear container for fresh render
                 
                 // Set ideal target height based on screen size
-                const targetRowHeight = window.innerWidth > 768 ? 350 : 200;
+                const targetRowHeight = window.innerWidth > 768 ? 600 : 200;
                 const gap = 12; // Must match CSS horizontal gap
                 const containerWidth = galleryContainer.clientWidth;
 
