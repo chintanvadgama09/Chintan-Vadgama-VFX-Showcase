@@ -63,12 +63,13 @@
             color: rgb(95, 150, 189);
             border-radius: 4px;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .btn-theme:hover {
             background-color: rgb(95, 150, 189);
             color: #060b0f;
-            box-shadow: 0 0px 15px rgba(126, 174, 209, 0.8);
+            box-shadow: 0 0px 15px rgba(126, 174, 209, 0.6);
+            transform: translateY(-1px);
         }
 
         /* Drag and Drop Overlay VFX */
@@ -85,6 +86,34 @@
         }
         .drag-over #dragOverlay {
             display: grid;
+            animation: pulseOverlay 2s infinite;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeInSlideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulseOverlay {
+            0% { border-color: rgba(0, 210, 214, 0.5); }
+            50% { border-color: rgba(0, 210, 214, 1); }
+            100% { border-color: rgba(0, 210, 214, 0.5); }
+        }
+
+        .animate-row {
+            opacity: 0;
+            animation: fadeInSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .animate-empty-state {
+            animation: fadeInSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
 </head>
@@ -93,7 +122,7 @@
     <div id="dragOverlay">
         <div class="text-center text-hover">
             <svg class="w-20 h-20 mx-auto mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(0,210,214,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-            <h2 class="text-4xl font-extrabold mb-2 tracking-tight">Drop JSON Here</h2>
+            <h2 class="text-4xl font-extrabold mb-2 tracking-tight">Drop JSON or CSV Here</h2>
             <p class="text-muted text-lg">Release to instantly import your data</p>
         </div>
     </div>
@@ -108,10 +137,19 @@
         
         <div class="flex items-center gap-4">
             <input type="file" id="fileInput" accept=".json" class="hidden">
+            <input type="file" id="csvInput" accept=".csv" class="hidden">
             
+            <button onclick="document.getElementById('csvInput').click()" class="btn-theme px-4 py-2 flex items-center gap-2 text-sm shadow-sm bg-transparent">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Import CSV
+            </button>
             <button onclick="document.getElementById('fileInput').click()" class="btn-theme px-4 py-2 flex items-center gap-2 text-sm shadow-sm bg-transparent">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                 Import JSON
+            </button>
+            <button onclick="exportCSV()" class="btn-theme px-4 py-2 flex items-center gap-2 text-sm shadow-sm bg-teal text-main !border-teal hover:!bg-hover hover:!text-main hover:!border-hover">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Export CSV
             </button>
             <button onclick="exportJSON()" class="btn-theme px-4 py-2 flex items-center gap-2 text-sm shadow-sm bg-teal text-main !border-teal hover:!bg-hover hover:!text-main hover:!border-hover">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -145,10 +183,10 @@
                 </table>
             </div>
             
-            <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-muted">
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-muted animate-empty-state">
                 <svg class="w-20 h-20 mb-4 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 <p class="text-xl font-semibold text-white">No data to display</p>
-                <p class="text-sm mt-2">Import a JSON file or add a row to get started.</p>
+                <p class="text-sm mt-2">Import a JSON/CSV file or add a row to get started.</p>
             </div>
         </div>
     </main>
@@ -172,10 +210,16 @@
             renderTable();
             setupDragAndDrop();
             
-            // Setup File Importer (Click)
+            // Setup File Importers (Click)
             document.getElementById('fileInput').addEventListener('change', function(e) {
                 const file = e.target.files[0];
-                if (file) handleFileUpload(file);
+                if (file) handleFileUpload(file, 'json');
+                e.target.value = ''; // Reset input
+            });
+
+            document.getElementById('csvInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) handleFileUpload(file, 'csv');
                 e.target.value = ''; // Reset input
             });
         }
@@ -205,32 +249,85 @@
                 if (e.dataTransfer.files.length > 0) {
                     e.preventDefault();
                     const file = e.dataTransfer.files[0];
-                    if (!file.name.endsWith('.json')) {
-                        alert("Please drop a valid JSON file.");
-                        return;
+                    if (file.name.endsWith('.json')) {
+                        handleFileUpload(file, 'json');
+                    } else if (file.name.endsWith('.csv')) {
+                        handleFileUpload(file, 'csv');
+                    } else {
+                        alert("Please drop a valid JSON or CSV file.");
                     }
-                    handleFileUpload(file);
                 }
             });
         }
 
         // Shared File Upload Handler
-        function handleFileUpload(file) {
+        function handleFileUpload(file, type) {
             const reader = new FileReader();
             reader.onload = function(event) {
+                const result = event.target.result;
                 try {
-                    let importedData = JSON.parse(event.target.result);
-                    // Ensure data is an array of objects for sheet view
-                    if (!Array.isArray(importedData)) {
-                        importedData = [importedData];
+                    if (type === 'json') {
+                        let importedData = JSON.parse(result);
+                        if (!Array.isArray(importedData)) importedData = [importedData];
+                        state = importedData;
+                    } else if (type === 'csv') {
+                        state = parseCSVToJSON(result);
                     }
-                    state = importedData;
-                    renderTable();
+                    // Reset table with new data to re-trigger animations
+                    document.getElementById('tableBody').innerHTML = ''; 
+                    setTimeout(renderTable, 50); 
                 } catch (error) {
-                    alert("Error parsing JSON file. Please ensure it's a valid JSON format.");
+                    alert("Error parsing file. Please ensure it's a valid format.");
+                    console.error(error);
                 }
             };
             reader.readAsText(file);
+        }
+
+        // Robust CSV Parser (Handles Commas and Quotes inside cells correctly)
+        function parseCSVToJSON(text) {
+            let p = '', row = [''], ret = [row], i = 0, r = 0, s = !0, l;
+            for (l of text) {
+                if ('"' === l) {
+                    if (s && l === p) row[i] += l;
+                    s = !s;
+                } else if (',' === l && s) l = row[++i] = '';
+                else if ('\n' === l && s) {
+                    if ('\r' === p) row[i] = row[i].slice(0, -1);
+                    row = ret[++r] = [l = '']; i = 0;
+                } else row[i] += l;
+                p = l;
+            }
+            
+            // Clean up trailing empty row
+            if (ret[ret.length - 1].length === 1 && ret[ret.length - 1][0] === '') ret.pop();
+
+            if (ret.length < 2) return [];
+
+            const headers = ret[0].map(h => h.trim());
+            const data = [];
+
+            for (let j = 1; j < ret.length; j++) {
+                let obj = {};
+                for (let k = 0; k < headers.length; k++) {
+                    let val = ret[j][k] !== undefined ? ret[j][k].trim() : "";
+                    
+                    if (val !== "") {
+                        if (!isNaN(val) && val.trim() !== "") {
+                            val = Number(val);
+                        } else if (val.toLowerCase() === "true") {
+                            val = true;
+                        } else if (val.toLowerCase() === "false") {
+                            val = false;
+                        } else if (val.toLowerCase() === "null") {
+                            val = null;
+                        }
+                    }
+                    obj[headers[k]] = val;
+                }
+                data.push(obj);
+            }
+            return data;
         }
 
         // Extract all unique keys from the state
@@ -282,8 +379,10 @@
             // Render Body
             let bodyHtml = '';
             state.forEach((row, rowIndex) => {
-                // Group class handles hover states for buttons. Draggable hooks into HTML5 native drag.
-                bodyHtml += `<tr class="group hover:bg-white/5 transition border-b border-white/5 relative bg-secondary" 
+                const animDelay = Math.min(rowIndex * 0.04, 0.5);
+
+                bodyHtml += `<tr class="group hover:bg-white/5 transition border-b border-white/5 relative bg-secondary animate-row" 
+                                 style="animation-delay: ${animDelay}s;"
                                  draggable="true" 
                                  ondragstart="handleRowDragStart(event, ${rowIndex})" 
                                  ondragover="handleRowDragOver(event, ${rowIndex})" 
@@ -304,7 +403,6 @@
                     const displayVal = formatForDisplay(val);
                     const safeVal = String(displayVal).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                     
-                    // Disabling draggable attribute on focus prevents text selection from triggering a row drag
                     bodyHtml += `
                         <td class="border-r border-white/5 align-top">
                             <div class="editable-cell" 
@@ -315,7 +413,7 @@
                         </td>`;
                 });
 
-                // Actions Column (Hidden until hover)
+                // Actions Column
                 bodyHtml += `
                     <td class="px-4 py-2 text-center align-middle">
                         <div class="flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -340,7 +438,6 @@
         function handleRowDragStart(e, index) {
             draggedRowIndex = index;
             e.dataTransfer.effectAllowed = 'move';
-            // Slight delay so the visual ghost being dragged stays solid
             setTimeout(() => {
                 e.target.classList.add('opacity-30', 'bg-teal/5');
             }, 10);
@@ -354,12 +451,10 @@
             const rect = tr.getBoundingClientRect();
             const midY = rect.top + rect.height / 2;
             
-            // Clear all previous drop indicators
             tr.parentElement.querySelectorAll('tr').forEach(row => {
                 row.classList.remove('border-t-2', 'border-t-hover', 'border-b-2', 'border-b-hover');
             });
 
-            // Draw indicator above or below based on mouse position inside the row
             if (e.clientY < midY) {
                 dragOverRowIndex = index;
                 tr.classList.add('border-t-2', 'border-t-hover');
@@ -379,7 +474,6 @@
             
             if (draggedRowIndex === null || dragOverRowIndex === null) return;
             
-            // Adjust calculation if we are moving the item downwards
             let newIndex = dragOverRowIndex;
             if (draggedRowIndex < newIndex) {
                 newIndex--;
@@ -398,7 +492,7 @@
         function handleRowDragEnd(e) {
             draggedRowIndex = null;
             dragOverRowIndex = null;
-            renderTable(); // Completely cleans up any leftover ghost classes
+            renderTable(); 
         }
 
         // --- CORE DATA LOGIC --- //
@@ -428,8 +522,6 @@
             } else {
                 state[rowIndex][colKey] = parsedValue;
             }
-            
-            renderTable();
         }
 
         function handleKeydown(event, el) {
@@ -439,7 +531,6 @@
             }
         }
 
-        // Insert Row Functionality (0 = above, 1 = below)
         function insertRow(index, positionOffset) {
             const newRow = {};
             columns.forEach(col => newRow[col] = ""); 
@@ -448,7 +539,7 @@
         }
 
         function addRow() {
-            insertRow(state.length, 0); // Appends to the very bottom
+            insertRow(state.length, 0); 
         }
 
         function addColumn() {
@@ -484,6 +575,50 @@
             const anchor = document.getElementById('downloadAnchor');
             anchor.href = url;
             anchor.download = "export.json";
+            anchor.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        function exportCSV() {
+            if (state.length === 0) {
+                alert("Nothing to export!");
+                return;
+            }
+            
+            updateColumns();
+            if (columns.length === 0) return;
+
+            let csvContent = "";
+            
+            // 1. Generate Headers
+            csvContent += columns.map(col => `"${String(col).replace(/"/g, '""')}"`).join(",") + "\n";
+            
+            // 2. Generate Rows
+            state.forEach(row => {
+                let rowArray = columns.map(col => {
+                    let val = row[col];
+                    if (val === undefined || val === null) {
+                        return '""';
+                    }
+                    if (typeof val === 'object') {
+                        val = JSON.stringify(val);
+                    } else {
+                        val = String(val);
+                    }
+                    // Escape internal quotes and wrap the whole value in quotes
+                    val = val.replace(/"/g, '""');
+                    return `"${val}"`;
+                });
+                csvContent += rowArray.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            
+            const anchor = document.getElementById('downloadAnchor');
+            anchor.href = url;
+            anchor.download = "export.csv";
             anchor.click();
             
             URL.revokeObjectURL(url);

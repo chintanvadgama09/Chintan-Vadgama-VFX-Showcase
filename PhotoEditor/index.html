@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photography JSON Editor</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        :root {
+            --bg-main: #060b0f;
+            --bg-secondary: #0b171e;
+            --bg-panel: rgba(10, 15, 20, 0.8);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --accent-teal: rgb(95, 150, 189);
+            --accent-hover: #00d2d6;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            padding: 2rem 5%;
+            min-height: 100vh;
+        }
+
+        /* Header & Controls */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--accent-teal);
+        }
+
+        .control-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        button, label.btn {
+            background: var(--bg-secondary);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        button:hover, label.btn:hover {
+            border-color: var(--accent-teal);
+            box-shadow: 0 0 15px rgba(95, 150, 189, 0.3);
+        }
+
+        button.primary { background: var(--accent-teal); color: #000; font-weight: 600; border: none; }
+        button.primary:hover { background: var(--accent-hover); }
+        
+        input[type="file"] { display: none; }
+
+        /* Add New Photo Form */
+        .add-form {
+            background: var(--bg-panel);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent-teal);
+        }
+
+        /* Draggable Grid */
+        .editor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .photo-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .photo-card:active { cursor: grabbing; }
+        
+        .photo-card.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .photo-card.drag-over {
+            border: 2px dashed var(--accent-teal);
+            transform: scale(1.02);
+        }
+
+        .card-img-wrapper {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .card-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .card-info { padding: 1rem; }
+        
+        .card-info input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.3rem 0;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-info input:focus { outline: none; border-color: var(--accent-teal); }
+        .card-info input.title-input { font-weight: 600; font-size: 1rem; }
+        .card-info input.src-input { font-size: 0.8rem; color: var(--text-muted); }
+
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover { background: var(--danger); color: white; }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-muted);
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>JSON Photo Editor</h1>
+        <div class="control-group">
+            <label class="btn" for="import-json">Import photos.json</label>
+            <input type="file" id="import-json" accept=".json">
+            <button class="primary" onclick="exportJSON()">Export Updates</button>
+        </div>
+    </header>
+
+    <div class="add-form">
+        <div class="input-group">
+            <label>Image Title</label>
+            <input type="text" id="new-title" placeholder="e.g., Neon Streets">
+        </div>
+        <div class="input-group">
+            <label>Image Source (Path)</label>
+            <input type="text" id="new-src" placeholder="e.g., images/street1.jpg">
+        </div>
+        <button onclick="addPhoto()">Add Photo</button>
+    </div>
+
+    <div class="editor-grid" id="editor-grid">
+        <div class="empty-state">Import a JSON file or add a new photo to get started.</div>
+    </div>
+
+    <script>
+        let photos = [];
+        const grid = document.getElementById('editor-grid');
+        let draggedItemIndex = null;
+
+        // --- Core Functions ---
+
+        function renderGrid() {
+            grid.innerHTML = '';
+            
+            if (photos.length === 0) {
+                grid.innerHTML = '<div class="empty-state">No photos in the sequence. Add one or import a JSON.</div>';
+                return;
+            }
+
+            photos.forEach((photo, index) => {
+                const card = document.createElement('div');
+                card.className = 'photo-card';
+                card.draggable = true;
+                card.dataset.index = index;
+
+                card.innerHTML = `
+                    <button class="delete-btn" onclick="deletePhoto(${index})" title="Remove Photo">&times;</button>
+                    <div class="card-img-wrapper">
+                        <img src="${photo.src}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23111\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23555\\'>Broken Link</text></svg>'">
+                    </div>
+                    <div class="card-info">
+                        <input type="text" class="title-input" value="${photo.title}" onchange="updatePhoto(${index}, 'title', this.value)" placeholder="Title">
+                        <input type="text" class="src-input" value="${photo.src}" onchange="updatePhoto(${index}, 'src', this.value)" placeholder="Image Path">
+                    </div>
+                `;
+
+                // Drag & Drop Event Listeners
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragover', handleDragOver);
+                card.addEventListener('dragenter', handleDragEnter);
+                card.addEventListener('dragleave', handleDragLeave);
+                card.addEventListener('drop', handleDrop);
+                card.addEventListener('dragend', handleDragEnd);
+
+                grid.appendChild(card);
+            });
+        }
+
+        function addPhoto() {
+            const titleInput = document.getElementById('new-title');
+            const srcInput = document.getElementById('new-src');
+            
+            if (!titleInput.value || !srcInput.value) {
+                alert("Please provide both a title and an image source path.");
+                return;
+            }
+
+            photos.push({
+                title: titleInput.value,
+                src: srcInput.value
+            });
+
+            titleInput.value = '';
+            srcInput.value = '';
+            renderGrid();
+        }
+
+        function updatePhoto(index, field, value) {
+            photos[index][field] = value;
+        }
+
+        function deletePhoto(index) {
+            if (confirm("Are you sure you want to remove this photo from the gallery?")) {
+                photos.splice(index, 1);
+                renderGrid();
+            }
+        }
+
+        // --- Drag and Drop Logic ---
+
+        function handleDragStart(e) {
+            draggedItemIndex = parseInt(this.dataset.index);
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            // Required for Firefox
+            e.dataTransfer.setData('text/plain', draggedItemIndex); 
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            if (this.dataset.index != draggedItemIndex) {
+                this.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+            
+            const dropIndex = parseInt(this.dataset.index);
+            
+            if (draggedItemIndex !== null && draggedItemIndex !== dropIndex) {
+                // Reorder the array
+                const draggedItem = photos.splice(draggedItemIndex, 1)[0];
+                photos.splice(dropIndex, 0, draggedItem);
+                renderGrid();
+            }
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.photo-card').forEach(card => {
+                card.classList.remove('drag-over');
+            });
+            draggedItemIndex = null;
+        }
+
+        // --- Import / Export ---
+
+        document.getElementById('import-json').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (Array.isArray(parsed)) {
+                        photos = parsed;
+                        renderGrid();
+                    } else {
+                        alert("The JSON file must contain an array of photo objects.");
+                    }
+                } catch (err) {
+                    alert("Error parsing JSON file. Make sure it's valid.");
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        window.exportJSON = function() {
+            if (photos.length === 0) {
+                alert("Nothing to export!");
+                return;
+            }
+
+            const dataStr = JSON.stringify(photos, null, 4);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "photos.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        // Initialize empty grid
+        renderGrid();
+    </script>
+</body>
+</html>
