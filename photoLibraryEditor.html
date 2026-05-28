@@ -28,7 +28,8 @@
             background-color: var(--bg-main);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 2rem 5%;
+            /* Synced to 10% to perfectly match the live site container width */
+            padding: 2rem 10%; 
             overflow-x: hidden;
         }
 
@@ -56,6 +57,20 @@
             gap: 1rem;
             align-items: center;
         }
+
+        /* --- Toggle Switch UI --- */
+        .toggle-container { 
+            display: flex; align-items: center; gap: 0.6rem; 
+            background: var(--bg-secondary); padding: 0.4rem 1.2rem; 
+            border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .toggle-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); transition: color 0.3s ease; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 34px; border: 1px solid rgba(255,255,255,0.2); }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: var(--text-main); transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: rgba(16, 185, 129, 0.2); border-color: var(--swap-color); }
+        input:checked + .slider:before { transform: translateX(22px); background-color: var(--swap-color); }
 
         button {
             background: var(--bg-secondary);
@@ -113,20 +128,8 @@
             transform: scale(1.01);
         }
 
-        #json-dropzone p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            pointer-events: none;
-        }
-
-        #json-dropzone svg {
-            width: 40px;
-            height: 40px;
-            fill: var(--text-muted);
-            pointer-events: none;
-            transition: fill 0.3s ease;
-        }
-
+        #json-dropzone p { color: var(--text-muted); font-size: 1.1rem; pointer-events: none; }
+        #json-dropzone svg { width: 40px; height: 40px; fill: var(--text-muted); pointer-events: none; transition: fill 0.3s ease; }
         #json-dropzone.dragover svg { fill: var(--accent-teal); }
         input[type="file"] { display: none; }
 
@@ -136,7 +139,7 @@
             padding: 1.5rem;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
             display: flex;
             gap: 1.5rem;
             align-items: flex-end;
@@ -145,73 +148,53 @@
         }
         
         .add-form.active { display: flex; }
+        .input-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; min-width: 0; }
+        .input-group label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        
+        .input-group input {
+            background: rgba(0, 0, 0, 0.3); border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: white; padding: 0.8rem 0.5rem;
+            font-family: 'Inter', sans-serif; transition: border-color 0.3s ease;
+        }
+        .input-group input:focus { outline: none; border-color: var(--accent-teal); }
 
-        .input-group {
+        /* --- Justified Layout Editor Grid --- */
+        #gallery-container {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            flex: 1;
-        }
-
-        .input-group label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .input-group input {
-            background: rgba(0, 0, 0, 0.3);
-            border: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 0.8rem 0.5rem;
-            font-family: 'Inter', sans-serif;
-            transition: border-color 0.3s ease;
+            gap: 12px; 
+            width: 100%;
+            padding-bottom: 100px;
         }
         
-        .input-group input:focus {
-            outline: none;
-            border-color: var(--accent-teal);
-        }
-
-        /* --- True Masonry Editor Grid --- */
-        .editor-masonry {
-            column-count: 4;
-            column-gap: 1.2rem;
+        .gallery-row {
+            display: flex;
+            flex-direction: row;
+            gap: 12px; 
             width: 100%;
         }
 
-        @media (max-width: 1200px) { .editor-masonry { column-count: 3; } }
-        @media (max-width: 900px) { .editor-masonry { column-count: 2; } }
-        @media (max-width: 600px) { .editor-masonry { column-count: 1; } }
-
         .photo-card {
-            break-inside: avoid;
-            margin-bottom: 1.2rem;
             background: var(--bg-secondary);
             border-radius: 4px;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.05);
             cursor: grab;
             position: relative;
+            display: flex;
+            flex-direction: column;
             
-            /* Clean Transitions */
+            /* CRITICAL FIX: Forces Flexbox to ignore long URLs and strictly obey the aspect-ratio math */
+            min-width: 0; 
+            
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                        box-shadow 0.4s ease, 
-                        border-color 0.3s ease,
-                        opacity 0.4s ease;
+                        box-shadow 0.4s ease, border-color 0.3s ease, opacity 0.4s ease;
         }
 
         /* Initial Load Animations Only */
-        .photo-card.stagger-prep {
-            opacity: 0;
-            transform: translateY(30px) scale(0.95);
-        }
-        .photo-card.animate-in {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
+        .photo-card.stagger-prep { opacity: 0; transform: translateY(30px) scale(0.95); }
+        .photo-card.animate-in { opacity: 1; transform: translateY(0) scale(1); }
 
         .photo-card:hover {
             transform: translateY(-5px) scale(1.02);
@@ -236,47 +219,56 @@
             opacity: 0.8;
         }
 
-        /* Shift Swap Mode */
-        .photo-card.drag-over.swap-mode {
+        /* Swap Mode */
+        .photo-card.swap-mode {
             border: 2px dashed var(--swap-color);
             box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+            transform: scale(1.05);
+            opacity: 0.8;
         }
 
         .card-img-wrapper {
             width: 100%;
+            flex-grow: 1; 
             background: #000;
             position: relative;
+            min-width: 0;
         }
 
         .card-img-wrapper img {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover; 
             display: block;
             pointer-events: none;
-            transition: opacity 0.3s ease;
         }
 
-        .card-info { padding: 1rem; }
+        .card-info { 
+            height: 85px; 
+            padding: 0.8rem 1rem; 
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0; /* CRITICAL FIX */
+        }
         
         .card-info input {
             width: 100%;
+            min-width: 0; /* CRITICAL FIX: Allows input to shrink smaller than the long URL string */
             background: transparent;
             border: none;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
-            padding: 0.4rem 0;
+            padding: 0.3rem 0;
             font-family: 'Inter', sans-serif;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             transition: border-color 0.3s ease;
         }
 
-        .card-info input:focus {
-            outline: none;
-            border-color: var(--accent-hover);
-        }
-
-        .card-info input.title-input { font-weight: 600; font-size: 1rem; }
-        .card-info input.src-input { font-size: 0.8rem; color: var(--text-muted); }
+        .card-info input:focus { outline: none; border-color: var(--accent-hover); }
+        .card-info input.title-input { font-weight: 600; font-size: 0.9rem; }
+        .card-info input.src-input { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0;}
 
         .delete-btn {
             position: absolute;
@@ -312,8 +304,16 @@
     <header>
         <h1>JSON Setup Pipeline</h1>
         <div class="control-group">
+            <div class="toggle-container">
+                <span class="toggle-label" id="insert-label" style="color: var(--accent-hover); font-weight: bold;">Insert</span>
+                <label class="switch">
+                    <input type="checkbox" id="mode-toggle">
+                    <span class="slider round"></span>
+                </label>
+                <span class="toggle-label" id="swap-label">Swap</span>
+            </div>
             <span style="color: var(--text-muted); font-size: 0.8rem; margin-right: 1rem;">
-                Hold <strong>SHIFT</strong> while dropping to Swap
+                (Hold <strong>'S'</strong> key to auto-switch)
             </span>
             <button onclick="clearWorkspace()">Clear</button>
             <button class="primary" onclick="exportJSON()">Export json</button>
@@ -340,20 +340,77 @@
         <button class="primary" onclick="addPhoto()">Add to Grid</button>
     </div>
 
-    <div class="editor-masonry" id="editor-grid"></div>
+    <div id="gallery-container"></div>
 
     <script>
+        // --- CONFIGURATION ---
+        const CONFIG_SWAP_KEY = 's'; 
+
+        // --- STATE VARIABLES ---
         let photos = [];
-        const grid = document.getElementById('editor-grid');
+        let draggedItemIndex = null;
+        let isInitialLoad = true;
+        let isSwapKeyHeld = false;
+        let currentHoveredCard = null;
+
+        const grid = document.getElementById('gallery-container');
         const dropzone = document.getElementById('json-dropzone');
         const fileInput = document.getElementById('file-input');
         const addForm = document.getElementById('add-form-container');
-        let draggedItemIndex = null;
+        
+        // --- UI TOGGLE & HOTKEY LOGIC ---
+        const modeToggle = document.getElementById('mode-toggle');
+        const insertLabel = document.getElementById('insert-label');
+        const swapLabel = document.getElementById('swap-label');
+
+        function getSwapMode() {
+            return modeToggle.checked || isSwapKeyHeld;
+        }
+
+        modeToggle.addEventListener('change', updateToggleVisuals);
+
+        function updateToggleVisuals() {
+            if (modeToggle.checked) {
+                swapLabel.style.color = 'var(--swap-color)'; swapLabel.style.fontWeight = 'bold';
+                insertLabel.style.color = 'var(--text-muted)'; insertLabel.style.fontWeight = 'normal';
+            } else {
+                insertLabel.style.color = 'var(--accent-hover)'; insertLabel.style.fontWeight = 'bold';
+                swapLabel.style.color = 'var(--text-muted)'; swapLabel.style.fontWeight = 'normal';
+            }
+            updateDragVisuals();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key.toLowerCase() === CONFIG_SWAP_KEY) {
+                isSwapKeyHeld = true;
+                updateDragVisuals();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key.toLowerCase() === CONFIG_SWAP_KEY) {
+                isSwapKeyHeld = false;
+                updateDragVisuals();
+            }
+        });
+
+        function updateDragVisuals() {
+            if (draggedItemIndex !== null && currentHoveredCard) {
+                if (getSwapMode()) {
+                    currentHoveredCard.classList.add('swap-mode');
+                    currentHoveredCard.classList.remove('drag-over');
+                } else {
+                    currentHoveredCard.classList.add('drag-over');
+                    currentHoveredCard.classList.remove('swap-mode');
+                }
+            }
+        }
 
         // --- Drag & Drop JSON Import Logic ---
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropzone.addEventListener(eventName, preventDefaults, false);
-            document.body.addEventListener(eventName, preventDefaults, false);
         });
 
         function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
@@ -383,10 +440,9 @@
                 try {
                     const parsed = JSON.parse(e.target.result);
                     if (Array.isArray(parsed)) {
-                        photos = parsed;
                         dropzone.style.display = 'none'; 
                         addForm.classList.add('active'); 
-                        renderGrid(true); // Initial load triggers animations
+                        processAndLoadPhotos(parsed);
                     } else {
                         alert("The JSON must contain an array of objects.");
                     }
@@ -395,6 +451,23 @@
                 }
             };
             reader.readAsText(file);
+        }
+
+        function processAndLoadPhotos(data) {
+            grid.innerHTML = '<p style="color: var(--text-muted); padding: 2rem; text-align: center;">Pre-calculating geometries...</p>';
+            
+            Promise.all(data.map(photo => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.src = photo.src;
+                    img.onload = () => { photo.aspectRatio = img.naturalWidth / img.naturalHeight; resolve(photo); };
+                    img.onerror = () => { photo.aspectRatio = 1.5; resolve(photo); };
+                });
+            })).then(processed => {
+                photos = processed;
+                isInitialLoad = true;
+                buildJustifiedGrid();
+            });
         }
 
         function clearWorkspace() {
@@ -407,9 +480,7 @@
             }
         }
 
-        // --- Event Delegation (No more inline onclicks) ---
-        
-        // Handles real-time text input updates
+        // --- Editor Real-time Input Logic ---
         grid.addEventListener('change', (e) => {
             const card = e.target.closest('.photo-card');
             if (!card) return;
@@ -419,68 +490,29 @@
                 photos[index].title = e.target.value;
             } else if (e.target.classList.contains('src-input')) {
                 photos[index].src = e.target.value;
-                // Live update the image without a full re-render
-                const img = card.querySelector('img');
-                if (img) img.src = e.target.value; 
+                const img = new Image();
+                img.src = photos[index].src;
+                img.onload = () => { 
+                    photos[index].aspectRatio = img.naturalWidth / img.naturalHeight; 
+                    buildJustifiedGrid(); 
+                };
+                img.onerror = () => { 
+                    photos[index].aspectRatio = 1.5; 
+                    buildJustifiedGrid(); 
+                };
             }
         });
 
-        // Handles Delete Buttons
         grid.addEventListener('click', (e) => {
             if (e.target.classList.contains('delete-btn')) {
                 if (confirm("Remove this photo from the flow?")) {
                     const card = e.target.closest('.photo-card');
                     const index = parseInt(card.dataset.index);
                     photos.splice(index, 1);
-                    card.remove(); // Direct DOM removal
-                    updateIndices();
+                    buildJustifiedGrid(); 
                 }
             }
         });
-
-        // --- Core Builders ---
-        function renderGrid(animate = true) {
-            grid.innerHTML = '';
-            photos.forEach((photo, index) => {
-                const card = createPhotoCard(photo, index, animate);
-                grid.appendChild(card);
-            });
-        }
-
-        function createPhotoCard(photo, index, animate) {
-            const card = document.createElement('div');
-            card.className = 'photo-card';
-            if (animate) card.classList.add('stagger-prep');
-            card.draggable = true;
-            card.dataset.index = index;
-
-            card.innerHTML = `
-                <button class="delete-btn" title="Remove Photo">&times;</button>
-                <div class="card-img-wrapper">
-                    <img src="${photo.src}" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'150\\'><rect width=\\'100\\' height=\\'150\\' fill=\\'%23111\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23555\\'>Broken Link</text></svg>'">
-                </div>
-                <div class="card-info">
-                    <input type="text" class="title-input" value="${photo.title}" placeholder="Title">
-                    <input type="text" class="src-input" value="${photo.src}" placeholder="Image Path">
-                </div>
-            `;
-
-            card.addEventListener('dragstart', handleItemDragStart);
-            card.addEventListener('dragover', handleItemDragOver);
-            card.addEventListener('dragenter', handleItemDragEnter);
-            card.addEventListener('dragleave', handleItemDragLeave);
-            card.addEventListener('drop', handleItemDrop);
-            card.addEventListener('dragend', handleItemDragEnd);
-
-            if (animate) {
-                setTimeout(() => {
-                    card.classList.add('animate-in');
-                    // Clean up animation classes once complete so they don't block hover states
-                    setTimeout(() => card.classList.remove('stagger-prep', 'animate-in'), 600);
-                }, 50 + (index * 80));
-            }
-            return card;
-        }
 
         function addPhoto() {
             const titleInput = document.getElementById('new-title');
@@ -492,104 +524,166 @@
             }
 
             const newObj = { title: titleInput.value, src: srcInput.value };
-            photos.push(newObj);
+            
+            const img = new Image();
+            img.src = newObj.src;
+            img.onload = () => {
+                newObj.aspectRatio = img.naturalWidth / img.naturalHeight;
+                photos.push(newObj);
+                buildJustifiedGrid(); 
+            };
+            img.onerror = () => {
+                newObj.aspectRatio = 1.5;
+                photos.push(newObj);
+                buildJustifiedGrid();
+            };
 
-            // Add new card dynamically without touching the existing grid
-            const newIndex = photos.length - 1;
-            const newCard = createPhotoCard(newObj, newIndex, true);
-            grid.appendChild(newCard);
-
-            titleInput.value = '';
-            srcInput.value = '';
+            titleInput.value = ''; srcInput.value = '';
         }
 
-        function updateIndices() {
-            Array.from(grid.children).forEach((card, idx) => {
-                card.dataset.index = idx;
+        // --- Justified Grid Builder Engine ---
+        function buildJustifiedGrid() {
+            grid.innerHTML = ''; 
+            
+            const targetImgHeight = window.innerWidth > 768 ? 350 : 200;
+            const gap = 12; 
+            const containerWidth = grid.clientWidth;
+            const footerHeight = 85; 
+
+            let rowPhotos = [];
+            let rowAspectRatioSum = 0;
+
+            photos.forEach((photo, index) => {
+                rowPhotos.push({ ...photo, originalIndex: index });
+                rowAspectRatioSum += photo.aspectRatio;
+
+                const estimatedWidth = (rowAspectRatioSum * targetImgHeight) + ((rowPhotos.length - 1) * gap);
+
+                if (estimatedWidth >= containerWidth) {
+                    const exactImgHeight = (containerWidth - ((rowPhotos.length - 1) * gap)) / rowAspectRatioSum;
+                    renderRow(rowPhotos, exactImgHeight, footerHeight);
+                    rowPhotos = [];
+                    rowAspectRatioSum = 0;
+                }
             });
-        }
 
-        // --- Advanced DOM Reordering Drag & Drop ---
-        function handleItemDragStart(e) {
-            draggedItemIndex = parseInt(this.dataset.index);
-            setTimeout(() => this.classList.add('dragging'), 0);
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', draggedItemIndex); 
-        }
-
-        function handleItemDragOver(e) {
-            e.preventDefault();
-            if (e.shiftKey) {
-                e.dataTransfer.dropEffect = 'copy';
-                this.classList.add('swap-mode');
-            } else {
-                e.dataTransfer.dropEffect = 'move';
-                this.classList.remove('swap-mode');
+            if (rowPhotos.length > 0) {
+                renderRow(rowPhotos, targetImgHeight, footerHeight, true);
             }
-            return false;
+
+            isInitialLoad = false; 
         }
 
-        function handleItemDragEnter(e) {
+        function renderRow(rowPhotos, imgHeight, footerHeight, isLastRow = false) {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'gallery-row';
+            
+            rowDiv.style.height = `${imgHeight + footerHeight}px`;
+
+            rowPhotos.forEach((photo, i) => {
+                const item = document.createElement('div');
+                item.className = 'photo-card';
+                item.draggable = true;
+                item.dataset.index = photo.originalIndex;
+                
+                item.style.flex = `${photo.aspectRatio} 1 0px`;
+                if (isLastRow) {
+                    item.style.flex = `0 1 ${photo.aspectRatio * imgHeight}px`;
+                }
+
+                if (isInitialLoad) {
+                    item.classList.add('stagger-prep');
+                    setTimeout(() => {
+                        item.classList.add('animate-in');
+                        setTimeout(() => item.classList.remove('stagger-prep', 'animate-in'), 600);
+                    }, 50 + (photo.originalIndex * 80));
+                }
+
+                item.innerHTML = `
+                    <button class="delete-btn" title="Remove Photo">&times;</button>
+                    <div class="card-img-wrapper" style="height: ${imgHeight}px;">
+                        <img src="${photo.src}" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'150\\'><rect width=\\'100\\' height=\\'150\\' fill=\\'%23111\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23555\\'>Broken Link</text></svg>'">
+                    </div>
+                    <div class="card-info">
+                        <input type="text" class="title-input" value="${photo.title}" placeholder="Title">
+                        <input type="text" class="src-input" value="${photo.src}" placeholder="Image Path">
+                    </div>
+                `;
+                rowDiv.appendChild(item);
+            });
+
+            grid.appendChild(rowDiv);
+        }
+
+        window.addEventListener('resize', () => {
+            if(photos.length > 0) buildJustifiedGrid();
+        });
+
+        // --- Drag & Drop Item Management ---
+        grid.addEventListener('dragstart', (e) => {
+            const card = e.target.closest('.photo-card');
+            if (card) {
+                draggedItemIndex = parseInt(card.dataset.index);
+                setTimeout(() => card.classList.add('dragging'), 0);
+                e.dataTransfer.effectAllowed = 'move';
+            }
+        });
+
+        grid.addEventListener('dragover', (e) => {
             e.preventDefault();
-            if (this.dataset.index != draggedItemIndex) this.classList.add('drag-over');
-        }
+            const card = e.target.closest('.photo-card');
+            if (card && parseInt(card.dataset.index) !== draggedItemIndex) {
+                currentHoveredCard = card;
+                if (getSwapMode()) {
+                    e.dataTransfer.dropEffect = 'copy';
+                    card.classList.add('swap-mode');
+                    card.classList.remove('drag-over');
+                } else {
+                    e.dataTransfer.dropEffect = 'move';
+                    card.classList.add('drag-over');
+                    card.classList.remove('swap-mode');
+                }
+            }
+        });
 
-        function handleItemDragLeave(e) {
-            this.classList.remove('drag-over', 'swap-mode');
-        }
+        grid.addEventListener('dragleave', (e) => {
+            const card = e.target.closest('.photo-card');
+            if (card) {
+                card.classList.remove('drag-over', 'swap-mode');
+                currentHoveredCard = null;
+            }
+        });
 
-        function handleItemDrop(e) {
-            e.stopPropagation();
-            this.classList.remove('drag-over', 'swap-mode');
+        grid.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const card = e.target.closest('.photo-card');
+            if (!card) return;
             
-            const dropIndex = parseInt(this.dataset.index);
-            
+            card.classList.remove('drag-over', 'swap-mode');
+            const dropIndex = parseInt(card.dataset.index);
+
             if (draggedItemIndex !== null && draggedItemIndex !== dropIndex) {
-                const draggedCard = grid.children[draggedItemIndex];
-                const dropCard = grid.children[dropIndex];
-
-                if (e.shiftKey) {
-                    // 1. SWAP IN ARRAY
+                if (getSwapMode()) {
                     const temp = photos[draggedItemIndex];
                     photos[draggedItemIndex] = photos[dropIndex];
                     photos[dropIndex] = temp;
-
-                    // 2. SWAP IN DOM (Direct manipulation, no re-render!)
-                    const afterDrop = dropCard.nextSibling;
-                    const afterDrag = draggedCard.nextSibling;
-
-                    if (draggedCard.nextSibling === dropCard) {
-                        grid.insertBefore(dropCard, draggedCard);
-                    } else if (dropCard.nextSibling === draggedCard) {
-                        grid.insertBefore(draggedCard, dropCard);
-                    } else {
-                        grid.insertBefore(draggedCard, afterDrop);
-                        grid.insertBefore(dropCard, afterDrag);
-                    }
                 } else {
-                    // 1. INSERT IN ARRAY
                     const draggedItem = photos.splice(draggedItemIndex, 1)[0];
                     photos.splice(dropIndex, 0, draggedItem);
-
-                    // 2. INSERT IN DOM
-                    if (dropIndex > draggedItemIndex) {
-                        grid.insertBefore(draggedCard, dropCard.nextSibling);
-                    } else {
-                        grid.insertBefore(draggedCard, dropCard);
-                    }
                 }
-                updateIndices();
+                buildJustifiedGrid(); 
             }
-            return false;
-        }
-
-        function handleItemDragEnd(e) {
-            this.classList.remove('dragging');
-            document.querySelectorAll('.photo-card').forEach(card => {
-                card.classList.remove('drag-over', 'swap-mode');
-            });
             draggedItemIndex = null;
-        }
+            currentHoveredCard = null;
+        });
+
+        grid.addEventListener('dragend', (e) => {
+            const card = e.target.closest('.photo-card');
+            if (card) card.classList.remove('dragging');
+            document.querySelectorAll('.photo-card').forEach(c => c.classList.remove('drag-over', 'swap-mode'));
+            draggedItemIndex = null;
+            currentHoveredCard = null;
+        });
 
         // --- Export JSON ---
         window.exportJSON = function() {
@@ -597,7 +691,8 @@
                 alert("Pipeline is empty. Nothing to export.");
                 return;
             }
-            const dataStr = JSON.stringify(photos, null, 4);
+            const cleanPhotos = photos.map(({ title, src }) => ({ title, src }));
+            const dataStr = JSON.stringify(cleanPhotos, null, 4);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             

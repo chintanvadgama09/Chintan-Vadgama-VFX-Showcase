@@ -37,10 +37,6 @@
             --accent-hover: #00d2d6;
             --tile-color: #7eaed1;
             
-            /* --- TWEAKABLE IMAGE FRAME VARIABLES --- */
-            --frame-width: 1px;
-            --frame-color: rgba(255, 255, 255, 1);
-
             --wipe-texture: url('images/flow.png'); 
             --wipe-texture-scale: 25vw 350%;
             --wipe-speed: 10s;
@@ -72,8 +68,8 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 400;
-            display: flex; /* Changed from inline-block */
-            align-items: center; /* Centers the icons vertically */
+            display: flex; 
+            align-items: center; 
             transition: color 0.3s ease, text-shadow 0.4s ease, transform 0.3s ease;
         }
         .nav-links a:hover {
@@ -91,38 +87,43 @@
         }
         .section-subtitle { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 4rem; margin-top: 1.5rem; }
 
-        /* --- Masonry Photography Grid --- */
-        .gallery-grid {
-            column-count: 4;
-            column-gap: 0.9rem;
+        /* --- Justified Layout Container --- */
+        #gallery-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px; /* Vertical gap between rows */
             width: 100%;
         }
+        
+        .gallery-row {
+            display: flex;
+            flex-direction: row;
+            gap: 12px; /* Horizontal gap between images */
+            width: 100%;
+        }
+
         .gallery-item {
-            break-inside: avoid;
-            margin-bottom: 1rem;
-            border-radius: 0px;
-            overflow: hidden;
             position: relative;
             cursor: pointer;
-            
-            /* Tweakable Frame */
-            /* border: var(--frame-width) solid var(--frame-color); */
-            
-            /* FIXED: Proper transition times for all properties */
+            border-radius: 4px;
+            overflow: hidden;
+            /* Flex properties are handled by the JS engine to maintain aspect ratio perfectly */
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
         }
+        
         .gallery-item img {
             width: 100%;
+            height: 100%;
             display: block;
-            /* Added slightly larger default scale to prevent border gaps */
-            transform: scale(1.5);
+            /* object-fit isn't doing the heavy lifting anymore, JS is. This just covers sub-pixel flexbox rounding */
+            object-fit: cover; 
             transition: opacity 0.3s ease;
         }
+
         .gallery-item:hover {
-            /* FIXED: Changed from 50% to 1.03 for a subtle pop effect */
-            transform: scale(2); 
-            box-shadow: 0 15px 35px rgba(0, 210, 214, 0.3);
-            z-index: 2;
+            transform: scale(1.04); 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 210, 214, 0.3);
+            z-index: 10; /* Bring above adjacent items when zoomed */
         }
 
         /* --- Lightbox Viewer --- */
@@ -157,7 +158,6 @@
             display: flex; justify-content: center; align-items: center;
         }
         
-        /* FIXED: Lightbox container specifically designed for overlapping cross-fades */
         #lightbox-img-container {
             position: relative;
             width: 100%;
@@ -167,14 +167,12 @@
             align-items: center;
         }
 
-        /* Image layers that stack on top of each other and fade */
         .lightbox-img-layer {
             position: absolute;
             max-width: 100%; 
             max-height: 100%; 
             border-radius: 4px;
             box-shadow: 0 10px 50px rgba(0,0,0,0.6);
-            /* Smooth half-second crossfade */
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
             opacity: 0;
             transform: scale(0.95);
@@ -191,8 +189,6 @@
             cursor: pointer; transition: all 0.3s ease; z-index: 2001;
             display: flex; justify-content: center; align-items: center;
             backdrop-filter: blur(5px);
-            
-            /* FIXED: Centers the unicode arrows perfectly */
             line-height: 0;
             padding-bottom: 4px;
         }
@@ -225,11 +221,9 @@
 
         /* --- Responsive Design --- */
         @media (max-width: 1024px) {
-            .gallery-grid { column-count: 2; }
             #prev-btn { left: 0; } #next-btn { right: 0; }
         }
         @media (max-width: 768px) {
-            .gallery-grid { column-count: 1; }
             nav { padding: 0.6rem 5%; justify-content: center; }
             .logo { display: none; }
             .nav-links { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
@@ -265,8 +259,7 @@
         <h2 class="section-title fade-pop">Captured Light</h2>
         <p class="section-subtitle fade-pop">A collection of visual experiments, raw textures, and everyday scenes.</p>
         
-        <div class="gallery-grid" id="gallery-container">
-            </div>
+        <div id="gallery-container"></div>
     </section>
 
     <div id="lightbox">
@@ -276,9 +269,7 @@
         </div>
         <div class="lightbox-content">
             <button class="nav-btn" id="prev-btn" onclick="prevPhoto(event)">&#10094;</button>
-            
             <div id="lightbox-img-container"></div>
-            
             <button class="nav-btn" id="next-btn" onclick="nextPhoto(event)">&#10095;</button>
         </div>
     </div>
@@ -288,18 +279,21 @@
             
             // --- Intersection Observer (Fade-pop animations) ---
             const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('is-visible');
-                    }
-                });
-            }, observerOptions);
+            let observer;
+            
+            function setupObserver() {
+                if (observer) observer.disconnect();
+                observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                        }
+                    });
+                }, observerOptions);
 
-            const observeElements = () => {
                 document.querySelectorAll('.fade-pop').forEach(el => observer.observe(el));
-            };
-            observeElements();
+            }
+            setupObserver();
 
             // --- Hextech Wipe Controller ---
             const wipeCooldown = 3200; 
@@ -312,46 +306,127 @@
             setTimeout(fireHextechWipe, 500);
             setInterval(fireHextechWipe, wipeCooldown);
 
-            // --- Photography Gallery Logic ---
+            // --- JUSTIFIED GALLERY Layout Engine ---
             let photoData = [];
             let currentIndex = 0;
             const galleryContainer = document.getElementById('gallery-container');
             const lightbox = document.getElementById('lightbox');
             const lightboxTitle = document.getElementById('lightbox-title');
 
-            // Fetching photos configuration
+            // 1. Fetch JSON
             fetch('photos.json')
                 .then(response => response.json())
                 .then(data => {
-                    photoData = data;
-                    renderGallery();
+                    galleryContainer.innerHTML = '<p style="color: var(--text-muted); padding: 2rem;">Pre-calculating photo geometries...</p>';
+                    
+                    // 2. Preload all images to calculate true natural Aspect Ratios before rendering
+                    return Promise.all(data.map(photo => {
+                        return new Promise((resolve) => {
+                            const img = new Image();
+                            img.src = photo.src;
+                            img.onload = () => {
+                                photo.aspectRatio = img.naturalWidth / img.naturalHeight;
+                                resolve(photo);
+                            };
+                            img.onerror = () => {
+                                photo.aspectRatio = 1.5; // Fallback math if broken link
+                                resolve(photo);
+                            };
+                        });
+                    }));
+                })
+                .then(loadedData => {
+                    photoData = loadedData;
+                    buildJustifiedGrid();
+                    
+                    // Recalculate the mathematical layout when the window is resized
+                    let resizeTimer;
+                    window.addEventListener('resize', () => {
+                        clearTimeout(resizeTimer);
+                        resizeTimer = setTimeout(buildJustifiedGrid, 150);
+                    });
                 })
                 .catch(err => {
-                    galleryContainer.innerHTML = '<p style="color: var(--text-muted);">Error loading photos. Ensure photos.json exists and you are running a local server.</p>';
+                    galleryContainer.innerHTML = '<p style="color: var(--danger);">Error loading photos. Ensure photos.json exists and you are running a local server.</p>';
                 });
 
-            function renderGallery() {
+            // 3. The Core Geometry Logic
+            function buildJustifiedGrid() {
+                galleryContainer.innerHTML = ''; // Clear container for fresh render
+                
+                // Set ideal target height based on screen size
+                const targetRowHeight = window.innerWidth > 768 ? 350 : 200;
+                const gap = 12; // Must match CSS horizontal gap
+                const containerWidth = galleryContainer.clientWidth;
+
+                let rowPhotos = [];
+                let rowAspectRatioSum = 0;
+
                 photoData.forEach((photo, index) => {
-                    // Stagger animation based on index
-                    const delay = (index % 5) * 0.1; 
-                    
+                    // Track original index so Lightbox mapping remains correct
+                    rowPhotos.push({ ...photo, originalIndex: index });
+                    rowAspectRatioSum += photo.aspectRatio;
+
+                    // Calculate estimated width of this row if it were set to the targetHeight
+                    const estimatedWidth = (rowAspectRatioSum * targetRowHeight) + ((rowPhotos.length - 1) * gap);
+
+                    // If estimated width exceeds container width, the row is full!
+                    if (estimatedWidth >= containerWidth) {
+                        // Mathematically adjust the height so it aligns perfectly with the right edge
+                        const exactHeight = (containerWidth - ((rowPhotos.length - 1) * gap)) / rowAspectRatioSum;
+                        renderRow(rowPhotos, exactHeight);
+                        
+                        // Reset for next row
+                        rowPhotos = [];
+                        rowAspectRatioSum = 0;
+                    }
+                });
+
+                // Render any remaining photos as the last row
+                if (rowPhotos.length > 0) {
+                    // We don't stretch the last row to the edge (otherwise 1 photo becomes huge). 
+                    // We render it at the target height aligned left.
+                    renderRow(rowPhotos, targetRowHeight, true);
+                }
+
+                setupObserver(); // Trigger entrance animations
+            }
+
+            function renderRow(photos, rowHeight, isLastRow = false) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'gallery-row';
+                // Lock row height
+                rowDiv.style.height = `${rowHeight}px`;
+
+                photos.forEach((photo, i) => {
                     const item = document.createElement('div');
                     item.className = 'gallery-item fade-pop';
-                    item.style.transitionDelay = `${delay}s`;
-                    item.onclick = () => openLightbox(index);
+                    
+                    // Flexbox takes over: It distributes the remaining widths perfectly based on the exact aspect ratio
+                    item.style.flex = `${photo.aspectRatio} 1 0px`;
+                    
+                    // If it's the last row, prevent stretching it to the edge
+                    if (isLastRow) {
+                        item.style.flex = `0 1 ${photo.aspectRatio * rowHeight}px`;
+                    }
+
+                    // Stagger animation based on index
+                    item.style.transitionDelay = `${(i % 5) * 0.1}s`;
+                    item.onclick = () => openLightbox(photo.originalIndex);
                     
                     item.innerHTML = `<img src="${photo.src}" alt="${photo.title}" loading="lazy">`;
-                    galleryContainer.appendChild(item);
+                    rowDiv.appendChild(item);
                 });
-                observeElements(); // re-trigger observer for new elements
+
+                galleryContainer.appendChild(rowDiv);
             }
 
             // --- Lightbox Controls ---
             window.openLightbox = function(index) {
                 currentIndex = index;
-                updateLightbox(false); // false = no transition delay on first open
+                updateLightbox(false); 
                 lightbox.classList.add('active');
-                document.body.style.overflow = 'hidden'; // Lock background scrolling
+                document.body.style.overflow = 'hidden'; 
             };
 
             window.closeLightbox = function() {
@@ -371,39 +446,26 @@
                 updateLightbox(true);
             };
 
-            // FIXED: Rebuilt for true overlapping cross-fades
             function updateLightbox(animate) {
                 lightboxTitle.textContent = photoData[currentIndex].title;
                 const container = document.getElementById('lightbox-img-container');
-                
-                // Find currently visible image (if any)
                 const oldImg = container.querySelector('.lightbox-img-layer.active');
                 
-                // Create the new image
                 const newImg = document.createElement('img');
                 newImg.src = photoData[currentIndex].src;
                 newImg.alt = photoData[currentIndex].title;
                 newImg.className = 'lightbox-img-layer';
                 
                 if (!animate) {
-                    // First load, instant display
                     newImg.classList.add('active');
-                    container.innerHTML = ''; // Clear container
+                    container.innerHTML = '';
                     container.appendChild(newImg);
                 } else {
-                    // Animated transition
                     container.appendChild(newImg);
-                    
-                    // Trigger DOM reflow to allow transition to register
-                    void newImg.offsetWidth; 
-                    
-                    // Fade in the new image
+                    void newImg.offsetWidth; // DOM reflow
                     newImg.classList.add('active');
-                    
                     if (oldImg) {
-                        // Fade out the old image
                         oldImg.classList.remove('active');
-                        // Remove from DOM after transition completes (0.5s)
                         setTimeout(() => oldImg.remove(), 500); 
                     }
                 }
@@ -418,7 +480,6 @@
             });
 
             lightbox.addEventListener('click', (e) => {
-                // Close if clicking the background blur or the container directly
                 if(e.target === lightbox || e.target.classList.contains('lightbox-content') || e.target.id === 'lightbox-img-container') {
                     closeLightbox();
                 }
