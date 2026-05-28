@@ -3,102 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON Sheet Editor</title>
-    <!-- Tailwind CSS for sleek, modern UI -->
+    <title>CV JSON Editor</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        main: '#060b0f',
+                        secondary: '#0b171e',
+                        teal: 'rgb(95, 150, 189)',
+                        hover: '#00d2d6',
+                        muted: '#94a3b8'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        /* Custom scrollbar for a polished look */
+        /* Custom scrollbar matching the dark theme */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #474747; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar-track { background: #060b0f; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgb(95, 150, 189); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00d2d6; }
         
         .editable-cell {
             outline: none;
             min-height: 24px;
             padding: 0.5rem;
             border: 1px solid transparent;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             border-radius: 0.25rem;
             word-break: break-all;
+            color: #ffffff;
         }
         .editable-cell:focus {
-            border-color: #01cb5a;
-            background-color: #eff6ff;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+            border-color: #00d2d6;
+            background-color: #0b171e;
+            box-shadow: 0 0 10px rgba(0, 210, 214, 0.2);
         }
         .editable-cell:hover:not(:focus) {
-            background-color: #f8fafc;
-            border-color: #e2e8f0;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Core Theme Buttons */
+        .btn-theme {
+            border: 2px solid rgb(95, 150, 189);
+            color: rgb(95, 150, 189);
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-theme:hover {
+            background-color: rgb(95, 150, 189);
+            color: #060b0f;
+            box-shadow: 0 0px 15px rgba(126, 174, 209, 0.8);
+        }
+
+        /* Drag and Drop Overlay VFX */
+        #dragOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(6, 11, 15, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 5000;
+            display: none;
+            place-items: center;
+            border: 4px dashed #00d2d6;
+            transition: all 0.3s ease;
+        }
+        .drag-over #dragOverlay {
+            display: grid;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans h-screen flex flex-col">
+<body class="bg-main text-white font-sans h-screen flex flex-col">
 
-    <!-- Header / Toolbar -->
-    <header class="bg-white border-b border-slate-200 shadow-sm px-6 py-4 flex items-center justify-between shrink-0">
+    <div id="dragOverlay">
+        <div class="text-center text-hover">
+            <svg class="w-20 h-20 mx-auto mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(0,210,214,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            <h2 class="text-4xl font-extrabold mb-2 tracking-tight">Drop JSON Here</h2>
+            <p class="text-muted text-lg">Release to instantly import your data</p>
+        </div>
+    </div>
+
+    <header class="bg-secondary border-b border-white/10 shadow-sm px-6 py-4 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
-            <div class="bg-blue-600 p-2 rounded-lg text-white">
+            <div class="border border-teal p-2 rounded-lg text-teal shadow-[0_0_10px_rgba(95,150,189,0.2)]">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
             </div>
-            <h1 class="text-xl font-bold text-slate-800 tracking-tight">CV JSON Editor</h1>
+            <h1 class="text-xl font-bold text-white tracking-tight">CV JSON Editor</h1>
         </div>
         
-        <div class="flex items-center gap-3">
-            <!-- Hidden File Input -->
+        <div class="flex items-center gap-4">
             <input type="file" id="fileInput" accept=".json" class="hidden">
             
-            <button onclick="document.getElementById('fileInput').click()" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium text-sm transition shadow-sm flex items-center gap-2">
+            <button onclick="document.getElementById('fileInput').click()" class="btn-theme px-4 py-2 flex items-center gap-2 text-sm shadow-sm bg-transparent">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                 Import JSON
             </button>
-            <button onclick="exportJSON()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition shadow-sm flex items-center gap-2">
+            <button onclick="exportJSON()" class="btn-theme px-4 py-2 flex items-center gap-2 text-sm shadow-sm bg-teal text-main !border-teal hover:!bg-hover hover:!text-main hover:!border-hover">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 Export JSON
             </button>
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 overflow-auto p-6">
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col min-h-full">
+    <main class="flex-1 overflow-auto p-6 bg-main">
+        <div class="bg-secondary rounded-xl shadow-lg border border-white/10 flex flex-col min-h-full overflow-hidden">
             
-            <!-- Table Toolbar -->
-            <div class="px-5 py-4 border-b border-slate-100 flex gap-2">
-                <button onclick="addRow()" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md hover:bg-emerald-100 font-medium text-sm transition flex items-center gap-1.5">
+            <div class="px-5 py-4 border-b border-white/10 flex gap-4 bg-secondary">
+                <button onclick="addRow()" class="px-4 py-1.5 bg-white/5 text-teal border border-teal/30 rounded-md hover:bg-teal/10 hover:border-teal hover:shadow-[0_0_10px_rgba(95,150,189,0.3)] font-medium text-sm transition-all flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Add Row
                 </button>
-                <button onclick="addColumn()" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-md hover:bg-indigo-100 font-medium text-sm transition flex items-center gap-1.5">
+                <button onclick="addColumn()" class="px-4 py-1.5 bg-white/5 text-teal border border-teal/30 rounded-md hover:bg-teal/10 hover:border-teal hover:shadow-[0_0_10px_rgba(95,150,189,0.3)] font-medium text-sm transition-all flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     Add Column
                 </button>
             </div>
 
-            <!-- Table Container -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse" id="jsonTable">
                     <thead>
-                        <tr id="tableHead" class="bg-slate-50 border-b border-slate-200 text-slate-600 text-sm">
-                            <!-- Headers injected by JS -->
-                        </tr>
+                        <tr id="tableHead" class="bg-main border-b border-white/10 text-muted text-sm uppercase tracking-wider">
+                            </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-slate-100 text-sm">
-                        <!-- Rows injected by JS -->
-                    </tbody>
+                    <tbody id="tableBody" class="divide-y divide-white/5 text-sm">
+                        </tbody>
                 </table>
             </div>
             
-            <!-- Empty State -->
-            <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-slate-400">
-                <svg class="w-16 h-16 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                <p class="text-lg font-medium text-slate-600">No data to display</p>
-                <p class="text-sm mt-1">Import a JSON file or add a row to get started.</p>
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-muted">
+                <svg class="w-20 h-20 mb-4 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <p class="text-xl font-semibold text-white">No data to display</p>
+                <p class="text-sm mt-2">Import a JSON file or add a row to get started.</p>
             </div>
         </div>
     </main>
 
-    <!-- Hidden anchor for downloading files -->
     <a id="downloadAnchor" class="hidden"></a>
 
     <script>
@@ -108,33 +162,75 @@
             { id: 2, name: "Guest", roles: ["viewer"], active: false }
         ];
         let columns = [];
+        
+        // Drag & Drop State
+        let draggedRowIndex = null;
+        let dragOverRowIndex = null;
 
         // Initialize App
         function init() {
             renderTable();
+            setupDragAndDrop();
             
-            // Setup File Importer
+            // Setup File Importer (Click)
             document.getElementById('fileInput').addEventListener('change', function(e) {
                 const file = e.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    try {
-                        let importedData = JSON.parse(event.target.result);
-                        // Ensure data is an array of objects for sheet view
-                        if (!Array.isArray(importedData)) {
-                            importedData = [importedData];
-                        }
-                        state = importedData;
-                        renderTable();
-                    } catch (error) {
-                        alert("Error parsing JSON file. Please ensure it's a valid JSON format.");
-                    }
-                };
-                reader.readAsText(file);
+                if (file) handleFileUpload(file);
                 e.target.value = ''; // Reset input
             });
+        }
+
+        // Setup File Drag and Drop Overlay
+        function setupDragAndDrop() {
+            const dropZone = document.body;
+            const dragOverlay = document.getElementById('dragOverlay');
+
+            dropZone.addEventListener('dragover', (e) => {
+                // Ensure we are dragging a file, not a row
+                if (e.dataTransfer.types.includes('Files')) {
+                    e.preventDefault();
+                    document.body.classList.add('drag-over');
+                }
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                if (e.target === dragOverlay || e.target === dropZone) {
+                    document.body.classList.remove('drag-over');
+                }
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                document.body.classList.remove('drag-over');
+                if (e.dataTransfer.files.length > 0) {
+                    e.preventDefault();
+                    const file = e.dataTransfer.files[0];
+                    if (!file.name.endsWith('.json')) {
+                        alert("Please drop a valid JSON file.");
+                        return;
+                    }
+                    handleFileUpload(file);
+                }
+            });
+        }
+
+        // Shared File Upload Handler
+        function handleFileUpload(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    let importedData = JSON.parse(event.target.result);
+                    // Ensure data is an array of objects for sheet view
+                    if (!Array.isArray(importedData)) {
+                        importedData = [importedData];
+                    }
+                    state = importedData;
+                    renderTable();
+                } catch (error) {
+                    alert("Error parsing JSON file. Please ensure it's a valid JSON format.");
+                }
+            };
+            reader.readAsText(file);
         }
 
         // Extract all unique keys from the state
@@ -176,54 +272,142 @@
             updateColumns();
 
             // Render Header
-            let headHtml = `<th class="px-4 py-3 w-16 font-semibold">Row</th>`;
+            let headHtml = `<th class="px-4 py-3 w-16 font-semibold border-r border-white/5">Row</th>`;
             columns.forEach(col => {
-                headHtml += `<th class="px-4 py-3 font-semibold">${col}</th>`;
+                headHtml += `<th class="px-4 py-3 font-semibold border-r border-white/5">${col}</th>`;
             });
-            headHtml += `<th class="px-4 py-3 w-20 text-center font-semibold">Actions</th>`;
+            headHtml += `<th class="px-4 py-3 w-32 text-center font-semibold">Actions</th>`;
             tableHead.innerHTML = headHtml;
 
             // Render Body
             let bodyHtml = '';
             state.forEach((row, rowIndex) => {
-                bodyHtml += `<tr class="hover:bg-slate-50 transition">`;
-                bodyHtml += `<td class="px-4 py-2 border-r border-slate-100 text-slate-400 font-mono text-xs font-semibold text-center">${rowIndex + 1}</td>`;
+                // Group class handles hover states for buttons. Draggable hooks into HTML5 native drag.
+                bodyHtml += `<tr class="group hover:bg-white/5 transition border-b border-white/5 relative bg-secondary" 
+                                 draggable="true" 
+                                 ondragstart="handleRowDragStart(event, ${rowIndex})" 
+                                 ondragover="handleRowDragOver(event, ${rowIndex})" 
+                                 ondragleave="handleRowDragLeave(event)"
+                                 ondrop="handleRowDrop(event, ${rowIndex})" 
+                                 ondragend="handleRowDragEnd(event)">`;
+                
+                // Row Number + Drag Handle
+                bodyHtml += `<td class="px-4 py-2 border-r border-white/5 text-muted font-mono text-xs font-semibold text-center cursor-move" title="Drag to reorder">
+                    <div class="flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4 text-white/20 group-hover:text-teal/60 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+                        ${rowIndex + 1}
+                    </div>
+                </td>`;
                 
                 columns.forEach(col => {
                     const val = row[col] !== undefined ? row[col] : "";
                     const displayVal = formatForDisplay(val);
-                    // Encode HTML to prevent injection if string contains tags
                     const safeVal = String(displayVal).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                     
+                    // Disabling draggable attribute on focus prevents text selection from triggering a row drag
                     bodyHtml += `
-                        <td class="border-r border-slate-100 align-top">
+                        <td class="border-r border-white/5 align-top">
                             <div class="editable-cell" 
                                  contenteditable="true" 
-                                 onblur="handleCellEdit(${rowIndex}, '${col}', this)"
+                                 onfocus="this.closest('tr').setAttribute('draggable', false)"
+                                 onblur="this.closest('tr').setAttribute('draggable', true); handleCellEdit(${rowIndex}, '${col}', this)"
                                  onkeydown="handleKeydown(event, this)">${safeVal}</div>
                         </td>`;
                 });
 
+                // Actions Column (Hidden until hover)
                 bodyHtml += `
                     <td class="px-4 py-2 text-center align-middle">
-                        <button onclick="deleteRow(${rowIndex})" class="text-slate-400 hover:text-red-500 transition" title="Delete Row">
-                            <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
+                        <div class="flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="insertRow(${rowIndex}, 0)" class="text-muted hover:text-hover hover:drop-shadow-[0_0_8px_rgba(0,210,214,0.5)] transition-all" title="Add Row Above">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 14H3M21 20H3M12 10V3M8 7l4-4 4 4"/></svg>
+                            </button>
+                            <button onclick="insertRow(${rowIndex}, 1)" class="text-muted hover:text-hover hover:drop-shadow-[0_0_8px_rgba(0,210,214,0.5)] transition-all" title="Add Row Below">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10H3M21 4H3M12 14v7M8 17l4 4 4-4"/></svg>
+                            </button>
+                            <button onclick="deleteRow(${rowIndex})" class="text-muted hover:text-red-400 hover:drop-shadow-[0_0_8px_rgba(248,113,113,0.5)] transition-all" title="Delete Row">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2m4 0H4"></path></svg>
+                            </button>
+                        </div>
                     </td>`;
                 bodyHtml += `</tr>`;
             });
             tableBody.innerHTML = bodyHtml;
         }
 
-        // Handle cell editing
+        // --- ROW DRAG AND DROP LOGIC --- //
+
+        function handleRowDragStart(e, index) {
+            draggedRowIndex = index;
+            e.dataTransfer.effectAllowed = 'move';
+            // Slight delay so the visual ghost being dragged stays solid
+            setTimeout(() => {
+                e.target.classList.add('opacity-30', 'bg-teal/5');
+            }, 10);
+        }
+
+        function handleRowDragOver(e, index) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const tr = e.currentTarget;
+            const rect = tr.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            
+            // Clear all previous drop indicators
+            tr.parentElement.querySelectorAll('tr').forEach(row => {
+                row.classList.remove('border-t-2', 'border-t-hover', 'border-b-2', 'border-b-hover');
+            });
+
+            // Draw indicator above or below based on mouse position inside the row
+            if (e.clientY < midY) {
+                dragOverRowIndex = index;
+                tr.classList.add('border-t-2', 'border-t-hover');
+            } else {
+                dragOverRowIndex = index + 1;
+                tr.classList.add('border-b-2', 'border-b-hover');
+            }
+        }
+
+        function handleRowDragLeave(e) {
+            e.currentTarget.classList.remove('border-t-2', 'border-t-hover', 'border-b-2', 'border-b-hover');
+        }
+
+        function handleRowDrop(e, index) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('border-t-2', 'border-t-hover', 'border-b-2', 'border-b-hover');
+            
+            if (draggedRowIndex === null || dragOverRowIndex === null) return;
+            
+            // Adjust calculation if we are moving the item downwards
+            let newIndex = dragOverRowIndex;
+            if (draggedRowIndex < newIndex) {
+                newIndex--;
+            }
+
+            if (draggedRowIndex !== newIndex) {
+                const item = state.splice(draggedRowIndex, 1)[0];
+                state.splice(newIndex, 0, item);
+                renderTable();
+            }
+            
+            draggedRowIndex = null;
+            dragOverRowIndex = null;
+        }
+
+        function handleRowDragEnd(e) {
+            draggedRowIndex = null;
+            dragOverRowIndex = null;
+            renderTable(); // Completely cleans up any leftover ghost classes
+        }
+
+        // --- CORE DATA LOGIC --- //
+
         function handleCellEdit(rowIndex, colKey, el) {
             let text = el.innerText.trim();
             
-            // Smart Parsing: Try to convert it back to actual datatypes (numbers, booleans, arrays, objects)
             let parsedValue;
             if (text === "") {
-                // If empty, delete the key entirely or set to empty string depending on preference
-                // For a cleaner JSON, setting to undefined removes it from stringify
                 parsedValue = undefined; 
             } else if (text === "null") {
                 parsedValue = null;
@@ -233,10 +417,8 @@
                 parsedValue = false;
             } else {
                 try {
-                    // This allows users to type ["a", "b"] and it turns into a real Array
                     parsedValue = JSON.parse(text); 
                 } catch (e) {
-                    // If it fails, treat it as a standard string
                     parsedValue = text;
                 }
             }
@@ -247,11 +429,9 @@
                 state[rowIndex][colKey] = parsedValue;
             }
             
-            // Re-render to format the newly entered data properly
             renderTable();
         }
 
-        // Intercept 'Enter' key to blur cell instead of creating new lines
         function handleKeydown(event, el) {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
@@ -259,21 +439,23 @@
             }
         }
 
-        // Add a new row
-        function addRow() {
+        // Insert Row Functionality (0 = above, 1 = below)
+        function insertRow(index, positionOffset) {
             const newRow = {};
-            columns.forEach(col => newRow[col] = ""); // Pre-fill with empty string so cells render
-            state.push(newRow);
+            columns.forEach(col => newRow[col] = ""); 
+            state.splice(index + positionOffset, 0, newRow);
             renderTable();
         }
 
-        // Add a new column
+        function addRow() {
+            insertRow(state.length, 0); // Appends to the very bottom
+        }
+
         function addColumn() {
             const newColName = prompt("Enter new column name:");
             if (newColName && newColName.trim() !== "") {
                 const key = newColName.trim();
                 if (!columns.includes(key)) {
-                    // Add property to all rows so the column exists everywhere
                     state.forEach(row => row[key] = "");
                     renderTable();
                 } else {
@@ -282,7 +464,6 @@
             }
         }
 
-        // Delete a row
         function deleteRow(index) {
             if(confirm("Are you sure you want to delete this row?")) {
                 state.splice(index, 1);
@@ -290,15 +471,12 @@
             }
         }
 
-        // Export JSON
         function exportJSON() {
             if (state.length === 0) {
                 alert("Nothing to export!");
                 return;
             }
             
-            // Clean up temporary undefined/empty fields before exporting if desired, 
-            // but JSON.stringify automatically omits `undefined` properties.
             const dataStr = JSON.stringify(state, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
