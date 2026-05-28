@@ -107,16 +107,22 @@
             cursor: pointer;
             border-radius: 4px;
             overflow: hidden;
-            outline: 2px solid rgba(250, 250, 250 ,0); /* Start with invisible outline for smooth transition */
-            /* We add !important here so .fade-pop cannot erase the box-shadow transition */
-            transition: outline 0.4 ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, opacity 0.8s ease-out !important;
+            outline: 2px solid rgba(250, 250, 250, 0); /* Start with invisible outline */
+            outline-offset: -2px;
+            
+            /* FIXED: Added 's' to 0.4s for the outline transition */
+            transition: outline 0.4s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, opacity 0.8s ease-out !important;
         }
 
         /* By chaining the classes, we guarantee this wins the specificity war over .fade-pop */
         .gallery-item.fade-pop.is-visible:hover {
-            transform: scale(1.03) !important; 
+            transform: scale(1.03) !important; /* Adjusted to 1.03 to match your previous scale, change to 1.2 if you want it larger! */
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
-            outline: 2px solid rgba(250, 250, 250, 255);
+            
+            /* FIXED: Changed alpha from 255 to 1 */
+            outline: 2px solid rgba(250, 250, 250, 1);
+            outline-offset: -2px;
+            
             z-index: 10;
             transition-delay: 0s !important; 
         }
@@ -336,11 +342,11 @@
                 .then(data => {
                     galleryContainer.innerHTML = '<p style="color: var(--text-muted); padding: 2rem;">Pre-calculating photo geometries...</p>';
                     
-                    // 2. Preload all images to calculate true natural Aspect Ratios before rendering
+                    // 2. Preload THUMBNAILS to calculate Aspect Ratios lightning fast
                     return Promise.all(data.map(photo => {
                         return new Promise((resolve) => {
                             const img = new Image();
-                            img.src = photo.src;
+                            img.src = photo.thumbnail; // Using thumbnail to prevent downloading 30 massive images
                             img.onload = () => {
                                 photo.aspectRatio = img.naturalWidth / img.naturalHeight;
                                 resolve(photo);
@@ -372,7 +378,7 @@
                 galleryContainer.innerHTML = ''; // Clear container for fresh render
                 
                 // Set ideal target height based on screen size
-                const targetRowHeight = window.innerWidth > 768 ? 600 : 200;
+                const targetRowHeight = window.innerWidth > 768 ? 500 : 200;
                 const gap = 12; // Must match CSS horizontal gap
                 const containerWidth = galleryContainer.clientWidth;
 
@@ -431,7 +437,8 @@
                     item.style.transitionDelay = `${(i % 5) * 0.1}s`;
                     item.onclick = () => openLightbox(photo.originalIndex);
                     
-                    item.innerHTML = `<img src="${photo.src}" alt="${photo.title}" loading="lazy">`;
+                    // USING THUMBNAIL for the grid view
+                    item.innerHTML = `<img src="${photo.thumbnail}" alt="${photo.title}" loading="lazy">`;
                     rowDiv.appendChild(item);
                 });
 
@@ -468,8 +475,10 @@
                 const container = document.getElementById('lightbox-img-container');
                 const oldImg = container.querySelector('.lightbox-img-layer.active');
                 
+                // When we create this new element, we pull the HIGH RES .src link!
+                // It will only download at this exact moment.
                 const newImg = document.createElement('img');
-                newImg.src = photoData[currentIndex].src;
+                newImg.src = photoData[currentIndex].src; 
                 newImg.alt = photoData[currentIndex].title;
                 newImg.className = 'lightbox-img-layer';
                 
