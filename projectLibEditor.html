@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects Pipeline | Chintan Vadgama</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+
+        /* --- Color Palette & Variables --- */
+        :root {
+            --bg-main: #060b0f;
+            --bg-secondary: #0b171e;
+            --bg-panel: rgba(10, 15, 20, 0.8);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --accent-teal: rgb(95, 150, 189);
+            --accent-hover: #00d2d6;
+            --danger: #ef4444;
+            --swap-color: #10b981; 
+            --tile-color: #7eaed1;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem 10%; 
+            overflow-x: hidden;
+        }
+
+        /* --- Header & Controls --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-weight: 400;
+            letter-spacing: 2px;
+            color: var(--tile-color);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* --- Toggle Switch UI --- */
+        .toggle-container { 
+            display: flex; align-items: center; gap: 0.6rem; 
+            background: var(--bg-secondary); padding: 0.4rem 1.2rem; 
+            border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .toggle-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); transition: color 0.3s ease; }
+        
+        /* Specific coloring for the View Toggle */
+        #view-toggle-container input:checked + .slider { background-color: rgba(95, 150, 189, 0.2); border-color: var(--accent-teal); }
+        #view-toggle-container input:checked + .slider:before { background-color: var(--accent-teal); }
+        
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 34px; border: 1px solid rgba(255,255,255,0.2); }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: var(--text-main); transition: .4s; border-radius: 50%; }
+        input:checked + .slider.swap-slider { background-color: rgba(16, 185, 129, 0.2); border-color: var(--swap-color); }
+        input:checked + .slider.swap-slider:before { transform: translateX(22px); background-color: var(--swap-color); }
+        input:checked + .slider { transform: translateX(0); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        button {
+            background: var(--bg-secondary);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            border-color: var(--accent-teal);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(95, 150, 189, 0.2);
+        }
+
+        button.primary {
+            background: var(--accent-teal);
+            color: var(--bg-main);
+            font-weight: 600;
+            border: none;
+        }
+
+        button.primary:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 5px 25px rgba(0, 210, 214, 0.4);
+        }
+
+        /* --- Drag & Drop JSON Import Zone --- */
+        #json-dropzone {
+            width: 100%;
+            padding: 3rem 2rem;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: var(--bg-secondary);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        #json-dropzone:hover, #json-dropzone.dragover {
+            border-color: var(--accent-teal);
+            background: rgba(95, 150, 189, 0.05);
+            transform: scale(1.01);
+        }
+
+        #json-dropzone p { color: var(--text-muted); font-size: 1.1rem; pointer-events: none; }
+        #json-dropzone svg { width: 40px; height: 40px; fill: var(--text-muted); pointer-events: none; transition: fill 0.3s ease; }
+        #json-dropzone.dragover svg { fill: var(--accent-teal); }
+        input[type="file"] { display: none; }
+
+        /* --- Add New Form --- */
+        .add-form {
+            background: var(--bg-panel);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-end;
+            backdrop-filter: blur(10px);
+            display: none; 
+        }
+        
+        .add-form.active { display: flex; }
+        .input-group { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; min-width: 200px; }
+        .input-group label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        
+        .add-form input, .add-form textarea {
+            background: rgba(0, 0, 0, 0.3); border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: white; padding: 0.8rem 0.5rem;
+            font-family: 'Inter', sans-serif; transition: border-color 0.3s ease;
+            resize: vertical;
+        }
+        .add-form input:focus, .add-form textarea:focus { outline: none; border-color: var(--accent-teal); }
+
+        /* --- Grid Container --- */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2.5rem;
+            padding-bottom: 100px;
+        }
+
+        /* --- Editor Card Styles --- */
+        .editor-card {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            cursor: grab;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .editor-card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border-color: rgba(95, 150, 189, 0.3);
+        }
+
+        .editor-card:active { cursor: grabbing; }
+        .editor-card.dragging { opacity: 0.4; transform: scale(0.9); }
+        .editor-card.drag-over { border: 2px dashed var(--accent-hover); transform: scale(1.02); opacity: 0.8; }
+        .editor-card.swap-mode { border: 2px dashed var(--swap-color); box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); transform: scale(1.02); opacity: 0.8; }
+
+        .editor-img-preview {
+            width: 100%;
+            height: 180px;
+            background-color: #1a252f;
+            background-size: cover;
+            background-position: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .editor-inputs {
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            flex-grow: 1;
+        }
+
+        .editor-inputs input, .editor-inputs textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.6rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .editor-inputs textarea { height: 80px; resize: none; }
+        .editor-inputs input:focus, .editor-inputs textarea:focus { outline: none; border-color: var(--accent-teal); }
+        .input-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: -0.5rem; }
+
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .delete-btn:hover { background: var(--danger); color: white; border-color: var(--danger); transform: scale(1.1) rotate(90deg); }
+
+        /* --- PREVIEW MODE STYLES (Identical to index.html) --- */
+        .project-link-wrapper { text-decoration: none; color: inherit; display: block; height: 100%; pointer-events: none; /* disabled for editor */ }
+        .project-card {
+            background-color: var(--bg-secondary); border-radius: 10px; overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; border: 2px solid rgba(255,255,255,0.05); height: 100%;
+        }
+        .project-image { width: 100%; height: 250px; background-color: #1a252f; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.9rem; }
+        .project-info { padding: 1.5rem; }
+        .project-title { font-size: 1.3rem; margin-bottom: 0.5rem; transition: color 0.3s ease; }
+        .project-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; }
+        .project-tools { display: flex; flex-wrap: wrap; gap: 0.8rem; font-size: 0.8rem; font-weight: 600; }
+        .project-tools span { background-color: rgba(0, 144, 181, 0.1); color: var(--accent-teal); padding: 0.3rem 0.8rem; border-radius: 05px; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Projects Setup Pipeline</h1>
+        <div class="control-group">
+            <div class="toggle-container" id="view-toggle-container">
+                <span class="toggle-label" id="edit-view-label" style="color: var(--accent-hover); font-weight: bold;">Edit Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="view-toggle">
+                    <span class="slider round"></span>
+                </label>
+                <span class="toggle-label" id="preview-view-label">Live Preview</span>
+            </div>
+
+            <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 0.5rem;"></div>
+
+            <div class="toggle-container" id="drag-toggle-container">
+                <span class="toggle-label" id="insert-label" style="color: var(--accent-hover); font-weight: bold;">Insert</span>
+                <label class="switch">
+                    <input type="checkbox" id="mode-toggle">
+                    <span class="slider round swap-slider"></span>
+                </label>
+                <span class="toggle-label" id="swap-label">Swap</span>
+            </div>
+            
+            <button onclick="clearWorkspace()">Clear</button>
+            <button class="primary" onclick="exportJSON()">Export json</button>
+        </div>
+    </header>
+
+    <div id="json-dropzone" onclick="document.getElementById('file-input').click()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+        </svg>
+        <p>Drag & Drop your <strong>projects.json</strong> here, or click to browse</p>
+        <input type="file" id="file-input" accept=".json">
+    </div>
+
+    <div class="add-form" id="add-form-container">
+        <div style="display: flex; gap: 1.5rem; width: 100%; flex-wrap: wrap;">
+            <div class="input-group">
+                <label>Title</label>
+                <input type="text" id="new-title" placeholder="e.g., Epic VFX Tool">
+            </div>
+            <div class="input-group">
+                <label>Image Path</label>
+                <input type="text" id="new-image" placeholder="e.g., images/project.png">
+            </div>
+            <div class="input-group">
+                <label>Project Link</label>
+                <input type="text" id="new-link" placeholder="e.g., https://...">
+            </div>
+        </div>
+        <div style="display: flex; gap: 1.5rem; width: 100%; flex-wrap: wrap;">
+            <div class="input-group" style="flex: 2;">
+                <label>Description</label>
+                <textarea id="new-desc" placeholder="Brief overview of the project..." style="height: 42px;"></textarea>
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>Tools (Comma Separated)</label>
+                <input type="text" id="new-tools" placeholder="Unity, HLSL, C#">
+            </div>
+            <button class="primary" onclick="addProject()" style="height: 42px;">Add Project</button>
+        </div>
+    </div>
+
+    <div class="projects-grid" id="grid-container"></div>
+
+    <script>
+        // --- STATE VARIABLES ---
+        let projects = [];
+        let draggedItemIndex = null;
+        let currentHoveredCard = null;
+        let isPreviewMode = false;
+        let isSwapKeyHeld = false;
+        const CONFIG_SWAP_KEY = 's';
+
+        const grid = document.getElementById('grid-container');
+        const dropzone = document.getElementById('json-dropzone');
+        const fileInput = document.getElementById('file-input');
+        const addForm = document.getElementById('add-form-container');
+        const dragToggleContainer = document.getElementById('drag-toggle-container');
+        
+        // --- TOGGLE LOGIC ---
+        const viewToggle = document.getElementById('view-toggle');
+        const editViewLabel = document.getElementById('edit-view-label');
+        const previewViewLabel = document.getElementById('preview-view-label');
+
+        const modeToggle = document.getElementById('mode-toggle');
+        const insertLabel = document.getElementById('insert-label');
+        const swapLabel = document.getElementById('swap-label');
+
+        // View Mode
+        viewToggle.addEventListener('change', () => {
+            isPreviewMode = viewToggle.checked;
+            if (isPreviewMode) {
+                previewViewLabel.style.color = 'var(--accent-teal)'; previewViewLabel.style.fontWeight = 'bold';
+                editViewLabel.style.color = 'var(--text-muted)'; editViewLabel.style.fontWeight = 'normal';
+                dragToggleContainer.style.opacity = '0.3';
+                dragToggleContainer.style.pointerEvents = 'none';
+            } else {
+                editViewLabel.style.color = 'var(--accent-hover)'; editViewLabel.style.fontWeight = 'bold';
+                previewViewLabel.style.color = 'var(--text-muted)'; previewViewLabel.style.fontWeight = 'normal';
+                dragToggleContainer.style.opacity = '1';
+                dragToggleContainer.style.pointerEvents = 'auto';
+            }
+            renderGrid();
+        });
+
+        // Drag Mode
+        function getSwapMode() { return modeToggle.checked || isSwapKeyHeld; }
+        
+        modeToggle.addEventListener('change', () => {
+            if (modeToggle.checked) {
+                swapLabel.style.color = 'var(--swap-color)'; swapLabel.style.fontWeight = 'bold';
+                insertLabel.style.color = 'var(--text-muted)'; insertLabel.style.fontWeight = 'normal';
+            } else {
+                insertLabel.style.color = 'var(--accent-hover)'; insertLabel.style.fontWeight = 'bold';
+                swapLabel.style.color = 'var(--text-muted)'; swapLabel.style.fontWeight = 'normal';
+            }
+            updateDragVisuals();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key.toLowerCase() === CONFIG_SWAP_KEY && !isPreviewMode) {
+                isSwapKeyHeld = true; updateDragVisuals();
+            }
+        });
+        document.addEventListener('keyup', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key.toLowerCase() === CONFIG_SWAP_KEY) {
+                isSwapKeyHeld = false; updateDragVisuals();
+            }
+        });
+
+        function updateDragVisuals() {
+            if (draggedItemIndex !== null && currentHoveredCard) {
+                if (getSwapMode()) {
+                    currentHoveredCard.classList.add('swap-mode');
+                    currentHoveredCard.classList.remove('drag-over');
+                } else {
+                    currentHoveredCard.classList.add('drag-over');
+                    currentHoveredCard.classList.remove('swap-mode');
+                }
+            }
+        }
+
+        // --- DRAG & DROP JSON IMPORT ---
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+        });
+        ['dragenter', 'dragover'].forEach(eventName => dropzone.addEventListener(eventName, () => dropzone.classList.add('dragover'), false));
+        ['dragleave', 'drop'].forEach(eventName => dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'), false));
+
+        dropzone.addEventListener('drop', e => handleFiles(e.dataTransfer.files), false);
+        fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            const file = files[0];
+            
+            if (file.type !== "application/json" && !file.name.endsWith('.json')) {
+                alert("Please drop a valid .json file."); return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (Array.isArray(parsed)) {
+                        dropzone.style.display = 'none'; 
+                        addForm.classList.add('active'); 
+                        projects = parsed;
+                        renderGrid();
+                    } else {
+                        alert("The JSON must contain an array of objects.");
+                    }
+                } catch (err) {
+                    alert("Error parsing JSON file. Is it formatted correctly?");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearWorkspace() {
+            if(confirm("Clear current workspace? Unexported changes will be lost.")) {
+                projects = [];
+                grid.innerHTML = '';
+                dropzone.style.display = 'flex';
+                addForm.classList.remove('active');
+                fileInput.value = '';
+            }
+        }
+
+        // --- GRID RENDERING ENGINE ---
+        function renderGrid() {
+            grid.innerHTML = '';
+
+            projects.forEach((proj, index) => {
+                // Sanitize tools array for input display
+                const toolsString = (proj.tools || []).join(', ');
+
+                if (isPreviewMode) {
+                    // --- PREVIEW MODE (Mimicking index.html exact structure) ---
+                    const toolsHtml = (proj.tools || []).map(tool => `<span>${tool}</span>`).join('');
+                    
+                    grid.innerHTML += `
+                        <div class="project-link-wrapper">
+                            <div class="project-card">
+                                <div class="project-image" style="background-image: url('${proj.image || ''}'); background-size: cover; background-position: center;">
+                                    ${!proj.image ? 'No Image Set' : ''}
+                                </div>
+                                <div class="project-info">
+                                    <h3 class="project-title">${proj.title || 'Untitled Project'}</h3>
+                                    <p class="project-desc">${proj.description || ''}</p>
+                                    <div class="project-tools">
+                                        ${toolsHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // --- EDIT MODE ---
+                    grid.innerHTML += `
+                        <div class="editor-card" draggable="true" data-index="${index}">
+                            <button class="delete-btn" title="Delete Project">&times;</button>
+                            <div class="editor-img-preview" style="background-image: url('${proj.image || ''}')"></div>
+                            
+                            <div class="editor-inputs">
+                                <div>
+                                    <div class="input-label">Title</div>
+                                    <input type="text" class="edit-title" value="${proj.title || ''}" placeholder="Project Title">
+                                </div>
+                                <div>
+                                    <div class="input-label">Image Path</div>
+                                    <input type="text" class="edit-img" value="${proj.image || ''}" placeholder="images/filename.png">
+                                </div>
+                                <div>
+                                    <div class="input-label">Project Link</div>
+                                    <input type="text" class="edit-link" value="${proj.link || ''}" placeholder="https://...">
+                                </div>
+                                <div>
+                                    <div class="input-label">Tools (Comma separated)</div>
+                                    <input type="text" class="edit-tools" value="${toolsString}" placeholder="Unity, C#, Shader Graph">
+                                </div>
+                                <div style="flex-grow: 1;">
+                                    <div class="input-label">Description</div>
+                                    <textarea class="edit-desc" placeholder="Project description...">${proj.description || ''}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // --- REAL-TIME INPUT BINDING ---
+        grid.addEventListener('input', (e) => {
+            if (isPreviewMode) return;
+            const card = e.target.closest('.editor-card');
+            if (!card) return;
+            const index = parseInt(card.dataset.index);
+
+            if (e.target.classList.contains('edit-title')) projects[index].title = e.target.value;
+            if (e.target.classList.contains('edit-link')) projects[index].link = e.target.value;
+            if (e.target.classList.contains('edit-desc')) projects[index].description = e.target.value;
+            
+            if (e.target.classList.contains('edit-img')) {
+                projects[index].image = e.target.value;
+                const previewDiv = card.querySelector('.editor-img-preview');
+                previewDiv.style.backgroundImage = `url('${e.target.value}')`;
+            }
+
+            if (e.target.classList.contains('edit-tools')) {
+                projects[index].tools = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
+            }
+        });
+
+        grid.addEventListener('click', (e) => {
+            if (isPreviewMode) return;
+            if (e.target.classList.contains('delete-btn')) {
+                if (confirm("Delete this project?")) {
+                    const card = e.target.closest('.editor-card');
+                    const index = parseInt(card.dataset.index);
+                    projects.splice(index, 1);
+                    renderGrid(); 
+                }
+            }
+        });
+
+        // --- ADD PROJECT ---
+        function addProject() {
+            const title = document.getElementById('new-title').value;
+            const image = document.getElementById('new-image').value;
+            const link = document.getElementById('new-link').value;
+            const desc = document.getElementById('new-desc').value;
+            const toolsRaw = document.getElementById('new-tools').value;
+            
+            if (!title) { alert("A title is required."); return; }
+
+            const toolsArray = toolsRaw.split(',').map(t => t.trim()).filter(Boolean);
+
+            projects.push({
+                image: image,
+                title: title,
+                description: desc,
+                tools: toolsArray,
+                link: link
+            });
+
+            document.getElementById('new-title').value = '';
+            document.getElementById('new-image').value = '';
+            document.getElementById('new-link').value = '';
+            document.getElementById('new-desc').value = '';
+            document.getElementById('new-tools').value = '';
+
+            renderGrid();
+        }
+
+        // --- CARD DRAG & DROP ---
+        grid.addEventListener('dragstart', (e) => {
+            if (isPreviewMode) { e.preventDefault(); return; }
+            const card = e.target.closest('.editor-card');
+            if (card) {
+                draggedItemIndex = parseInt(card.dataset.index);
+                setTimeout(() => card.classList.add('dragging'), 0);
+                e.dataTransfer.effectAllowed = 'move';
+            }
+        });
+
+        grid.addEventListener('dragover', (e) => {
+            if (isPreviewMode) return;
+            e.preventDefault();
+            const card = e.target.closest('.editor-card');
+            if (card && parseInt(card.dataset.index) !== draggedItemIndex) {
+                currentHoveredCard = card;
+                if (getSwapMode()) {
+                    e.dataTransfer.dropEffect = 'copy';
+                    card.classList.add('swap-mode');
+                    card.classList.remove('drag-over');
+                } else {
+                    e.dataTransfer.dropEffect = 'move';
+                    card.classList.add('drag-over');
+                    card.classList.remove('swap-mode');
+                }
+            }
+        });
+
+        grid.addEventListener('dragleave', (e) => {
+            if (isPreviewMode) return;
+            const card = e.target.closest('.editor-card');
+            if (card) { card.classList.remove('drag-over', 'swap-mode'); currentHoveredCard = null; }
+        });
+
+        grid.addEventListener('drop', (e) => {
+            if (isPreviewMode) return;
+            e.preventDefault();
+            const card = e.target.closest('.editor-card');
+            if (!card) return;
+            
+            card.classList.remove('drag-over', 'swap-mode');
+            const dropIndex = parseInt(card.dataset.index);
+
+            if (draggedItemIndex !== null && draggedItemIndex !== dropIndex) {
+                if (getSwapMode()) {
+                    const temp = projects[draggedItemIndex];
+                    projects[draggedItemIndex] = projects[dropIndex];
+                    projects[dropIndex] = temp;
+                } else {
+                    const draggedItem = projects.splice(draggedItemIndex, 1)[0];
+                    projects.splice(dropIndex, 0, draggedItem);
+                }
+                renderGrid(); 
+            }
+            draggedItemIndex = null;
+            currentHoveredCard = null;
+        });
+
+        grid.addEventListener('dragend', (e) => {
+            if (isPreviewMode) return;
+            const card = e.target.closest('.editor-card');
+            if (card) card.classList.remove('dragging');
+            document.querySelectorAll('.editor-card').forEach(c => c.classList.remove('drag-over', 'swap-mode'));
+            draggedItemIndex = null;
+            currentHoveredCard = null;
+        });
+
+        // --- EXPORT JSON ---
+        window.exportJSON = function() {
+            if (projects.length === 0) { alert("Pipeline is empty. Nothing to export."); return; }
+            
+            // Cleanup empty properties before export
+            const cleanProjects = projects.map(p => {
+                const out = {};
+                if(p.image) out.image = p.image;
+                if(p.title) out.title = p.title;
+                if(p.description) out.description = p.description;
+                if(p.tools && p.tools.length > 0) out.tools = p.tools;
+                if(p.link) out.link = p.link;
+                return out;
+            });
+
+            const dataStr = JSON.stringify(cleanProjects, null, 2); // 2 spaces for standard formatting
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "projects.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+    </script>
+</body>
+</html>

@@ -22,14 +22,25 @@
     "link": "https://chintanart.in/BoardGame/SNL/"
   },
   {
+    "image": "https://d34kmbgkaszffl.cloudfront.net/files/blobs/proxy/eyJfcmFpbHMiOnsiZGF0YSI6MTc0MDAsInB1ciI6ImJsb2JfaWQifX0=--32ff559aa491664db2f6812eff35238606532897/IMG3.png",
+    "title": "Parametric Lightning Shader",
+    "description": "A highly optimized, real-time lightning shader built in Unity that generates endless variations from a single material. Featured on Jettelly, it utilizes Vertex Streams, flipbook distortion, and custom posterization to deliver snappy, realistic strikes with HDR edge bloom.",
+    "tools": [
+      "Unity",
+      "Shader Graph",
+      "Particle System"
+    ],
+    "link": "https://jettelly.com/blog/building-a-lightning-shader-in-unity-using-a-single-material"
+  },
+  {
     "image": "images/Cakeidle.png",
     "title": "Cake Idle Game",
     "description": "A casual mobile idle game featuring automated progression mechanics, engaging visual feedback, and optimized assets",
-    "link": "https://www.behance.net/gallery/242331857/Cake-Idle-Game",
     "tools": [
       "Unity",
       "C#",
       "Blender"
-    ]
+    ],
+    "link": "https://www.behance.net/gallery/242331857/Cake-Idle-Game"
   }
 ]
