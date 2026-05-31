@@ -1,6 +1,6 @@
 [
   {
-    "image": "images/moba.png",
+    "image": "images/MobaVFX.jpg",
     "title": "MOBA VFX (Playable WIP)",
     "description": "A real-time Unity WebGL showcase featuring stylized MOBA-inspired VFX, including elemental abilities, spell impacts, energy trails, and combat effects crafted for immersive gameplay visuals.",
     "tools": [
@@ -11,7 +11,7 @@
     "link": "https://chintanart.in/MobaVFX/"
   },
   {
-    "image": "images/snl.png",
+    "image": "images/SNL.jpg",
     "title": "Snakes And Ladder (Playable WIP)",
     "description": "A cozy and visually polished 3D Snakes & Ladders experience built in Unity WebGL. Roll the dice, climb ladders, avoid sneaky snakes, and race to the finish in a relaxing tabletop-inspired world with smooth animations, warm lighting, and casual mobile-game aesthetics.",
     "tools": [
@@ -22,7 +22,7 @@
     "link": "https://chintanart.in/BoardGame/SNL/"
   },
   {
-    "image": "https://d34kmbgkaszffl.cloudfront.net/files/blobs/proxy/eyJfcmFpbHMiOnsiZGF0YSI6MTc0MDAsInB1ciI6ImJsb2JfaWQifX0=--32ff559aa491664db2f6812eff35238606532897/IMG3.png",
+    "image": "images/Lightning.jpg",
     "title": "Parametric Lightning Shader",
     "description": "A highly optimized, real-time lightning shader built in Unity that generates endless variations from a single material. Featured on Jettelly, it utilizes Vertex Streams, flipbook distortion, and custom posterization to deliver snappy, realistic strikes with HDR edge bloom.",
     "tools": [
@@ -31,16 +31,5 @@
       "Particle System"
     ],
     "link": "https://jettelly.com/blog/building-a-lightning-shader-in-unity-using-a-single-material"
-  },
-  {
-    "image": "images/Cakeidle.png",
-    "title": "Cake Idle Game",
-    "description": "A casual mobile idle game featuring automated progression mechanics, engaging visual feedback, and optimized assets",
-    "tools": [
-      "Unity",
-      "C#",
-      "Blender"
-    ],
-    "link": "https://www.behance.net/gallery/242331857/Cake-Idle-Game"
   }
 ]
