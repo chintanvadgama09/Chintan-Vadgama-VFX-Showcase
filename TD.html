@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call of Legends | Workflow</title>
+    <style>
+        /* --- Local Fonts --- */
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-Light.ttf') format('truetype');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-SemiBold.ttf') format('truetype');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-ExtraBold.ttf') format('truetype');
+            font-weight: 800;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* --- Color Palette & Variables --- */
+        :root {
+            /* Static Background Gradient */
+            --bg-gradient: radial-gradient(circle at top, #131c23 0%, #060b0f 100%);
+            
+            /* Adjustable Spacing Between Sections */
+            --section-spacing: 15vh; 
+            
+            --text-main: #ffffff;
+            --text-muted: #e2e8f0;
+            --accent-teal: rgb(95, 150, 189);
+            
+            /* Title Colors */
+            --title-blue: #a3e4f9;     /* Light blue for the Static Main Page Title */
+            --subject-yellow: #fcd34d; /* Original Yellow for JSON subjectTitle */
+            --method-blue: #7eaed1;    /* Original Blue for JSON methodTitle */
+
+            /* --- HEXTECH WIPE VFX PROPERTIES --- */
+            --wipe-texture: url('images/flow.png'); 
+            --wipe-texture-scale: 25vw 350%;
+            --wipe-speed: 10s;
+        }
+
+        /* --- Global Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: auto; /* Handled smoothly by JS now */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden; 
+        }
+
+        /* Drag-to-scroll active state */
+        body.dragging {
+            cursor: grabbing !important;
+            user-select: none;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--text-main);
+            transition: color 0.3s ease;
+            -webkit-user-drag: none; /* Prevent ghost dragging of links */
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 5%;
+            background: rgba(10, 15, 20, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: flex-end; 
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden; 
+        }
+
+        .nav-links {
+            position: relative;
+            z-index: 1; 
+            display: flex;
+            gap: 6rem;
+        }
+
+        .nav-links a {
+            font-size: 1rem; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 400;
+            display: flex; 
+            align-items: center; 
+            transition: color 0.3s ease, text-shadow 0.4s ease, transform 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: rgb(250, 250, 250);
+            text-shadow: 0 0 10px rgba(58, 186, 255, 1), 0 0 30px rgba(58, 186, 255, 1);
+            transform: scale(1.2); 
+        }
+
+        /* --- HEXTECH UI FLOW --- */
+        nav::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 180%; 
+            height: 100%;
+            pointer-events: none;
+            z-index: 0; 
+            opacity: 0.4;
+            transform: skewX(-30deg);
+            background-image: 
+                linear-gradient(90deg, transparent 0%, transparent 35%, transparent 50%, transparent 65%, transparent 100%),
+                var(--wipe-texture);
+            background-size: 100% 100%, var(--wipe-texture-scale);
+            background-repeat: repeat-y, repeat-x;
+            background-blend-mode: additive;
+            -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 35%, black 50%, transparent 65%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0%, transparent 35%, black 50%, transparent 65%, transparent 100%);
+        }
+
+        nav.run-wipe::before {
+            animation: hextech-wipe var(--wipe-speed) forwards cubic-bezier(0.25, 1, 1, 1);
+        }
+
+        @keyframes hextech-wipe {
+            0% { left: -150%; background-position: 0 0, 0 0; }
+            100% { left: 150%; background-position: 0 0, -330vw 0; }
+        }
+
+        /* --- Content Layout Section --- */
+        #content-section {
+            padding: 120px 8% 120px 8%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page-main-title {
+            color: var(--title-blue);
+            font-size: 3.5rem;
+            font-weight: 800;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 5rem;
+            line-height: 1.2;
+            letter-spacing: 1px;
+        }
+
+        #json-container {
+            width: 100%;
+            max-width: 1400px; 
+            display: flex;
+            flex-direction: column;
+            gap: var(--section-spacing); 
+        }
+
+        /* --- Intersection Observer Animations --- */
+        .fade-pop {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+            transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            will-change: opacity, transform;
+        }
+
+        .fade-pop.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* --- Individual JSON Slide Layout --- */
+        
+        .slide-anchor {
+            width: 100%;
+        }
+
+        .presentation-slide {
+            display: flex;
+            flex-direction: row;
+            gap: 5rem;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 70vh; 
+            width: 100%;
+        }
+
+        .slide-image-wrapper {
+            flex: 0 0 45%; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide-image-wrapper img {
+            width: 100%;
+            max-height: 80vh;
+            object-fit: contain; 
+            filter: drop-shadow(0 0 40px rgba(0, 0, 0, 0.6));
+            cursor: zoom-in;
+            -webkit-user-drag: none; /* Prevents native drag so click registers smoothly */
+            user-select: none;
+            transition: transform 0.3s ease;
+        }
+        
+        .slide-image-wrapper img:hover {
+            transform: scale(1.02);
+        }
+
+        .slide-text-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .subject-title {
+            color: var(--subject-yellow);
+            font-size: 2.7rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 0.5;
+        }
+
+        .method-title {
+            color: var(--method-blue);
+            font-size: 2rem; 
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .slide-body {
+            color: var(--text-muted);
+            font-size: 1.15rem; 
+            line-height: 1.2;
+            font-weight: 400;
+        }
+
+        .slide-body p { margin-bottom: 1.5rem; }
+
+        .slide-body ul {
+            padding-left: 1.8rem;
+            margin-bottom: 1.5rem;
+            list-style-type: disc;
+        }
+
+        .slide-body li { margin-bottom: 0.4rem; }
+        .slide-body li::marker { color: var(--method-blue); }
+
+        /* --- Smart Fixed Scroll Indicators --- */
+        #scroll-indicator, #scroll-indicator-up {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 45px;
+            height: 35px;
+            cursor: pointer;
+            z-index: 999;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            opacity: 0.8;
+            visibility: visible;
+        }
+
+        #scroll-indicator {
+            bottom: 30px;
+            animation: floatUpDown 2s infinite ease-in-out;
+        }
+
+        #scroll-indicator-up {
+            top: 90px; 
+            animation: floatTopDown 2s infinite ease-in-out;
+            opacity: 0;
+            visibility: hidden; 
+        }
+
+        #scroll-indicator.hidden, #scroll-indicator-up.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #scroll-indicator.visible, #scroll-indicator-up.visible {
+            opacity: 0.8;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        #scroll-indicator:hover, #scroll-indicator-up:hover { opacity: 1; }
+
+        #scroll-indicator svg, #scroll-indicator-up svg {
+            width: 100%;
+            height: 100%;
+            fill: var(--title-blue); 
+            filter: drop-shadow(0 2px 10px rgba(0,0,0,0.8));
+        }
+
+        @keyframes floatUpDown {
+            0%, 100% { margin-bottom: 0; }
+            50% { margin-bottom: 10px; }
+        }
+
+        @keyframes floatTopDown {
+            0%, 100% { margin-top: 0; }
+            50% { margin-top: 10px; }
+        }
+
+        /* --- Fullscreen Zoomable Lightbox --- */
+        #lightbox {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            overflow: hidden;
+        }
+
+        #lightbox.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #lightbox-img {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            cursor: grab;
+            transform-origin: center center;
+            -webkit-user-drag: none;
+        }
+
+        #lightbox-img:active {
+            cursor: grabbing;
+        }
+
+        .lightbox-controls {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            display: flex;
+            gap: 15px;
+            z-index: 3001;
+        }
+
+        .lightbox-controls button {
+            background: rgba(10, 15, 20, 0.6);
+            color: var(--text-main);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            width: 45px;
+            height: 45px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .lightbox-controls button:hover {
+            background: var(--title-blue);
+            color: #000;
+            border-color: var(--title-blue);
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 1200px) {
+            .presentation-slide { gap: 3rem; }
+            .slide-image-wrapper { flex: 0 0 40%; }
+            .nav-links { gap: 4rem; }
+            .page-main-title { font-size: 2.8rem; }
+        }
+
+        @media (max-width: 900px) {
+            .presentation-slide {
+                flex-direction: column;
+                text-align: center;
+                gap: 2rem;
+                min-height: auto;
+                padding: 2rem 0;
+            }
+            .slide-image-wrapper { width: 100%; max-height: 50vh; }
+            .slide-body ul { text-align: left; display: inline-block; }
+            .nav-links { gap: 2rem; }
+            .page-main-title { margin-bottom: 2rem; }
+        }
+
+        @media (max-width: 768px) {
+            nav { justify-content: center; }
+            .nav-links { flex-wrap: wrap; justify-content: center; gap: 1.5rem; }
+            .page-main-title { font-size: 2.2rem; }
+            .method-title { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body id="top"> 
+
+    <nav>
+        <div class="nav-links">
+            <a href="https://chintanart.in">Home</a>
+            <a href="#top">Characters</a> <a href="#chibi">Chibi</a>
+            <a href="#maps">Maps</a>
+            <a href="#animations">Animations</a>
+            <a href="#effects">Effects</a>
+        </div>
+    </nav>
+
+    <div id="scroll-indicator-up" class="hidden" title="Scroll to Previous Slide">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 17L12 7L22 17H2Z" />
+        </svg>
+    </div>
+
+    <section id="content-section">
+        <h1 class="page-main-title fade-pop">Call Of Legends : TD</h1>
+        
+        <div id="json-container">
+            </div>
+    </section>
+
+    <div id="scroll-indicator" title="Scroll to Next Slide">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 7L12 17L22 7H2Z" />
+        </svg>
+    </div>
+
+    <div id="lightbox">
+        <div class="lightbox-controls">
+            <button id="lightbox-zoom-out" title="Zoom Out">&minus;</button>
+            <button id="lightbox-zoom-in" title="Zoom In">+</button>
+            <button id="lightbox-close" title="Close">&times;</button>
+        </div>
+        <img id="lightbox-img" src="" alt="Zoomed Content">
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // =========================================
+            // HEXTECH NAV WIPE LOGIC
+            // =========================================
+            const wipeCooldown = 3200; 
+            const wipeNav = document.querySelector('nav');
+            function fireHextechWipe() {
+                wipeNav.classList.remove('run-wipe');
+                void wipeNav.offsetWidth; 
+                wipeNav.classList.add('run-wipe');
+            }
+            setTimeout(fireHextechWipe, 500);
+            setInterval(fireHextechWipe, wipeCooldown);
+
+            // =========================================
+            // INTERSECTION OBSERVER FOR SCROLL ANIMATIONS
+            // =========================================
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15 
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    } else {
+                        entry.target.classList.remove('is-visible');
+                    }
+                });
+            }, observerOptions);
+
+            const observeElements = () => {
+                const elements = document.querySelectorAll('.fade-pop');
+                elements.forEach(el => observer.observe(el));
+            };
+
+            observeElements(); 
+
+            // =========================================
+            // FETCH JSON AND BUILD ELEMENTS
+            // =========================================
+            fetch('data.json')
+                .then(response => {
+                    if (!response.ok) throw new Error("Could not load data.json");
+                    return response.json();
+                })
+                .then(data => {
+                    const container = document.getElementById('json-container');
+                    
+                    data.forEach((item, index) => {
+                        const subjectHtml = item.subjectTitle 
+                            ? `<h2 class="subject-title">${item.subjectTitle}</h2>` 
+                            : '';
+
+                        let parsedBody = '';
+                        const paragraphs = item.body.split('\n\n');
+                        
+                        paragraphs.forEach(p => {
+                            if (p.includes('•')) {
+                                const lines = p.split('\n');
+                                let listHtml = '<ul>';
+                                let preText = '';
+                                
+                                lines.forEach(line => {
+                                    if (line.trim().startsWith('•')) {
+                                        listHtml += `<li>${line.replace('•', '').trim()}</li>`;
+                                    } else if (line.trim() !== '') {
+                                        preText += `${line}<br>`;
+                                    }
+                                });
+                                listHtml += '</ul>';
+                                parsedBody += `<p>${preText}${listHtml}</p>`;
+                            } else {
+                                parsedBody += `<p>${p.replace(/\n/g, '<br>')}</p>`;
+                            }
+                        });
+
+                        const slideAnchor = document.createElement('div');
+                        slideAnchor.className = 'slide-anchor';
+
+                        const slide = document.createElement('div');
+                        slide.className = 'presentation-slide fade-pop';
+                        
+                        // NEW: Assign the HD link as a data-attribute for the Lightbox script. 
+                        // It falls back to the medium image if the JSON item doesn't have an HD link provided.
+                        const highResLink = item.imageLinkHD || item.imageLink;
+
+                        slide.innerHTML = `
+                            <div class="slide-image-wrapper">
+                                <img src="${item.imageLink}" data-hd-src="${highResLink}" alt="${item.methodTitle}" title="Click to enlarge">
+                            </div>
+                            <div class="slide-text-wrapper">
+                                ${subjectHtml}
+                                <h3 class="method-title">${item.methodTitle}</h3>
+                                <div class="slide-body">
+                                    ${parsedBody}
+                                </div>
+                            </div>
+                        `;
+                        
+                        slideAnchor.appendChild(slide);
+                        container.appendChild(slideAnchor);
+                    });
+
+                    observeElements();
+                })
+                .catch(error => {
+                    console.error("Error loading JSON:", error);
+                    document.getElementById('json-container').innerHTML = 
+                        '<p style="text-align:center; color: var(--text-muted);">Please ensure you are running this file via a local server (like VSCode Live Server) to allow JSON fetching.</p>';
+                });
+
+            // =========================================
+            // LIGHTBOX (ZOOM & PAN LOGIC)
+            // =========================================
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const btnClose = document.getElementById('lightbox-close');
+            const btnZoomIn = document.getElementById('lightbox-zoom-in');
+            const btnZoomOut = document.getElementById('lightbox-zoom-out');
+
+            let lbScale = 1;
+            let lbPanX = 0;
+            let lbPanY = 0;
+            let lbPanning = false;
+            let lbStartX = 0;
+            let lbStartY = 0;
+
+            function applyLightboxTransform() {
+                lightboxImg.style.transform = `translate(${lbPanX}px, ${lbPanY}px) scale(${lbScale})`;
+            }
+
+            function resetLightbox() {
+                lbScale = 1;
+                lbPanX = 0;
+                lbPanY = 0;
+                applyLightboxTransform();
+            }
+
+            // Open Lightbox when clicking ANY presentation image
+            document.getElementById('content-section').addEventListener('click', (e) => {
+                if (e.target.tagName === 'IMG' && e.target.closest('.slide-image-wrapper')) {
+                    // NEW: Pull the HD source from the data attribute instead of the visible source
+                    lightboxImg.src = e.target.getAttribute('data-hd-src');
+                    lightbox.classList.add('active');
+                    resetLightbox();
+                }
+            });
+
+            // Close Logic
+            function closeLightbox() {
+                lightbox.classList.remove('active');
+                setTimeout(() => lightboxImg.src = '', 300); // clear image after fade out
+            }
+            btnClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox(); // Close if clicking the dark background
+            });
+
+            // Button Zoom Controls
+            btnZoomIn.addEventListener('click', () => { 
+                lbScale = Math.min(lbScale + 0.5, 5); 
+                applyLightboxTransform(); 
+            });
+            btnZoomOut.addEventListener('click', () => { 
+                lbScale = Math.max(lbScale - 0.5, 0.5); 
+                applyLightboxTransform(); 
+            });
+
+            // Mouse Wheel Zoom
+            lightbox.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomSpeed = 0.005;
+                const delta = e.deltaY * -zoomSpeed;
+                lbScale = Math.min(Math.max(0.5, lbScale + delta), 5); // Clamp between 0.5x and 5x
+                applyLightboxTransform();
+            }, { passive: false });
+
+            // Mouse Drag to Pan
+            lightboxImg.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                lbPanning = true;
+                lbStartX = e.clientX - lbPanX;
+                lbStartY = e.clientY - lbPanY;
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!lbPanning) return;
+                lbPanX = e.clientX - lbStartX;
+                lbPanY = e.clientY - lbStartY;
+                applyLightboxTransform();
+            });
+
+            window.addEventListener('mouseup', () => {
+                lbPanning = false;
+            });
+
+            // =========================================
+            // SMART EXACT-CONTAINER SCROLL INDICATOR
+            // =========================================
+            const scrollIndicatorDown = document.getElementById('scroll-indicator');
+            const scrollIndicatorUp = document.getElementById('scroll-indicator-up');
+            
+            window.addEventListener('scroll', () => {
+                const anchors = document.querySelectorAll('.slide-anchor');
+                if (!anchors.length) return; 
+
+                const nav = document.querySelector('nav');
+                const navHeight = nav ? nav.offsetHeight : 0;
+                const visualCenter = navHeight + ((window.innerHeight - navHeight) / 2);
+                
+                const firstAnchor = anchors[0];
+                if (firstAnchor.getBoundingClientRect().bottom < visualCenter) {
+                    scrollIndicatorUp.classList.add('visible');
+                    scrollIndicatorUp.classList.remove('hidden');
+                } else {
+                    scrollIndicatorUp.classList.add('hidden');
+                    scrollIndicatorUp.classList.remove('visible');
+                }
+                
+                const lastAnchor = anchors[anchors.length - 1];
+                if (lastAnchor.getBoundingClientRect().top < visualCenter + 150) { 
+                    scrollIndicatorDown.classList.add('hidden');
+                    scrollIndicatorDown.classList.remove('visible');
+                } else {
+                    scrollIndicatorDown.classList.add('visible');
+                    scrollIndicatorDown.classList.remove('hidden');
+                }
+            });
+
+            scrollIndicatorDown.addEventListener('click', () => {
+                const anchors = document.querySelectorAll('.slide-anchor');
+                const currentScroll = window.scrollY;
+                
+                const nav = document.querySelector('nav');
+                const navHeight = nav ? nav.offsetHeight : 0;
+                const visualCenter = navHeight + ((window.innerHeight - navHeight) / 2);
+                
+                let nextAnchor = null;
+
+                for (let i = 0; i < anchors.length; i++) {
+                    const rect = anchors[i].getBoundingClientRect();
+                    const anchorTop = rect.top + currentScroll;
+                    const anchorCenter = anchorTop + (rect.height / 2);
+                    
+                    if (anchorCenter > currentScroll + visualCenter + 50) {
+                        nextAnchor = anchors[i];
+                        break;
+                    }
+                }
+
+                if (nextAnchor) {
+                    const rect = nextAnchor.getBoundingClientRect();
+                    const anchorTop = rect.top + currentScroll;
+                    const targetPosition = anchorTop + (rect.height / 2) - visualCenter;
+                    window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+                }
+            });
+
+            scrollIndicatorUp.addEventListener('click', () => {
+                const anchors = document.querySelectorAll('.slide-anchor');
+                const currentScroll = window.scrollY;
+                
+                const nav = document.querySelector('nav');
+                const navHeight = nav ? nav.offsetHeight : 0;
+                const visualCenter = navHeight + ((window.innerHeight - navHeight) / 2);
+                
+                let prevAnchor = null;
+
+                for (let i = anchors.length - 1; i >= 0; i--) {
+                    const rect = anchors[i].getBoundingClientRect();
+                    const anchorTop = rect.top + currentScroll;
+                    const anchorCenter = anchorTop + (rect.height / 2);
+                    
+                    if (anchorCenter < currentScroll + visualCenter - 50) {
+                        prevAnchor = anchors[i];
+                        break;
+                    }
+                }
+
+                if (prevAnchor) {
+                    const rect = prevAnchor.getBoundingClientRect();
+                    const anchorTop = rect.top + currentScroll;
+                    const targetPosition = anchorTop + (rect.height / 2) - visualCenter;
+                    window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+
+            // =========================================
+            // DRAG TO SCROLL LOGIC
+            // =========================================
+            let isDragging = false;
+            let startY;
+            let startScrollTop;
+
+            window.addEventListener('mousedown', (e) => {
+                // EXCLUSION LIST: Links, scroll triangles, images, and the entire lightbox are safe from drag-to-scroll.
+                if (e.target.closest('a') || 
+                    e.target.closest('#scroll-indicator') || 
+                    e.target.closest('#scroll-indicator-up') ||
+                    e.target.closest('.slide-image-wrapper img') ||
+                    e.target.closest('#lightbox')) return;
+                
+                isDragging = true;
+                startY = e.clientY;
+                startScrollTop = window.scrollY;
+                document.body.classList.add('dragging');
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                document.body.classList.remove('dragging');
+            });
+
+            window.addEventListener('mouseleave', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                document.body.classList.remove('dragging');
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const dy = e.clientY - startY;
+                window.scrollTo(0, startScrollTop - dy);
+            });
+
+        });
+    </script>
+</body>
+</html>

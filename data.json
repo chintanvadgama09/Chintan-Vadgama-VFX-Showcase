@@ -1,0 +1,58 @@
+[
+  {
+    "subjectTitle": "Character Creation Workflow",
+    "methodTitle": "",
+    "body": "One of the biggest challenges during the development of Call of Legends: RPG TD was the sheer number of playable heroes that needed to be designed, illustrated, and integrated into the game within a limited production timeline. Traditional character concepting and illustration pipelines would have required significant artist-hours for every hero, making it difficult to maintain both quality and schedule.\n\nTo solve this, we built a hybrid workflow that combined AI-assisted concept generation with manual artistic refinement, allowing us to rapidly explore ideas while still retaining full creative control over the final results.",
+    "imageLink": "https://i.ibb.co/prjLXqHy/Aphrodite-Dialogue-View-Image-1.png",
+    "imageLinkHD": "https://i.ibb.co/JFjskZYQ/Aphrodite-Dialogue-View-Image-1.png"
+  },
+  {
+    "subjectTitle": "",
+    "methodTitle": "Step 1 — Defining the Character Identity",
+    "body": "Every character started with a clear creative direction.\n\nBefore generating any artwork, we would first establish:\n• Character theme and mythology\n• Personality traits\n• Combat role and gameplay identity\n• Silhouette and overall body structure\n• Desired pose and presentation\n\nFor example, when creating Aphrodite, we wanted her to immediately communicate elegance, beauty, and divine charm. The pose needed to feel graceful while still fitting the stylized fantasy aesthetic of the game.\n\nThe goal at this stage wasn't visual polish—it was creating a strong foundation that would guide all future iterations.",
+    "imageLink": "https://i.ibb.co/dwQ9rcGv/Yokai-Dialogue-View-Image-2.png",
+    "imageLinkHD": "https://i.ibb.co/bMrhP3zV/Yokai-Dialogue-View-Image-2.png"
+  },
+  {
+    "subjectTitle": "",
+    "methodTitle": "Step 2 — Base Pose Generation",
+    "body": "Once the direction was approved, we generated a simple character base.\n\nRather than immediately focusing on costumes, accessories, and details, we first created a low-detail character that roughly matched the intended anatomy and pose.\n\nThis allowed us to evaluate:\n• Overall silhouette\n• Character proportions\n• Readability at game scale\n• Visual balance\n• Personality conveyed through posture\n\nBy validating the pose early, we avoided spending time detailing concepts that ultimately didn't fit the character.",
+    "imageLink": "https://i.ibb.co/xt3rSb6X/Arwen-Dialogue-View-Image-1.png",
+    "imageLinkHD": "https://i.ibb.co/Kpm8jgWb/Arwen-Dialogue-View-Image-1.png"
+  },
+  {
+    "subjectTitle": "",
+    "methodTitle": "Step 3 — AI-Assisted Concept Exploration",
+    "body": "At this stage, we used a custom workflow built in ComfyUI, powered by:\n• FLUX models\n• Custom-trained LoRA models\n• Internal prompt workflows\n• Character-specific guidance\n\nThe objective wasn't to generate a final character.\n\nInstead, AI became a rapid ideation tool that allowed us to explore dozens of visual directions within hours rather than days.\n\nFor each character, we generated multiple variations that explored:\n• Costume designs\n• Hair styles\n• Accessories\n• Color palettes\n• Material treatments\n• Fantasy elements\n\nThis gave the team a much broader design space than a traditional concept pass could realistically achieve within the same timeframe.",
+    "imageLink": "https://i.ibb.co/wF2rLWJG/One-Punch-Monk-Dialogue-View-Image-1.png",
+    "imageLinkHD": "https://i.ibb.co/MxJ5hV8w/One-Punch-Monk-Dialogue-View-Image-1.png"
+  },
+  {
+    "subjectTitle": "",
+    "methodTitle": "Step 4 — Selecting the Strongest Direction",
+    "body": "After reviewing multiple generated concepts, we selected the version that best matched the original vision.\n\nThis was rarely a one-click process.\n\nOften, we would:\n• Merge ideas from multiple iterations\n• Re-generate specific sections\n• Adjust prompts\n• Refine silhouettes\n• Experiment with accessories and ornamentation\n\nThe goal was to gradually converge toward a design that felt unique, recognizable, and production-ready.\n\nCharacters such as Aphrodite, Athena, Ares, Arwen, and Sejong all went through multiple rounds of exploration before reaching their final appearance.\n\nEach iteration brought the design closer to the intended gameplay fantasy while improving visual clarity and consistency across the roster.",
+    "imageLink": "https://i.ibb.co/V7PbRjm/Thor-Dialogue-View-Image-2.png",
+    "imageLinkHD": "https://i.ibb.co/kRWzjH1/Thor-Dialogue-View-Image-2.png"
+  },
+  {
+    "subjectTitle": "",
+    "methodTitle": "Step 5 — Manual Art Refinement",
+    "body": "Once a concept was selected, the real production work began.\n\nWhile the generated artwork often provided an excellent foundation, it was never considered final.\n\nEvery character underwent a manual refinement pass where artists would:\n• Remove visual artifacts\n• Correct anatomy issues\n• Improve costume construction\n• Adjust proportions\n• Refine materials and ornaments\n• Enhance readability\n• Improve visual hierarchy\n• Ensure stylistic consistency with the game's art direction\n\nEven when the generated result looked visually impressive, small imperfections could become obvious once the character was viewed repeatedly in-game. Manual polish ensured that every hero met the quality standards required for production.",
+    "imageLink": "https://i.ibb.co/KzxQrT4H/Lexica-Dialogue-View-Image-1.png",
+    "imageLinkHD": "https://i.ibb.co/dJ4358Cy/Lexica-Dialogue-View-Image-1.png"
+  },
+  {
+    "subjectTitle": "",
+    "methodTitle": "Step 6 — Final Character Approval",
+    "body": "After refinement, the character would be reviewed against several criteria:\n• Does the silhouette read clearly?\n• Is the role immediately recognizable?\n• Does the design fit the game's visual language?\n• Is the character memorable?\n• Does it align with the original vision?\n\nOnly after passing these checks would the character move forward into the next stages of production, including:\n• Chibi character creation\n• Animation production\n• VFX integration\n• UI implementation\n• Gameplay testing",
+    "imageLink": "https://i.ibb.co/0VQyTqT2/Sif-Dialogue-View-Image-1.png",
+    "imageLinkHD": "https://i.ibb.co/wrYhVyVg/Sif-Dialogue-View-Image-1.png"
+  },
+  {
+    "subjectTitle": "",
+    "methodTitle": "Why We Used AI",
+    "body": "The decision to incorporate AI into the concepting pipeline was driven by production efficiency rather than artistic replacement.\n\nA traditional workflow could require approximately 8-10 days to fully concept and finalize a single hero.\n\nBy integrating AI-assisted exploration into the early design stages, we reduced that timeline to roughly 2-3 days per character, while still maintaining artistic oversight and manual refinement throughout the process.\n\nThis allowed the team to:\n• Create a larger hero roster\n• Explore more design variations\n• Iterate faster\n• Maintain visual quality\n• Meet production deadlines\n\nRather than replacing artists, AI functioned as an accelerator that enabled the team to spend more time making creative decisions and less time producing exploratory drafts.",
+    "imageLink": "https://i.ibb.co/fYxbVwc2/Kalpie-Dialogue-View-Image-1.png",
+    "imageLinkHD": "https://i.ibb.co/svVhpYB2/Kalpie-Dialogue-View-Image-1.png"
+  }
+]
