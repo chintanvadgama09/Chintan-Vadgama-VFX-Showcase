@@ -424,11 +424,43 @@
             .page-main-title { margin-bottom: 2rem; }
         }
 
+        /* --- Enhanced Mobile Adjustments --- */
         @media (max-width: 768px) {
-            nav { justify-content: center; }
-            .nav-links { flex-wrap: wrap; justify-content: center; gap: 1.5rem; }
-            .page-main-title { font-size: 2.2rem; }
-            .method-title { font-size: 1.8rem; }
+            nav { padding: 1rem 3%; }
+            .nav-links { flex-wrap: wrap; justify-content: center; gap: 1rem; }
+            .nav-links a { font-size: 0.9rem; }
+            
+            #content-section { padding: 140px 5% 80px 5%; }
+            
+            .page-main-title { font-size: 2.2rem; margin-bottom: 2rem; }
+            
+            /* Typography scaling for mobile readability */
+            .subject-title { font-size: 2rem; line-height: 1.2; margin-bottom: 0.8rem; }
+            .method-title { font-size: 1.6rem; }
+            .slide-body { font-size: 1rem; }
+            
+            /* Resize UI controls for smaller screens */
+            .lightbox-controls { top: 15px; right: 15px; gap: 10px; }
+            .lightbox-controls button { width: 38px; height: 38px; font-size: 1.2rem; }
+            
+            #scroll-indicator, #scroll-indicator-up {
+                width: 35px;
+                height: 25px;
+            }
+            #scroll-indicator { bottom: 15px; }
+            #scroll-indicator-up { top: 110px; } /* Ensures it clears wrapped nav links */
+        }
+
+        @media (max-width: 480px) {
+            .page-main-title { font-size: 1.8rem; margin-bottom: 1.5rem; }
+            .subject-title { font-size: 1.6rem; }
+            .method-title { font-size: 1.3rem; }
+            .nav-links { gap: 0.8rem; }
+            .nav-links a { font-size: 0.8rem; }
+            #content-section { padding-top: 150px; } /* Extra room for deeply wrapped nav */
+            
+            /* Make lightbox buttons slightly smaller for tiny phones */
+            .lightbox-controls button { width: 34px; height: 34px; font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -589,7 +621,7 @@
                 });
 
             // =========================================
-            // LIGHTBOX (ZOOM & PAN LOGIC)
+            // LIGHTBOX (ZOOM & PAN LOGIC - MOUSE & TOUCH)
             // =========================================
             const lightbox = document.getElementById('lightbox');
             const lightboxImg = document.getElementById('lightbox-img');
@@ -654,7 +686,7 @@
                 applyLightboxTransform();
             }, { passive: false });
 
-            // Mouse Drag to Pan
+            // --- Mouse Drag to Pan ---
             lightboxImg.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 lbPanning = true;
@@ -670,6 +702,30 @@
             });
 
             window.addEventListener('mouseup', () => {
+                lbPanning = false;
+            });
+
+            // --- Touch Drag to Pan (For Mobile Native Interaction) ---
+            lightboxImg.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    lbPanning = true;
+                    lbStartX = e.touches[0].clientX - lbPanX;
+                    lbStartY = e.touches[0].clientY - lbPanY;
+                }
+            });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!lbPanning || e.touches.length !== 1) return;
+                // Stop native body scrolling while trying to pan inside the lightbox
+                if (lightbox.classList.contains('active')) {
+                    e.preventDefault(); 
+                }
+                lbPanX = e.touches[0].clientX - lbStartX;
+                lbPanY = e.touches[0].clientY - lbStartY;
+                applyLightboxTransform();
+            }, { passive: false });
+
+            window.addEventListener('touchend', () => {
                 lbPanning = false;
             });
 
