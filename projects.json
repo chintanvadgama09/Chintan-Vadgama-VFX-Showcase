@@ -1,5 +1,20 @@
 [
   {
+    "image": "images/TD.jpg",
+    "title": "TD Art & Animation",
+    "description": "For Call of Legends: RPG TD, each hero started as a character concept, followed by a chibi gameplay version, map integration, animation, and finally VFX. This streamlined pipeline helped us efficiently create a large roster of heroes while maintaining visual consistency and quality throughout production.",
+    "tools": [
+      "FLUX",
+      "ComfyUI",
+      "Photoshop",
+      "Spine",
+      "Unity",
+      "Shader Graph",
+      "Particle System"
+    ],
+    "link": "TD.html"
+  },
+  {
     "image": "images/MobaVFX.jpg",
     "title": "MOBA VFX (Playable WIP)",
     "description": "A real-time Unity WebGL showcase featuring stylized MOBA-inspired VFX, including elemental abilities, spell impacts, energy trails, and combat effects crafted for immersive gameplay visuals.",
