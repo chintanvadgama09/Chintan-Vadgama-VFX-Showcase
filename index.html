@@ -62,7 +62,6 @@
 
         /* --- Global Styles --- */
         html {
-            /* Fixes anchor links cutting off section titles due to fixed header */
             scroll-padding-top: 100px; 
             scroll-behavior: smooth;
         }
@@ -116,9 +115,8 @@
             gap: 1rem;
         }
 
-        /* Replaced font mark with PNG styles */
         .cv-logo-img {
-            height: 45px;
+            height: 30px;
             width: auto;
             object-fit: contain;
         }
@@ -815,7 +813,6 @@
             }
             .projects-wrapper { padding: 1.5rem; }
             .about-content { grid-template-columns: 1fr; }
-            /* Side icon display is kept for mobile now, see below query */
         }
 
         /* --- Dedicated Mobile Layout Fixes --- */
@@ -825,12 +822,19 @@
                 flex-wrap: wrap;
                 padding: 0.8rem 5%;
             }
+            
+            nav > .btn-outline {
+                display: none; /* Hide Let's Connect button on mobile */
+            }
+            
             .logo-text {
                 display: none; /* Hide heavy text to save space */
             }
+            
             .cv-logo-img {
                 height: 35px; /* Scale logo for phone */
             }
+            
             .nav-links {
                 width: 100%;
                 justify-content: space-between;
@@ -838,47 +842,73 @@
                 margin-top: 1rem;
                 overflow-x: auto;
             }
+            
             .nav-links a {
                 font-size: 0.75rem;
             }
-            .btn-outline {
-                padding: 0.5rem 1rem;
-                font-size: 0.75rem;
+            
+            /* Responsive Hero Adjustments utilizing Flex Order */
+            #hero { 
+                padding-top: 110px; 
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-start;
             }
             
-            /* Responsive Hero Adjustments */
-            #hero { padding-top: 110px; }
+            .hero-content {
+                order: 1;
+                padding-right: 0; 
+                width: 100%;
+            }
+            
             .hero-title {
                 font-size: 2.5rem;
                 margin-bottom: 1rem;
             }
+            
             .hero-desc {
                 font-size: 1rem;
                 margin-bottom: 2rem;
             }
+            
             .hero-actions {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 1rem;
                 margin-bottom: 2rem;
             }
+            
             .btn-solid, .btn-solidoutline {
                 justify-content: center;
                 text-align: center;
             }
+            
             .hero-stats {
                 gap: 1.5rem;
                 flex-wrap: wrap;
             }
             
-            /* Keeps the Side Icons on phone but scales & prevents overlap */
+            /* Moves the side icons elegantly below the game stats */
             .hero-social-sidebar {
-                right: 10px; /* Bring them closer to the edge */
-                transform: scale(0.75); 
-                transform-origin: right center;
+                order: 2;
+                position: static;
+                flex-direction: row;
+                justify-content: flex-start;
+                align-items: center;
+                width: 100%;
+                padding: 0 5%;
+                margin-top: 2.5rem;
+                transform: none; 
             }
-            .hero-content {
-                padding-right: 50px; /* Prevents text from slipping under the icons */
+            
+            .social-line {
+                display: none;
+            }
+            
+            .hero-contact-text {
+                writing-mode: horizontal-tb;
+                margin-top: 0;
+                margin-left: 0.5rem;
             }
             
             /* Clean up footer on mobile */
@@ -894,7 +924,7 @@
 
     <nav>
         <div class="logo">
-            <img src="images/logo.png" alt="CV Logo" class="cv-logo-img">
+            <img src="images/CVLogo.png" alt="CV Logo" class="cv-logo-img">
             <div class="logo-text">
                 <span class="logo-name">CHINTAN VADGAMA</span>
                 <span class="logo-title">GAME VFX & TECHNICAL ARTIST</span>
@@ -962,7 +992,7 @@
                     <h3>100+</h3>
                     <p>VFX Assets</p>
                 </div>
-                </div>
+            </div>
         </div>
     </section>
 
