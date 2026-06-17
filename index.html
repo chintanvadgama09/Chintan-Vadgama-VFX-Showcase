@@ -61,6 +61,12 @@
         }
 
         /* --- Global Styles --- */
+        html {
+            /* Fixes anchor links cutting off section titles due to fixed header */
+            scroll-padding-top: 100px; 
+            scroll-behavior: smooth;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -110,15 +116,11 @@
             gap: 1rem;
         }
 
-        .cv-mark {
-            font-size: 1.8rem;
-            font-weight: 600;
-            letter-spacing: -1px;
-            color: var(--text-main);
-        }
-
-        .cv-mark span {
-            color: var(--accent);
+        /* Replaced font mark with PNG styles */
+        .cv-logo-img {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
         }
 
         .logo-text {
@@ -326,7 +328,7 @@
             font-weight: 600;
         }
 
-        /* --- Hero Social Sidebar (NEW) --- */
+        /* --- Hero Social Sidebar --- */
         .hero-social-sidebar {
             position: absolute;
             right: 5%;
@@ -692,11 +694,10 @@
             border-radius: 12px;
             border: 1px solid var(--border-color);
             background-color: var(--bg-card); 
-            cursor: pointer; /* NEW: Indicates interactivity */
-            transition: transform 0.3s ease, border-color 0.3s ease; /* NEW */
+            cursor: pointer; 
+            transition: transform 0.3s ease, border-color 0.3s ease; 
         }
 
-        /* NEW: Hover effect for interactive images */
         .collage-img:hover {
             transform: scale(1.02);
             border-color: var(--accent);
@@ -706,7 +707,7 @@
         .collage-img:nth-child(2) { height: 240px; }
         .collage-img:nth-child(3) { height: 220px; }
 
-        /* --- Lightbox Styles (NEW) --- */
+        /* --- Lightbox Styles --- */
         .lightbox {
             display: none;
             position: fixed;
@@ -802,7 +803,7 @@
         .delay-4 { transition-delay: 0.4s; }
         .delay-5 { transition-delay: 0.5s; }
 
-        /* --- Responsive Design --- */
+        /* --- Responsive Design (PC adjustments) --- */
         @media (max-width: 1024px) {
             .hero-title { font-size: 3.5rem; }
             .what-i-do-wrapper { padding: 2rem; }
@@ -814,8 +815,78 @@
             }
             .projects-wrapper { padding: 1.5rem; }
             .about-content { grid-template-columns: 1fr; }
-            /* Hide the floating sidebar on smaller screens as we have footer links */
-            .hero-social-sidebar { display: none; }
+            /* Side icon display is kept for mobile now, see below query */
+        }
+
+        /* --- Dedicated Mobile Layout Fixes --- */
+        @media (max-width: 768px) {
+            /* Makes the top bar layout thin and wrapped */
+            nav {
+                flex-wrap: wrap;
+                padding: 0.8rem 5%;
+            }
+            .logo-text {
+                display: none; /* Hide heavy text to save space */
+            }
+            .cv-logo-img {
+                height: 35px; /* Scale logo for phone */
+            }
+            .nav-links {
+                width: 100%;
+                justify-content: space-between;
+                gap: 0.5rem;
+                margin-top: 1rem;
+                overflow-x: auto;
+            }
+            .nav-links a {
+                font-size: 0.75rem;
+            }
+            .btn-outline {
+                padding: 0.5rem 1rem;
+                font-size: 0.75rem;
+            }
+            
+            /* Responsive Hero Adjustments */
+            #hero { padding-top: 110px; }
+            .hero-title {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+            .hero-desc {
+                font-size: 1rem;
+                margin-bottom: 2rem;
+            }
+            .hero-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+            .btn-solid, .btn-solidoutline {
+                justify-content: center;
+                text-align: center;
+            }
+            .hero-stats {
+                gap: 1.5rem;
+                flex-wrap: wrap;
+            }
+            
+            /* Keeps the Side Icons on phone but scales & prevents overlap */
+            .hero-social-sidebar {
+                right: 10px; /* Bring them closer to the edge */
+                transform: scale(0.75); 
+                transform-origin: right center;
+            }
+            .hero-content {
+                padding-right: 50px; /* Prevents text from slipping under the icons */
+            }
+            
+            /* Clean up footer on mobile */
+            footer {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -823,7 +894,7 @@
 
     <nav>
         <div class="logo">
-            <div class="cv-mark">C<span>V</span></div>
+            <img src="images/logo.png" alt="CV Logo" class="cv-logo-img">
             <div class="logo-text">
                 <span class="logo-name">CHINTAN VADGAMA</span>
                 <span class="logo-title">GAME VFX & TECHNICAL ARTIST</span>
@@ -1022,7 +1093,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             
             // =========================================
-            // LIGHTBOX FOR ABOUT SECTION PHOTOS (NEW)
+            // LIGHTBOX FOR ABOUT SECTION PHOTOS 
             // =========================================
             const lightbox = document.getElementById("lightbox");
             const lightboxImg = document.getElementById("lightbox-img");
