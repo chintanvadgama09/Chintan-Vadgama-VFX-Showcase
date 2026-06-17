@@ -26,15 +26,15 @@
     "link": "https://chintanart.in/MobaVFX/"
   },
   {
-    "image": "images/SNL.jpg",
-    "title": "Snakes And Ladder (Playable WIP)",
-    "description": "A visually polished 3D Snakes and Ladders experience built in Unity WebGL. Roll dice, climb ladders, and avoid snakes in a relaxing world.",
+    "image": "images/Coins.jpg",
+    "title": "Universal Coin Animation",
+    "description": "Flexible Unity coin animation system with configurable paths, speed, easing, rotation, scaling, spread, delays, and target attraction for polished reward collection effects.",
     "tools": [
       "Unity",
-      "HLSL",
-      "Shader Graph"
+      "C#",
+      "Particle System"
     ],
-    "link": "https://chintanart.in/BoardGame/SNL/"
+    "link": "https://chintanart.in/CoinTest"
   },
   {
     "image": "images/Lightning.jpg",
@@ -46,5 +46,16 @@
       "Particle System"
     ],
     "link": "https://jettelly.com/blog/building-a-lightning-shader-in-unity-using-a-single-material"
+  },
+  {
+    "image": "images/SNL.jpg",
+    "title": "Snakes And Ladder (Playable WIP)",
+    "description": "A visually polished 3D Snakes and Ladders experience built in Unity WebGL. Roll dice, climb ladders, and avoid snakes in a relaxing world.",
+    "tools": [
+      "Unity",
+      "HLSL",
+      "Shader Graph"
+    ],
+    "link": "https://chintanart.in/BoardGame/SNL/"
   }
 ]
