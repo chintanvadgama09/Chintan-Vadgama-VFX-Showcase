@@ -4,7 +4,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chintan Vadgama | Technical Artist & VFX</title>
+    <title>Chintan Vadgama | Game VFX & Tech Artist</title>
     <style>
         /* --- Local Fonts --- */
         @font-face {
@@ -41,28 +41,23 @@
 
         /* --- Color Palette & Variables --- */
         :root {
-            --bg-main: #060b0f;
-            --bg-secondary: #0b171e;
+            --bg-main: #05090d;
+            --bg-card: #0a1117;
+            --bg-card-hover: #111a22;
+            --border-color: rgba(255, 255, 255, 0.08);
+            
             --text-main: #ffffff;
             --text-muted: #94a3b8;
-            --accent-teal: rgb(95, 150, 189);
-            --accent-hover: #00d2d6;
-            --tile-color: #7eaed1;
-
-            /* --- Hero Video Background Controls --- */
-            --video-tint: rgba(31, 71, 100, 0.5); 
-            --video-vignette-color: #060b0f; 
-            --video-vignette-spread: 90%; 
-
-            /* --- HEXTECH WIPE VFX PROPERTIES --- */
-            /* Point this to your flow.png */
-            --wipe-texture: url('images/flow.png'); 
+            --text-dark: #64748b;
             
-            /* Scale/size of the repeating texture (width height) - Converted to Viewport Width (vw) for responsive scaling */
-            --wipe-texture-scale: 25vw 350%;
+            --sectionTitle: #82f0cf;
+            --accent: #38d9a9;
+            --accent-hover: #72dfbe;
+            --secondaryaccent: #38d9a9;
+            --secondaryaccent-hover: #3863d9;
+            --accent-transparent: rgba(56, 217, 169, 0.15);
             
-            /* Speed of the wipe traveling across the screen */
-            --wipe-speed: 10s;
+            --transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         /* --- Global Styles --- */
@@ -83,213 +78,582 @@
 
         a {
             text-decoration: none;
-            color: var(--text-main);
-            transition: color 0.3s ease;
+            color: inherit;
+            transition: var(--transition);
+        }
+
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+            padding: 0 5%;
         }
 
         /* --- Navigation --- */
         nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            padding: 1rem 5%;
-            background: rgba(10, 15, 20, 0.8);
-            backdrop-filter: blur(10px);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0.5rem 5%;
+            background: rgba(5, 9, 13, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            position: fixed;
+            width: 100%;
+            top: 0;
             z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            overflow: hidden; 
-        }
-
-        .logo, .nav-links {
-            position: relative;
-            z-index: 1; 
+            box-shadow: 0 0px 50px rgba(5, 9, 13, 0.85);
         }
 
         .logo {
-            font-weight: 525;
-            font-size: 1.5rem;
-            letter-spacing: 2px;
-            color: var(--tile-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .cv-mark {
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: -1px;
+            color: var(--text-main);
+        }
+
+        .cv-mark span {
+            color: var(--accent);
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .logo-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .logo-title {
+            font-size: 0.8rem;
+            color: var(--text-dark);
+            letter-spacing: 0.5px;
         }
 
         .nav-links {
             display: flex;
-            gap: 6rem;
+            gap: 2.5rem;
         }
 
         .nav-links a {
-            font-size: 1rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            font-weight: 400;
-            display: flex; 
-            align-items: center; 
-            transition: color 0.3s ease, text-shadow 0.4s ease, transform 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: rgb(250, 250, 250);
-            text-shadow: 0 0 10px rgba(58, 186, 255, 1), 0 0 30px rgba(58, 186, 255, 1);
-            transform: scale(1.2);
-        }
-
-        /* --- Sections --- */
-        section {
-            padding: 100px 10%;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
+            font-weight: 600;
+            color: var(--text-muted);
             position: relative;
-            display: inline-block;
         }
 
-        .section-title::after {
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent);
+        }
+
+        .nav-links a.active::after {
             content: '';
             position: absolute;
-            left: 0;
-            bottom: -10px;
-            width: 50px;
-            height: 3px;
-            background-color: var(--accent-teal);
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            transition: all 0.3s ease;
         }
 
-        /* --- Hero Section --- */
+        .btn-outline {
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            background: var(--accent-transparent);
+        }
+
+        /* --- Full Width Hero Section --- */
         #hero {
             position: relative;
-            align-items: flex-start;
-            overflow: hidden; 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 130px; 
         }
 
-        #hero > *:not(.hero-video):not(.hero-overlay) {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-video {
+        .hero-visual {
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+        }
+
+        .hero-visual video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            z-index: -2;
-        }
-
-        .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
+            opacity: 0.25; 
             pointer-events: none;
-            background-color: var(--video-tint);
-            background-image: radial-gradient(circle at center, transparent 10%, var(--video-vignette-color) var(--video-vignette-spread));
-            backdrop-filter: blur(5px);
         }
 
-        .hero-subtitle {
-            color: var(--accent-teal);
-            font-weight: 500;
-            letter-spacing: 1px;
-            font-size: 1.5rem;
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px; 
+            text-align: left;
+            margin-left: 0;
+            padding-right: 2rem;
+        }
+
+        .hero-tag {
+            color: var(--accent);
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
             margin-bottom: 0.5rem;
         }
 
         .hero-title {
             font-size: 4.5rem;
             font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 1.2rem;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title span {
+            color: var(--accent);
         }
 
         .hero-desc {
             color: var(--text-muted);
-            max-width: 1200px;
             font-size: 1.2rem;
-            margin-bottom: 1.5rem;
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
 
-        .hero-action-container {
+        .hero-actions {
             display: flex;
             align-items: center;
             gap: 2rem;
-            flex-wrap: wrap;
-            margin-top: 1rem;
+            margin-bottom: 4rem;
         }
 
-        .social-icons-hero {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .social-icons-hero a {
-            color: var(--text-muted);
-            transition: color 0.3s ease, transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), filter 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
-
-        .social-icons-hero a:hover {
-            color: var(--accent-teal);
-            transform: translateY(-3px);
-            filter: drop-shadow(0 0 8px rgba(0, 210, 214, 0.4));
-        }
-
-        /* --- Social Icon Text Pop-up VFX --- */
-        .icon-text {
-            max-width: 0;
-            opacity: 0;
-            margin-left: 0;
-            overflow: hidden;
-            white-space: nowrap;
-            font-size: 0.95rem;
-            font-weight: 600;
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-
-        .social-icons-hero a:hover .icon-text {
-            max-width: 100px; /* Expands to show text */
-            opacity: 1;
-            margin-left: 0.6rem; /* Creates gap between icon and text */
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 0.8rem 2rem;
-            border: 2px solid var(--accent-teal);
-            color: var(--accent-teal);
-            border-radius: 4px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            background-color: var(--accent-teal);
+        .btn-solid {
+            background-color: var(--accent);
             color: var(--bg-main);
-            box-shadow: 0 0px 15px rgba(126, 174, 209, 0.8);
+            padding: 0.9rem 2rem;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-solid:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(56, 217, 169, 0.2);
+        }
+
+        .btn-solidoutline {
+            background-color: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.9rem 2rem;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-solidoutline:hover {
+            border-color: var(--accent);
+            background: var(--accent-transparent);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(56, 217, 169, 0.2);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 2rem;
+        }
+
+        .stat-item h3 {
+            font-size: 2rem;
+            font-weight: 400;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-item p {
+            font-size: 0.75rem;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* --- Hero Social Sidebar (NEW) --- */
+        .hero-social-sidebar {
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            z-index: 10;
+        }
+
+        .hero-social-sidebar a {
+            color: var(--text-muted);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-social-sidebar a:hover {
+            color: var(--accent);
+            transform: scale(1.2) translateY(-2px);
+        }
+
+        .social-line {
+            width: 1px;
+            height: 50px;
+            background-color: var(--border-color);
+            margin: 0.5rem 0;
+        }
+
+        .hero-contact-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+        }
+
+        .hero-contact-text:hover {
+            color: var(--accent);
+            transform: translateY(-5px);
+        }
+
+        /* --- Sections Layout --- */
+        section {
+            padding: 80px 0;
+            position: relative;
+        }
+
+        /* --- Section Titles (Centered & Outside) --- */
+        .section-header-centered {
+            text-align: center;
+            margin: 1rem;
+        }
+
+        .section-header-centered .section-tag {
+            color: var(--sectionTitle);
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .section-header-centered h2 {
+            font-size: 2rem;
+            font-weight: 400;
+            line-height: 1;
+            margin-bottom: -1rem;
+        }
+
+        /* --- What I Do Section --- */
+        .what-i-do-wrapper {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+        }
+
+        .skills-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 0;
+        }
+
+        .skill-item {
+            flex: 1;
+            padding: 0 1.5rem;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .skill-item:first-child {
+            padding-left: 0;
+        }
+
+        .skill-item:last-child {
+            border-right: none;
+            padding-right: 0;
+        }
+
+        .skill-item svg {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 1.5rem;
+            stroke: var(--accent);
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        .skill-item h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .skill-item p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        /* --- Tool Stack Section --- */
+        .tools-wrapper {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            position: relative;
+        }
+
+        .tools-scroll-mask {
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            width: 100%;
+            overflow: hidden;
+            padding: 1rem 0;
+        }
+
+        .tools-grid-container {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 2rem;
+            align-items: center;
+            overflow-x: auto;
+            overflow-y: hidden;
+            cursor:all-scroll;
+            padding: 0rem 7%; 
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+        }
+        
+        .tools-grid-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tools-grid-container:active {
+            cursor: grabbing;
+        }
+
+        .tool-icon-box {
+            width: 110px;
+            height: 110px;
+            background-color: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            flex: 0 0 auto;
+            user-select: none;
+            transition: var(--transition);
+        }
+
+        .tool-icon-box:hover {
+            transform: scale(0.98);
+            background-color: rgba(255,255,255,0.03);
+        }
+
+        .tool-icon-box img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .tool-icon-box:hover img {
+            filter: grayscale(0%) brightness(1) opacity(1);
+        }
+
+        .tool-icon-box span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* --- Featured Projects Section --- */
+        .projects-wrapper {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem; 
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+            gap: 1.5rem; 
+        }
+
+        .project-card {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .project-card:hover {
+            border-color: var(--accent);
+            transform: scale(0.95);
+            background-color: var(--accent-transparent);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .project-image {
+            width: 100%;
+            height: 240px;
+            background-color: #1a252f;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .project-info {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .project-tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .project-tag {
+            color: var(--accent);
+            background: var(--accent-transparent);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 0.03rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(56, 217, 169, 0.05);
+        }
+
+        .project-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+        }
+
+        .project-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .project-link {
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            transition: var(--transition);
+        }
+
+        .project-card:hover .project-link {
+            gap: 0.8rem;
+        }
+
+        /* Project Expansion Styles */
+        .hidden-project {
+            display: none !important;
+        }
+        
+        .projects-footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            padding-bottom: 1rem;
         }
 
         /* --- About Section --- */
-        #about {
-            background-color: var(--bg-secondary);
-        }
-
         .about-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem; 
             display: grid;
-            grid-template-columns: 1.2fr 0.8fr; 
+            grid-template-columns: 1fr 1fr; 
             gap: 4rem;
             align-items: center;
+        }
+
+        .about-text h4 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--secondaryaccent);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
         }
 
         .about-text p {
@@ -298,86 +662,79 @@
             font-size: 1.1rem;
         }
 
-        .skills-list {
+        .about-text ul {
+            list-style: none;
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 2rem;
+            flex-direction: column;
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
         }
 
-        .skill-tag {
-            background: rgba(0, 173, 181, 0.1);
-            color: var(--accent-teal);
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border: 1px solid rgba(0, 173, 181, 0.2);
+        .about-text li {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.6;
         }
 
-        /* --- About Photo Collage --- */
+        .about-text strong {
+            color: var(--text-main);
+        }
+
         .about-collage {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            width: 100%;
+            gap: 1rem;
         }
 
         .collage-img {
             width: 100%;
             object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 173, 181, 0.3);
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            background-color: #1a252f; 
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-card); 
+            cursor: pointer; /* NEW: Indicates interactivity */
+            transition: transform 0.3s ease, border-color 0.3s ease; /* NEW */
+        }
+
+        /* NEW: Hover effect for interactive images */
+        .collage-img:hover {
+            transform: scale(1.02);
+            border-color: var(--accent);
         }
 
         .collage-img:nth-child(1) { height: 280px; }
-        .collage-img:nth-child(2) { height: 380px; }
-        .collage-img:nth-child(3) { height: 240px; }
+        .collage-img:nth-child(2) { height: 240px; }
+        .collage-img:nth-child(3) { height: 220px; }
 
-        .collage-img:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0px 20px rgba(58, 186, 255, 0.2);
-            border-color: var(--accent-teal);
-        }
-
-        /* --- Lightbox Modal --- */
+        /* --- Lightbox Styles (NEW) --- */
         .lightbox {
-            display: none; 
+            display: none;
             position: fixed;
             z-index: 2000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(6, 11, 15, 0.95); 
+            overflow: auto;
+            background-color: rgba(5, 9, 13, 0.95);
             backdrop-filter: blur(8px);
-            justify-content: center;
             align-items: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .lightbox.show {
-            display: flex;
-            opacity: 1;
+            justify-content: center;
         }
 
         .lightbox-content {
             max-width: 90%;
             max-height: 90vh;
-            border-radius: 8px;
-            border: 2px solid var(--accent-teal);
-            box-shadow: 0 0 30px rgba(0, 210, 214, 0.3);
-            transform: scale(0.95);
-            transition: transform 0.3s ease;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 50px rgba(0,0,0,0.6);
+            animation: zoomIn 0.3s ease;
             object-fit: contain;
         }
 
-        .lightbox.show .lightbox-content {
-            transform: scale(1);
+        @keyframes zoomIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .lightbox-close {
@@ -386,143 +743,57 @@
             right: 40px;
             color: var(--text-muted);
             font-size: 45px;
-            font-weight: bold;
+            font-weight: 300;
+            transition: var(--transition);
             cursor: pointer;
-            transition: color 0.3s ease, text-shadow 0.3s ease;
             line-height: 1;
         }
 
         .lightbox-close:hover {
-            color: #ffffff;
-            text-shadow: 0 0 15px var(--accent-teal);
+            color: var(--accent);
+            transform: scale(1.1);
         }
 
-        /* --- Projects Section --- */
-        #projects {
-            background-color: var(--bg-main);
-        }
-
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2.5rem;
-        }
-
-        .project-link-wrapper {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .project-card {
-            background-color: var(--bg-secondary);
-            border-radius: 10px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 2px solid rgba(255,255,255,0.05);
-            height: 100%;
-        }
-
-        .project-card:hover {
-            transform: translateY(-5px);
-            transform: scale(1.02);
-            box-shadow: 0 0px 20px rgba(58, 186, 255, 0.3);
-            border-color: rgba(0, 144, 181, 0.3);
-        }
-
-        .project-link-wrapper:hover .project-title {
-            color: var(--accent-teal);
-        }
-
-        .project-image {
-            width: 100%;
-            height: 250px;
-            background-color: #1a252f;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .project-info {
-            padding: 1.5rem;
-        }
-
-        .project-title {
-            font-size: 1.3rem;
-            margin-bottom: 0.5rem;
-            transition: color 0.3s ease;
-        }
-
-        .project-desc {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .project-tools {
-            display: flex;
-            flex-wrap: wrap; 
-            gap: 0.8rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .project-tools span {
-            background-color: rgba(0, 144, 181, 0.1);
-            color: var(--accent-teal);
-            padding: 0.3rem 0.8rem; 
-            border-radius: 05px;    
-        }
-
-        /* --- Contact Section --- */
-        #contact {
-            background-color: var(--bg-main);
-            text-align: center;
-            align-items: center;
-            padding: 60px 10%;
-            min-height: auto;
-        }
-
-        #contact .section-title::after {
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .contact-content {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .contact-content p {
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
-
+        /* --- Footer --- */
         footer {
-            text-align: center;
-            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 5%;
+            margin-top: 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             background-color: var(--bg-main);
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            border-top: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* =========================================
-           ANIMATION CLASSES
-           ========================================= */
+        .footer-text {
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .social-icons a {
+            color: var(--text-dark);
+        }
+
+        .social-icons a:hover {
+            color: var(--accent);
+        }
+
+        /* --- Animations --- */
         .fade-pop {
             opacity: 0;
-            transform: translateY(40px) scale(0.95);
-            transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
             will-change: opacity, transform;
         }
 
         .fade-pop.is-visible {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translateY(0);
         }
 
         .delay-1 { transition-delay: 0.1s; }
@@ -531,277 +802,291 @@
         .delay-4 { transition-delay: 0.4s; }
         .delay-5 { transition-delay: 0.5s; }
 
-        /* =========================================
-           VFX: LIGHTNING & ELECTRIC IDLE FX
-           ========================================= */
-        .hero-title.lightning-fx {
-            position: relative;
-            display: inline-block;
-            animation: electric-pulse 4s infinite;
-        }
-
-        .hero-title.lightning-fx::before,
-        .hero-title.lightning-fx::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0;
-        }
-
-        .hero-title.lightning-fx::before {
-            color: var(--accent-hover); 
-            animation: lightning-strike 4s infinite;
-        }
-
-        .hero-title.lightning-fx::after {
-            color: #ffffff; 
-            animation: lightning-strike 4s infinite reverse;
-            filter: blur(2px);
-        }
-
-        @keyframes electric-pulse {
-            0%, 100% { text-shadow: 0 0 8px rgba(0, 210, 214, 0.2); }
-            50% { text-shadow: 0 0 15px rgba(0, 210, 214, 0.5), 0 0 25px rgba(0, 210, 214, 0.2); }
-            89% { color: #ffffff; text-shadow: 0 0 8px rgba(0, 210, 214, 0.3); }
-            90% { color: var(--bg-main); text-shadow: none; } 
-            91% { color: #ffffff; text-shadow: 0 0 30px #ffffff, 0 0 50px var(--accent-hover), 0 0 80px var(--accent-teal); } 
-            92% { color: var(--bg-main); text-shadow: none; }
-            93% { color: #ffffff; text-shadow: 0 0 40px var(--accent-hover), 0 0 60px #ffffff; } 
-            94% { color: #ffffff; text-shadow: 0 0 8px rgba(0, 210, 214, 0.3); }
-        }
-
-        @keyframes lightning-strike {
-            0%, 89%, 95%, 100% {
-                opacity: 0;
-                clip-path: inset(0 0 0 0);
-                transform: translate(0, 0);
-            }
-            90% {
-                opacity: 1;
-                clip-path: inset(20% 0 60% 0);
-                transform: translate(-4px, 2px);
-            }
-            92% {
-                opacity: 0.9;
-                clip-path: inset(60% 0 10% 0);
-                transform: translate(4px, -2px) skewX(10deg);
-            }
-            94% {
-                opacity: 0.8;
-                clip-path: inset(10% 0 80% 0);
-                transform: translate(-2px, 1px);
-            }
-        }
-
-        /* =========================================
-           VFX: HEXTECH UI FLOW
-           ========================================= */
-        nav::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -150%;
-            width: 180%; 
-            height: 100%;
-            pointer-events: none;
-            z-index: 0; 
-            opacity: 0.4;
-            transform: skewX(-30deg);
-
-            background-image: 
-                linear-gradient(
-                    90deg, 
-                    transparent 0%, 
-                    transparent 35%, 
-                    transparent 50%, 
-                    transparent 65%, 
-                    transparent 100%
-                ),
-                var(--wipe-texture);
-            
-            background-size: 100% 100%, var(--wipe-texture-scale);
-            background-repeat: repeat-y, repeat-x;
-            background-blend-mode: additive;
-
-            -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 35%, black 50%, transparent 65%, transparent 100%);
-            mask-image: linear-gradient(90deg, transparent 0%, transparent 35%, black 50%, transparent 65%, transparent 100%);
-        }
-
-        nav.run-wipe::before {
-            animation: hextech-wipe var(--wipe-speed) forwards cubic-bezier(0.25, 1, 1, 1);
-        }
-
-        @keyframes hextech-wipe {
-            0% { 
-            left: -150%; 
-            background-position: 0 0, 0 0; 
-            }
-        100% { 
-            left: 150%; 
-            background-position: 0 0, -330vw 0; 
-            }
-        }
-
         /* --- Responsive Design --- */
-        @media (max-width: 768px) {
-            .hero-title { font-size: 3rem; }
-            .about-content { grid-template-columns: 1fr; gap: 2rem; }
-            
-            .collage-img:nth-child(1) { height: 220px; }
-            .collage-img:nth-child(2) { height: 260px; }
-            .collage-img:nth-child(3) { height: 220px; }
-            
-            nav {
-                padding: 0.6rem 5%;
-                justify-content: center;
+        @media (max-width: 1024px) {
+            .hero-title { font-size: 3.5rem; }
+            .what-i-do-wrapper { padding: 2rem; }
+            .skills-grid { flex-wrap: wrap; gap: 2rem; }
+            .skill-item {
+                flex: 1 1 200px;
+                border-right: none !important;
+                padding: 0 !important;
             }
-            
-            .logo { display: none; }
-            
-            .nav-links {
-                display: flex;
-                gap: 1.5rem;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .nav-links a { font-size: 0.85rem; }
+            .projects-wrapper { padding: 1.5rem; }
+            .about-content { grid-template-columns: 1fr; }
+            /* Hide the floating sidebar on smaller screens as we have footer links */
+            .hero-social-sidebar { display: none; }
         }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="logo">Chintan Vadgama</div>
-        <div class="nav-links">
-            <a href="#hero">Home</a>
-            <a href="#projects">Projects</a>
-            <a href="#about">About</a>
-            
-            <a href="#contact" aria-label="Contact" title="Contact">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.03 21c.76 0 .99-.67.99-1.21v-3.42c0-.55-.46-1-.99-1z"/>
-                </svg>
-            </a>
-
-            <a href="photography.html" aria-label="Photography" title="Photography">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3z"/>
-                </svg>
-            </a>
+        <div class="logo">
+            <div class="cv-mark">C<span>V</span></div>
+            <div class="logo-text">
+                <span class="logo-name">CHINTAN VADGAMA</span>
+                <span class="logo-title">GAME VFX & TECHNICAL ARTIST</span>
+            </div>
         </div>
+        <div class="nav-links">
+            <a href="#hero" class="active">HOME</a>
+            <a href="#tools">TOOLS</a>
+            <a href="#projects">WORK</a>
+            <a href="#about">ABOUT</a>
+            <a href="photography.html">PHOTOGRAPHY</a>
+        </div>
+        <a href="mailto:chintan.vadgama09@gmail.com" class="btn-outline">LET'S CONNECT ↗</a>
     </nav>
 
     <section id="hero">
-        <video class="hero-video" autoplay loop muted playsinline>
-            <source src="images/BGFootage.mp4" type="video/mp4">
-        </video>
-        <div class="hero-overlay"></div>
+        <div class="hero-visual fade-pop delay-2">
+            <video autoplay loop muted playsinline>
+                <source src="images/BGFootage.mp4" type="video/mp4">
+            </video>
+        </div>
+        
+        <div class="hero-social-sidebar fade-pop delay-5">
+            <a href="https://www.linkedin.com/in/chintanvadgama18/" target="_blank" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+            <a href="https://www.behance.net/chintan_vadgama" target="_blank" aria-label="Behance">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M22 7h-7v-2h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14h-8.027c.13 3.211 3.483 3.312 4.588 2.029h3.168zm-7.686-4h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988h-6.466v-14.967h6.953c5.476.081 5.58 5.444 2.72 6.906 3.461 1.26 3.577 8.061-3.207 8.061zm-3.466-8.988h3.584c2.508 0 2.906-3-.312-3h-3.272v3zm3.391 3h-3.391v3.016h3.341c3.055 0 2.868-3.016.05-3.016z"/></svg>
+            </a>
+            <a href="https://www.artstation.com/batboy18" target="_blank" aria-label="ArtStation">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M.014 19.264l2.932 4.736h13.084l-2.333-4.048H4.63l-3.467-6.171-.384-.667zm10.741-17.264l-6.834 11.846h4.298l3.435-5.952 3.447 5.952h4.301zM15.932 14.39l-3.235 5.61h6.817l3.235-5.61z"/></svg>
+            </a>
+            <a href="mailto:chintan.vadgama09@gmail.com" aria-label="Email">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.03 21c.76 0 .99-.67.99-1.21v-3.42c0-.55-.46-1-.99-1z"/>
+                </svg>
+            </a>
+            <div class="social-line"></div>
+            <a href="mailto:chintan.vadgama09@gmail.com" class="hero-contact-text">CONTACT</a>
+        </div>
+        <div class="container hero-content">
+            <div class="hero-tag fade-pop delay-1">Game VFX & Technical Artist</div>
+            
+            <h1 class="hero-title fade-pop delay-2">Bridging Art <br><span>&</span> Technology.</h1>
+            
+            <p class="hero-desc fade-pop delay-3">
+                I build real-time VFX, shaders, tools and production pipelines that bring ideas to life in games. Over 8 years bridging the gap between imagination and engineering.
+            </p>
 
-        <p class="hero-subtitle fade-pop delay-1">Hello, I am</p>
-        
-        <h1 class="hero-title fade-pop delay-2 lightning-fx" data-text="Chintan Vadgama.">Chintan Vadgama.</h1>
-        
-        <h2 class="hero-title fade-pop delay-3" style="color: var(--text-muted); font-size: 3rem; margin-top: -1rem;">I bridge the gap between art and code.</h2>
-        
-        <p class="hero-desc fade-pop delay-4">
-            I am a Technical Artist and VFX specialist with over 8 years of experience shaping the visual and technical landscapes of games. Combining advanced non-photorealistic shading (NPR), realtime VFX, and customized generative AI workflows, I transform complex creative visions into optimized, high-performing realities. Whether directing art pipelines, building tools from scratch, or ensuring seamless performance on low-end devices, I thrive at the intersection of imagination and engineering.
-        </p>
+            <div class="hero-actions fade-pop delay-4">
+                <a href="#projects" class="btn-solid">VIEW MY WORK &rarr;</a>
+                <a href="#" class="btn-solidoutline">DOWNLOAD CV &darr;</a>
+            </div>
 
-        <div class="fade-pop delay-5 hero-action-container">
-            <a href="#projects" class="btn">View My Work</a>
-            <div class="social-icons-hero">
-                <a href="https://www.linkedin.com/in/chintanvadgama18/" target="_blank" aria-label="LinkedIn" title="LinkedIn">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                    <span class="icon-text">LinkedIn</span>
-                </a>
-                <a href="https://www.behance.net/chintan_vadgama" target="_blank" aria-label="Behance" title="Behance">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M22 7h-7v-2h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14h-8.027c.13 3.211 3.483 3.312 4.588 2.029h3.168zm-7.686-4h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988h-6.466v-14.967h6.953c5.476.081 5.58 5.444 2.72 6.906 3.461 1.26 3.577 8.061-3.207 8.061zm-3.466-8.988h3.584c2.508 0 2.906-3-.312-3h-3.272v3zm3.391 3h-3.391v3.016h3.341c3.055 0 2.868-3.016.05-3.016z"/></svg>
-                    <span class="icon-text">Behance</span>
-                </a>
-                <a href="https://www.artstation.com/batboy18" target="_blank" aria-label="ArtStation" title="ArtStation">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M.014 19.264l2.932 4.736h13.084l-2.333-4.048H4.63l-3.467-6.171-.384-.667zm10.741-17.264l-6.834 11.846h4.298l3.435-5.952 3.447 5.952h4.301zM15.932 14.39l-3.235 5.61h6.817l3.235-5.61z"/></svg>
-                    <span class="icon-text">ArtStation</span>
-                </a>
-                <a href="https://www.instagram.com/beyondtheframe.15/" target="_blank" aria-label="Instagram" title="Instagram">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.209-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                    <span class="icon-text">Instagram</span>
-                </a>
+            <div class="hero-stats">
+                <div class="stat-item fade-pop delay-1">
+                    <h3>8+</h3>
+                    <p>Years Experience</p>
+                </div>
+                <div class="stat-item fade-pop delay-2">
+                    <h3>15+</h3>
+                    <p>Games Released</p>
+                </div>
+                <div class="stat-item fade-pop delay-3">
+                    <h3>100+</h3>
+                    <p>VFX Assets</p>
+                </div>
+                </div>
+        </div>
+    </section>
+
+    <section id="capabilities" class="container">
+        <div class="section-header-centered fade-pop">
+            <span class="section-tag">What I Do</span>
+            </div>
+        
+        <div class="what-i-do-wrapper fade-pop delay-1">
+            <div class="skills-grid">
+                <div class="skill-item fade-pop delay-1">
+                    <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <h4>Real-Time VFX</h4>
+                    <p>Stylized effects with performance in mind across PC and Mobile devices.</p>
+                </div>
+                <div class="skill-item fade-pop delay-2">
+                    <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    <h4>Shaders</h4>
+                    <p>Custom HLSL & Shader Graph for striking non-photorealistic visuals & more.</p>
+                </div>
+                <div class="skill-item fade-pop delay-3">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <h4>Tools</h4>
+                    <p>Editor tools & automation that empower teams and cut manual labor to zero.</p>
+                </div>
+                <div class="skill-item fade-pop delay-4">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><path d="M14 8h-1v8h1"/></svg>
+                    <h4>AI Pipelines</h4>
+                    <p>AI-assisted workflows (ComfyUI / SD) to accelerate art production.</p>
+                </div>
+                <div class="skill-item fade-pop delay-1">
+                    <svg viewBox="0 0 24 24"><path d="M22 12A10 10 0 1 1 12 2a10 10 0 0 1 10 10z"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <h4>Optimization</h4>
+                    <p>Profiling, batching & rendering strategies ensuring 60 FPS on 2GB devices.</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <section id="projects">
-        <h2 class="section-title fade-pop">Selected Projects</h2>
-        <div class="projects-grid" id="projects-container">
+    <section id="tools" class="container">
+        <div class="section-header-centered fade-pop">
+            <span class="section-tag">The Arsenal</span>
             </div>
+        <div class="tools-wrapper fade-pop delay-1">
+            <div class="tools-scroll-mask">
+                <div class="tools-grid-container" id="toolstack-container">
+                    </div>
+            </div>
+        </div>
     </section>
 
-    <section id="about">
-        <h2 class="section-title fade-pop">About Me</h2>
-        <div class="about-content">
-            <div class="about-text fade-pop">
+    <section id="projects" class="container">
+        <div class="section-header-centered fade-pop">
+            <span class="section-tag">Featured Works</span>
+            </div>
+        <div class="projects-wrapper fade-pop delay-1">
+            <div class="projects-grid" id="projects-container">
+                </div>
+            
+            <div class="projects-footer fade-pop delay-2">
+                <button id="view-all-btn" class="btn-outline" style="margin: 0 auto; background: transparent;">
+                    VIEW ALL PROJECTS &darr;
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="container">
+        <div class="section-header-centered fade-pop">
+            <span class="section-tag">Beyond the Tools</span>
+            </div>
+        
+        <div class="about-content fade-pop delay-1">
+            <div class="about-text fade-pop delay-2">
                 <p>
                     I am a multidisciplinary game developer with over 8 years of experience bridging the gap between engineering and art. From my early days modding GTA to leading art teams and optimizing entire production pipelines, my greatest strength is my versatility. If a tool doesn't exist, I build it. If a pipeline is slow, I automate it. If a team has a gap, I fill it.
                 </p>
                 
-                <h3 style="color: var(--accent-teal); margin-bottom: 1rem; font-size: 1.3rem;">What I Do Best:</h3>
-                <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
-                    <li style="color: var(--text-muted); margin-bottom: 0.8rem; font-size: 1.1rem;"><strong style="color: var(--text-main);">Technical Art & Shaders:</strong> Master of NPR/toon shading and bridging 2D/3D workflows. Creator of custom shaders and tools across Unity, Blender, and Photoshop that reduce manual work to zero.</li>
-                    <li style="color: var(--text-muted); margin-bottom: 0.8rem; font-size: 1.1rem;"><strong style="color: var(--text-main);">Art Direction & Generative AI:</strong> Proven track record directing titles like Epic Merge and Cooking Valley. Pioneer in adopting and training custom FLUX and Stable Diffusion models to supercharge studio pipelines.</li>
-                    <li style="color: var(--text-muted); margin-bottom: 0.8rem; font-size: 1.1rem;"><strong style="color: var(--text-main);">Realtime VFX & Animation:</strong> Expert in Spine, Unity Particle Systems, and creating highly optimized hero effects for resource-heavy games like Call of Legends: RPG TD Game.</li>
-                    <li style="color: var(--text-muted); margin-bottom: 0.8rem; font-size: 1.1rem;"><strong style="color: var(--text-main);">Optimization & Product Leadership:</strong> Experienced Product Owner capable of architecting 3D games (like Chef Factory) that run buttery-smooth on 2GB low-end devices without sacrificing visual fidelity.</li>
+                <h4>What I Do Best:</h4>
+                <ul>
+                    <li><strong>Technical Art & Shaders:</strong> Master of NPR/toon shading and bridging 2D/3D workflows. Creator of custom shaders and tools across Unity, Blender, and Photoshop that reduce manual work to zero.</li>
+                    <li><strong>Art Direction & Generative AI:</strong> Proven track record directing titles like Epic Merge and Cooking Valley. Pioneer in adopting and training custom FLUX and Stable Diffusion models to supercharge studio pipelines.</li>
+                    <li><strong>Realtime VFX & Animation:</strong> Expert in Spine, Unity Particle Systems, and creating highly optimized hero effects for resource-heavy games like Call of Legends: RPG TD Game.</li>
+                    <li><strong>Optimization & Product Leadership:</strong> Experienced Product Owner capable of architecting 3D games (like Chef Factory) that run buttery-smooth on 2GB low-end devices without sacrificing visual fidelity.</li>
                 </ul>
 
-                <h3 style="color: var(--accent-teal); margin-bottom: 1rem; font-size: 1.3rem;">Why Work With Me?</h3>
+                <h4>Why Work With Me?</h4>
                 <p>
                     I am the ultimate "Swiss Army Knife" of game development. I speak the language of programmers, artists, and producers fluently, allowing me to foresee bottlenecks, lead teams with empathy, and deliver highly polished products on time.
                 </p>
-
-                <div class="skills-list">
-                    <span class="skill-tag">Unity</span>
-                    <span class="skill-tag">Realtime VFX</span>
-                    <span class="skill-tag">Shader Programming</span>
-                    <span class="skill-tag">Blender</span>
-                    <span class="skill-tag">ComfyUI / Stable Diffusion</span>
-                    <span class="skill-tag">C#</span>
-                </div>
             </div>
-            
             <div class="about-collage">
-                <img src="images/MeAbout1.jpg" alt="Chintan Vadgama" class="collage-img fade-pop delay-1" onclick="openLightbox(this)">
-                <img src="images/MeAbout2.jpg" alt="Chintan Working" class="collage-img fade-pop delay-2" onclick="openLightbox(this)">
-                <img src="images/MeAbout3.jpg" alt="Setup/VFX" class="collage-img fade-pop delay-3" onclick="openLightbox(this)">
+                <img src="images/MeAbout1.jpg" alt="Chintan Vadgama" class="collage-img fade-pop delay-3">
+                <img src="images/MeAbout2.jpg" alt="Chintan Working" class="collage-img fade-pop delay-4">
+                <img src="images/MeAbout3.jpg" alt="Chintan Workspace" class="collage-img fade-pop delay-5">
             </div>
         </div>
     </section>
 
-    <section id="contact">
-        <h2 class="section-title fade-pop">Get In Touch</h2>
-        <div class="contact-content fade-pop delay-1">
-            <p>I'm currently open to new opportunities and collaborations. Whether you have a question about my realtime workflows, need a technical artist for your next project, or just want to say hi, my inbox is always open!</p>
-            <p style="font-weight: 600; color: var(--accent-teal); margin-top: -1rem;">Based in Rajkot, Gujarat</p>
-            <a href="mailto:chintan.vadgama09@gmail.com" class="btn" style="margin-top: 2rem;">Say Hello</a>
-        </div>
-    </section>
-
-    <footer>
-        <p>Designed & Built by Chintan Vadgama &copy; 2026</p>
-    </footer>
-
-    <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+    <div id="lightbox" class="lightbox">
         <span class="lightbox-close">&times;</span>
-        <img id="lightbox-img" class="lightbox-content">
+        <img class="lightbox-content" id="lightbox-img" alt="Enlarged view">
     </div>
+
+    <footer class="fade-pop">
+        <div class="footer-text">
+            &copy; 2026 Chintan Vadgama. Based in Rajkot, Gujarat.
+        </div>
+        <div class="social-icons">
+            <a href="https://www.linkedin.com/in/chintanvadgama18/" target="_blank" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+            <a href="https://www.behance.net/chintan_vadgama" target="_blank" aria-label="Behance">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22 7h-7v-2h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14h-8.027c.13 3.211 3.483 3.312 4.588 2.029h3.168zm-7.686-4h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988h-6.466v-14.967h6.953c5.476.081 5.58 5.444 2.72 6.906 3.461 1.26 3.577 8.061-3.207 8.061zm-3.466-8.988h3.584c2.508 0 2.906-3-.312-3h-3.272v3zm3.391 3h-3.391v3.016h3.341c3.055 0 2.868-3.016.05-3.016z"/></svg>
+            </a>
+            <a href="https://www.artstation.com/batboy18" target="_blank" aria-label="ArtStation">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M.014 19.264l2.932 4.736h13.084l-2.333-4.048H4.63l-3.467-6.171-.384-.667zm10.741-17.264l-6.834 11.846h4.298l3.435-5.952 3.447 5.952h4.301zM15.932 14.39l-3.235 5.61h6.817l3.235-5.61z"/></svg>
+            </a>
+            <a href="mailto:chintan.vadgama09@gmail.com" aria-label="Email">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.03 21c.76 0 .99-.67.99-1.21v-3.42c0-.55-.46-1-.99-1z"/>
+                </svg>
+            </a>
+        </div>
+    </footer>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             
             // =========================================
-            // INTERSECTION OBSERVER FOR ANIMATIONS
+            // LIGHTBOX FOR ABOUT SECTION PHOTOS (NEW)
+            // =========================================
+            const lightbox = document.getElementById("lightbox");
+            const lightboxImg = document.getElementById("lightbox-img");
+            const closeBtn = document.querySelector(".lightbox-close");
+            const collageImages = document.querySelectorAll(".collage-img");
+
+            // Open lightbox on image click
+            collageImages.forEach(img => {
+                img.addEventListener("click", function() {
+                    lightbox.style.display = "flex";
+                    lightboxImg.src = this.src;
+                });
+            });
+
+            // Close lightbox on 'X' click
+            closeBtn.addEventListener("click", () => {
+                lightbox.style.display = "none";
+            });
+
+            // Close lightbox on background click
+            lightbox.addEventListener("click", (e) => {
+                if (e.target === lightbox) {
+                    lightbox.style.display = "none";
+                }
+            });
+
+            // Close lightbox on Escape key press
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" && lightbox.style.display === "flex") {
+                    lightbox.style.display = "none";
+                }
+            });
+
+            // =========================================
+            // 5. SCROLL SPY FOR NAVIGATION DOT
+            // =========================================
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+
+            const scrollSpyOptions = {
+                root: null,
+                rootMargin: '-40% 0px -40% 0px', 
+                threshold: 0
+            };
+
+            const scrollSpyObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const currentId = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${currentId}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, scrollSpyOptions);
+
+            sections.forEach(sec => scrollSpyObserver.observe(sec));
+
+
+            // =========================================
+            // INTERSECTION OBSERVER FOR FADE ANIMATIONS
             // =========================================
             const observerOptions = {
                 root: null,
@@ -813,98 +1098,192 @@
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('is-visible');
-                    } else {
-                        entry.target.classList.remove('is-visible');
                     }
                 });
             }, observerOptions);
 
             const observeElements = () => {
-                const elements = document.querySelectorAll('.fade-pop');
+                const elements = document.querySelectorAll('.fade-pop:not(.is-visible)');
                 elements.forEach(el => observer.observe(el));
             };
             observeElements();
 
-            // =========================================
-            // HEXTECH WIPE COOLDOWN CONTROLLER
-            // =========================================
-            const wipeCooldown = 3200; 
-            const wipeNav = document.querySelector('nav');
 
-            function fireHextechWipe() {
-                wipeNav.classList.remove('run-wipe');
-                void wipeNav.offsetWidth; 
-                wipeNav.classList.add('run-wipe');
+            // =========================================
+            // 2. HORIZONTAL DRAG & SCROLL FOR TOOL STACK
+            // =========================================
+            const toolSlider = document.getElementById('toolstack-container');
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            toolSlider.addEventListener('mousedown', (e) => {
+                isDown = true;
+                startX = e.pageX - toolSlider.offsetLeft;
+                scrollLeft = toolSlider.scrollLeft;
+            });
+            toolSlider.addEventListener('mouseleave', () => { isDown = false; });
+            toolSlider.addEventListener('mouseup', () => { isDown = false; });
+            toolSlider.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - toolSlider.offsetLeft;
+                const walk = (x - startX) * 2; 
+                toolSlider.scrollLeft = scrollLeft - walk;
+            });
+
+            toolSlider.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                toolSlider.scrollLeft += e.deltaY;
+            }, { passive: false });
+
+
+            // =========================================
+            // 1. FETCH TOOL STACK FROM JSON
+            // =========================================
+            fetch('toolstack.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('toolstack.json not found');
+                    return response.json();
+                })
+                .then(tools => {
+                    toolSlider.innerHTML = ''; 
+                    tools.forEach(tool => {
+                        toolSlider.innerHTML += `
+                            <div class="tool-icon-box fade-pop">
+                                <img src="${tool.icon}" alt="${tool.name}">
+                                <span>${tool.name}</span>
+                            </div>
+                        `;
+                    });
+                    observeElements();
+                })
+                .catch(err => {
+                    console.warn('Could not load toolstack.json, loading fallback template.', err);
+                    const fallbackTools = [
+                        { name: "Unity", icon: "images/unity-icon.png" },
+                        { name: "C#", icon: "images/csharp-icon.png" },
+                        { name: "Shader Graph", icon: "images/shadergraph-icon.png" },
+                        { name: "Blender", icon: "images/blender-icon.png" },
+                        { name: "Substance", icon: "images/substance-icon.png" }
+                    ];
+                    toolSlider.innerHTML = '';
+                    fallbackTools.forEach((tool, index) => {
+                        const delayClass = `delay-${(index % 4) + 1}`;
+                        toolSlider.innerHTML += `
+                            <div class="tool-icon-box fade-pop ${delayClass}">
+                                <img src="${tool.icon}" alt="${tool.name}">
+                                <span>${tool.name}</span>
+                            </div>
+                        `;
+                    });
+                    observeElements();
+                });
+
+
+            // =========================================
+            // 3. FETCH PROJECTS & MULTIPLE TAGS w/ EXPAND
+            // =========================================
+            
+            // Reusable render function for project cards
+            function renderProject(project, index) {
+                const staggerDelay = (index % 4) * 0.1; 
+                const hiddenClass = index >= 4 ? 'hidden-project' : '';
+                
+                const tagsArray = project.tools && project.tools.length > 0 ? project.tools : ["PROJECT"];
+                const tagsHtml = tagsArray.map(tag => `<span class="project-tag">${tag}</span>`).join('');
+
+                return `
+                    <a href="${project.link || '#'}" target="_blank" rel="noopener noreferrer" class="project-card fade-pop ${hiddenClass}" style="transition-delay: ${staggerDelay}s">
+                        <div class="project-image" style="background-image: url('${project.image}'); background-color: ${project.bgColor || '#1a252f'};"></div>
+                        <div class="project-info">
+                            <div class="project-tags-container">
+                                ${tagsHtml}
+                            </div>
+                            <h3 class="project-title">${project.title}</h3>
+                            <p class="project-desc">${project.description}</p>
+                            <span class="project-link">VIEW CASE STUDY &rarr;</span>
+                        </div>
+                    </a>
+                `;
             }
 
-            setTimeout(fireHextechWipe, 500);
-            setInterval(fireHextechWipe, wipeCooldown);
-
-            // =========================================
-            // FETCH PROJECTS
-            // =========================================
             fetch('projects.json')
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
+                    if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(projects => {
                     const container = document.getElementById('projects-container');
-                    
+                    let htmlString = "";
                     projects.forEach((project, index) => {
-                        const toolsHtml = project.tools.map(tool => `<span>${tool}</span>`).join('');
-                        const staggerDelay = (index % 3) * 0.15; 
-
-                        const cardHtml = `
-                            <a href="${project.link || '#'}" target="_blank" rel="noopener noreferrer" class="project-link-wrapper fade-pop" style="transition-delay: ${staggerDelay}s">
-                                <div class="project-card">
-                                    <div class="project-image" style="background-image: url('${project.image}'); background-size: cover; background-position: center;">
-                                    </div>
-                                    <div class="project-info">
-                                        <h3 class="project-title">${project.title}</h3>
-                                        <p class="project-desc">${project.description}</p>
-                                        <div class="project-tools">
-                                            ${toolsHtml}
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        `;
-                        
-                        container.innerHTML += cardHtml;
+                        htmlString += renderProject(project, index);
                     });
+                    container.innerHTML = htmlString;
                     observeElements();
+                    setupExpandButton();
                 })
                 .catch(error => {
-                    console.error('Error loading projects:', error);
-                    document.getElementById('projects-container').innerHTML = 
-                        '<p style="color: var(--text-muted);">Unable to load projects. Please ensure you are viewing this via a local server.</p>';
+                    console.warn('Error loading projects, loading fallback data:', error);
+                    // Provide enough mockup projects to demonstrate the "View All" expansion 
+                    const mockProjects = [
+                        { title: "Tales & Dragons", description: "Delivered 100+ optimized VFX & shaders. Reduced frame drops by 35%.", tools: ["MOBILE RPG", "UNITY"], image: "images/mockup_dragon.jpg", bgColor: "#3b1717" },
+                        { title: "Call of Legends", description: "High quality VFX for mobile MOBA. 60 FPS on target devices.", tools: ["MOBA", "SHADERS"], image: "images/mockup_moba.jpg", bgColor: "#271438" },
+                        { title: "Chef Factory", description: "End-to-end from prototype to live. VFX, tools, optimization & more.", tools: ["CASUAL", "PIPELINE"], image: "images/mockup_chef.jpg", bgColor: "#3d2a1c" },
+                        { title: "Weed Burger Ready!", description: "Shipped fast with reusable VFX prefabs & automated pipeline.", tools: ["HYPER CASUAL"], image: "images/mockup_burger.jpg", bgColor: "#3d2c1c" },
+                        { title: "Neon Drifter", description: "Built custom vehicle shader pipelines and hyper-stylized impact VFX.", tools: ["RACING", "HLSL"], image: "images/mockup_neon.jpg", bgColor: "#111" },
+                        { title: "Stellar Combat", description: "Orchestrated particle systems for complex sci-fi abilities.", tools: ["SCI-FI", "VFX"], image: "images/mockup_space.jpg", bgColor: "#091320" },
+                        { title: "Forest Explorer", description: "Created wind simulation tools and stylized foliage shaders.", tools: ["ADVENTURE", "TOOLS"], image: "images/mockup_forest.jpg", bgColor: "#1b2a1a" },
+                        { title: "Retro Brawl", description: "Developed pixel-art rendering pipelines within Unity.", tools: ["FIGHTER", "PIPELINE"], image: "images/mockup_retro.jpg", bgColor: "#2a1b1b" }
+                    ];
+                    
+                    const container = document.getElementById('projects-container');
+                    let htmlString = "";
+                    mockProjects.forEach((project, index) => {
+                        htmlString += renderProject(project, index);
+                    });
+                    container.innerHTML = htmlString;
+                    observeElements();
+                    setupExpandButton();
                 });
-        });
-
-        // =========================================
-        // LIGHTBOX CONTROLLER LOGIC
-        // =========================================
-        function openLightbox(element) {
-            const lightbox = document.getElementById('lightbox');
-            const lightboxImg = document.getElementById('lightbox-img');
-            
-            lightboxImg.src = element.src;
-            lightbox.classList.add('show');
-            
-            document.body.style.overflow = 'hidden'; 
-        }
-
-        function closeLightbox(event) {
-            const lightbox = document.getElementById('lightbox');
-            
-            if (event.target === lightbox || event.target.className === 'lightbox-close') {
-                lightbox.classList.remove('show');
-                document.body.style.overflow = 'auto';
+                
+            function setupExpandButton() {
+                const viewAllBtn = document.getElementById('view-all-btn');
+                viewAllBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const hiddenProjects = document.querySelectorAll('.project-card.hidden-project, .project-card.was-hidden');
+                    const isExpanded = viewAllBtn.classList.contains('expanded');
+                    
+                    if (!isExpanded) {
+                        // Expand down to show all
+                        hiddenProjects.forEach(p => {
+                            p.classList.remove('hidden-project');
+                            p.classList.add('was-hidden'); 
+                            
+                            // Trigger reflow to restart transition
+                            void p.offsetWidth;
+                            p.classList.add('is-visible');
+                        });
+                        viewAllBtn.classList.add('expanded');
+                        viewAllBtn.innerHTML = 'SHOW LESS &uarr;';
+                        observeElements(); // ensure observer catches the newly visible elements
+                    } else {
+                        // Collapse back
+                        hiddenProjects.forEach(p => {
+                            p.classList.add('hidden-project');
+                            p.classList.remove('was-hidden');
+                            p.classList.remove('is-visible');
+                        });
+                        viewAllBtn.classList.remove('expanded');
+                        viewAllBtn.innerHTML = 'VIEW ALL PROJECTS &darr;';
+                        
+                        // Scroll nicely back up to projects start
+                        document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
             }
-        }
+        });
     </script>
 </body>
 </html>

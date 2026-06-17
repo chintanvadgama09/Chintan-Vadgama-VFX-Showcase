@@ -2,7 +2,7 @@
   {
     "image": "images/TD.jpg",
     "title": "TD Art & Animation",
-    "description": "For Call of Legends: RPG TD, each hero started as a character concept, followed by a chibi gameplay version, map integration, animation, and finally VFX. This streamlined pipeline helped us efficiently create a large roster of heroes while maintaining visual consistency and quality throughout production.",
+    "description": "For Call of Legends, we streamlined the character pipeline from initial concept art to chibi versions, animations, and VFX for absolute visual consistency.",
     "tools": [
       "FLUX",
       "ComfyUI",
@@ -17,7 +17,7 @@
   {
     "image": "images/MobaVFX.jpg",
     "title": "MOBA VFX (Playable WIP)",
-    "description": "A real-time Unity WebGL showcase featuring stylized MOBA-inspired VFX, including elemental abilities, spell impacts, energy trails, and combat effects crafted for immersive gameplay visuals.",
+    "description": "A real time Unity WebGL showcase featuring stylized MOBA inspired VFX, including elemental abilities, spell impacts, and combat effects crafted for immersive gameplay.",
     "tools": [
       "Unity",
       "HLSL",
@@ -28,7 +28,7 @@
   {
     "image": "images/SNL.jpg",
     "title": "Snakes And Ladder (Playable WIP)",
-    "description": "A cozy and visually polished 3D Snakes & Ladders experience built in Unity WebGL. Roll the dice, climb ladders, avoid sneaky snakes, and race to the finish in a relaxing tabletop-inspired world with smooth animations, warm lighting, and casual mobile-game aesthetics.",
+    "description": "A visually polished 3D Snakes and Ladders experience built in Unity WebGL. Roll dice, climb ladders, and avoid snakes in a relaxing world.",
     "tools": [
       "Unity",
       "HLSL",
@@ -39,7 +39,7 @@
   {
     "image": "images/Lightning.jpg",
     "title": "Parametric Lightning Shader",
-    "description": "A highly optimized, real-time lightning shader built in Unity that generates endless variations from a single material. Featured on Jettelly, it utilizes Vertex Streams, flipbook distortion, and custom posterization to deliver snappy, realistic strikes with HDR edge bloom.",
+    "description": "An optimized real time lightning shader built in Unity generating endless variations from one material, using flipbook distortion to deliver snappy, realistic strikes.",
     "tools": [
       "Unity",
       "Shader Graph",

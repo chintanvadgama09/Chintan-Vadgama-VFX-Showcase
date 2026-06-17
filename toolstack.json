@@ -1,0 +1,54 @@
+[
+  {
+    "name": "Unity",
+    "icon": "Icons/Unity.png"
+  },
+  {
+    "name": "Blender",
+    "icon": "Icons/Blender.png"
+  },
+  {
+    "name": "Photoshop",
+    "icon": "Icons/PS.png"
+  },
+  {
+    "name": "Spine 2D",
+    "icon": "Icons/Spine.png"
+  },
+  {
+    "name": "Figma",
+    "icon": "Icons/Figma.png"
+  },
+  {
+    "name": "ComfyUI",
+    "icon": "Icons/ComfyUI.png"
+  },
+  {
+    "name": "SB Designer",
+    "icon": "Icons/DS.png"
+  },
+  {
+    "name": "SB Painter",
+    "icon": "Icons/PT.png"
+  },
+  {
+    "name": "C#",
+    "icon": "Icons/CSharp.png"
+  },
+  {
+    "name": "Shader Graph",
+    "icon": "Icons/ShaderGraph.png"
+  },
+  {
+    "name": "HLSL",
+    "icon": "Icons/HLSL.png"
+  },
+  {
+    "name": "After Effects",
+    "icon": "Icons/AE.png"
+  },
+  {
+    "name": "Lightroom",
+    "icon": "Icons/LR.png"
+  }
+]
