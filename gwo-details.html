@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Details | Chintan Vadgama</title>
+    
+    <!-- Quill core CSS for rendering the HTML properly if it contains quill classes -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.core.css" rel="stylesheet">
+    
+    <style>
+        /* --- Local Fonts --- */
+        @font-face { font-family: 'Inter'; src: url('fonts/Inter-Light.ttf') format('truetype'); font-weight: 300; }
+        @font-face { font-family: 'Inter'; src: url('fonts/Inter-Regular.ttf') format('truetype'); font-weight: 400; }
+        @font-face { font-family: 'Inter'; src: url('fonts/Inter-SemiBold.ttf') format('truetype'); font-weight: 600; }
+        @font-face { font-family: 'Inter'; src: url('fonts/Inter-ExtraBold.ttf') format('truetype'); font-weight: 800; }
+
+        /* --- Color Palette & Variables --- */
+        :root {
+            --bg-main: #05090d;
+            --bg-card: #0a1117;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --text-dark: #64748b;
+            --accent: #38d9a9;
+            --accent-transparent: rgba(56, 217, 169, 0.15);
+            --transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        html { scroll-behavior: smooth; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; color: inherit; transition: var(--transition); }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 5%;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.5rem 5%; background: rgba(5, 9, 13, 0.85); backdrop-filter: blur(8px);
+            position: fixed; width: 100%; top: 0; z-index: 1000;
+            box-shadow: 0 0px 50px rgba(5, 9, 13, 0.85);
+        }
+        .logo { display: flex; align-items: center; gap: 1rem; }
+        .cv-logo-img { height: 30px; width: auto; object-fit: contain; }
+        .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+        .logo-name { font-size: 1.1rem; font-weight: 600; letter-spacing: 1px; }
+        .logo-title { font-size: 0.8rem; color: var(--text-dark); letter-spacing: 0.5px; }
+        .nav-links { display: flex; gap: 2.5rem; }
+        .nav-links a { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; color: var(--text-muted); position: relative; }
+        .nav-links a:hover { color: var(--accent); }
+        .btn-outline {
+            border: 1px solid var(--border-color); padding: 0.6rem 1.5rem; border-radius: 50px;
+            font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; color: var(--accent);
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn-outline:hover { border-color: var(--accent); background: var(--accent-transparent); }
+
+        /* --- Blog Header --- */
+        .blog-header {
+            margin-top: 120px;
+            text-align: center;
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .blog-tags {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .blog-tag {
+            color: var(--accent);
+            background: var(--accent-transparent);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 0.2rem 0.8rem;
+            border-radius: 4px;
+            border: 1px solid rgba(56, 217, 169, 0.05);
+        }
+
+        .blog-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .blog-desc {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+        }
+
+        .blog-hero-img {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+            border-radius: 16px;
+            background-color: #1a252f;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        /* --- Blog Content --- */
+        .blog-content {
+            padding: 4rem 0;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto;
+            flex-grow: 1;
+        }
+
+        .blog-content h1, .blog-content h2, .blog-content h3 {
+            color: var(--text-main);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .blog-content p {
+            margin-bottom: 1.5rem;
+        }
+
+        .blog-content img, .blog-content iframe, .blog-content video {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .blog-content a {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .blog-content ul, .blog-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        /* --- Footer --- */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 5%;
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-main);
+        }
+        .footer-text { color: var(--text-dark); font-size: 0.9rem; }
+        .social-icons { display: flex; gap: 1.5rem; }
+        .social-icons a { color: var(--text-dark); }
+        .social-icons a:hover { color: var(--accent); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav { flex-wrap: wrap; padding: 0.8rem 5%; }
+            nav > .btn-outline { display: none; }
+            .logo-text { display: none; }
+            .nav-links { width: 100%; justify-content: space-between; gap: 0.5rem; margin-top: 1rem; overflow-x: auto; }
+            .nav-links a { font-size: 0.75rem; }
+            
+            .blog-title { font-size: 2rem; }
+            .blog-desc { font-size: 1rem; }
+            .blog-content { padding: 2rem 0; font-size: 1rem; }
+            footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 100px;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+        
+        .error {
+            text-align: center;
+            padding: 100px;
+            font-size: 1.5rem;
+            color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <img src="images/CVLogo.png" alt="CV Logo" class="cv-logo-img">
+            <div class="logo-text">
+                <span class="logo-name">CHINTAN VADGAMA</span>
+                <span class="logo-title">GAME VFX & TECHNICAL ARTIST</span>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="index.html#hero">HOME</a>
+            <a href="index.html#tools">TOOLS</a>
+            <a href="index.html#projects">WORK</a>
+            <a href="index.html#gwo" class="active">GAMES</a>
+            <a href="index.html#about">ABOUT</a>
+            <a href="photography.html">PHOTOGRAPHY</a>
+        </div>
+        <a href="mailto:chintan.vadgama09@gmail.com" class="btn-outline">LET'S CONNECT ↗</a>
+    </nav>
+
+    <div id="app">
+        <div class="loading">Loading details...</div>
+    </div>
+
+    <footer>
+        <div class="footer-text">
+            &copy; 2026 Chintan Vadgama. Based in Rajkot, Gujarat.
+        </div>
+        <div class="social-icons">
+            <a href="https://www.linkedin.com/in/chintanvadgama18/" target="_blank" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+            <a href="https://www.behance.net/chintan_vadgama" target="_blank" aria-label="Behance">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M22 7h-7v-2h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14h-8.027c.13 3.211 3.483 3.312 4.588 2.029h3.168zm-7.686-4h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988h-6.466v-14.967h6.953c5.476.081 5.58 5.444 2.72 6.906 3.461 1.26 3.577 8.061-3.207 8.061zm-3.466-8.988h3.584c2.508 0 2.906-3-.312-3h-3.272v3zm3.391 3h-3.391v3.016h3.341c3.055 0 2.868-3.016.05-3.016z"/></svg>
+            </a>
+            <a href="https://www.artstation.com/batboy18" target="_blank" aria-label="ArtStation">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M.014 19.264l2.932 4.736h13.084l-2.333-4.048H4.63l-3.467-6.171-.384-.667zm10.741-17.264l-6.834 11.846h4.298l3.435-5.952 3.447 5.952h4.301zM15.932 14.39l-3.235 5.61h6.817l3.235-5.61z"/></svg>
+            </a>
+            <a href="mailto:chintan.vadgama09@gmail.com" aria-label="Email">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.03 21c.76 0 .99-.67.99-1.21v-3.42c0-.55-.46-1-.99-1z"/>
+                </svg>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('id');
+
+            if (gameId === null) {
+                document.getElementById('app').innerHTML = '<div class="error">Error: No game ID specified. <br><a href="index.html" style="text-decoration: underline; color: var(--accent); font-size: 1rem;">Go back to home</a></div>';
+                return;
+            }
+
+            fetch('GWO.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(games => {
+                    const game = games[parseInt(gameId)];
+                    if (!game) {
+                        document.getElementById('app').innerHTML = '<div class="error">Error: Game not found. <br><a href="index.html" style="text-decoration: underline; color: var(--accent); font-size: 1rem;">Go back to home</a></div>';
+                        return;
+                    }
+
+                    document.title = `${game.title} | Chintan Vadgama`;
+
+                    const tagsHtml = (game.tags && game.tags.length > 0 ? game.tags : []).map(tag => `<span class="blog-tag">${tag}</span>`).join('');
+                    
+                    const heroImageHtml = game.image ? `<img src="${game.image}" alt="${game.title}" class="blog-hero-img">` : '';
+
+                    document.getElementById('app').innerHTML = `
+                        <div class="container blog-header">
+                            <div class="blog-tags">
+                                ${tagsHtml}
+                            </div>
+                            <h1 class="blog-title">${game.title}</h1>
+                            <p class="blog-desc">${game.description || ''}</p>
+                            ${heroImageHtml}
+                        </div>
+                        <div class="container blog-content ql-editor">
+                            ${game.blogContent || '<p>No detailed blog content available for this game.</p>'}
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error fetching GWO:', error);
+                    document.getElementById('app').innerHTML = '<div class="error">Error loading game details. <br><a href="index.html" style="text-decoration: underline; color: var(--accent); font-size: 1rem;">Go back to home</a></div>';
+                });
+        });
+    </script>
+</body>
+</html>

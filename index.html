@@ -529,6 +529,40 @@
             font-weight: 500;
         }
 
+        /* --- GWO Scroll --- */
+        .gwo-scroll-mask {
+            -webkit-mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+            width: 100%;
+            overflow: hidden;
+            padding: 1rem 0;
+        }
+
+        .gwo-grid-container {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 1.5rem;
+            align-items: stretch;
+            overflow-x: auto;
+            overflow-y: hidden;
+            cursor: all-scroll;
+            padding: 0rem 2%; 
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+        }
+
+        .gwo-grid-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .gwo-grid-container:active {
+            cursor: grabbing;
+        }
+
+        .gwo-grid-container .project-card {
+            flex: 0 0 320px;
+        }
+
         /* --- Featured Projects Section --- */
         .projects-wrapper {
             background-color: var(--bg-card);
@@ -934,6 +968,7 @@
             <a href="#hero" class="active">HOME</a>
             <a href="#tools">TOOLS</a>
             <a href="#projects">WORK</a>
+            <a href="#gwo">GAMES</a>
             <a href="#about">ABOUT</a>
             <a href="photography.html">PHOTOGRAPHY</a>
         </div>
@@ -1056,6 +1091,18 @@
                 <button id="view-all-btn" class="btn-outline" style="margin: 0 auto; background: transparent;">
                     VIEW ALL PROJECTS &darr;
                 </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="gwo" class="container">
+        <div class="section-header-centered fade-pop">
+            <span class="section-tag">Games Worked On</span>
+        </div>
+        <div class="projects-wrapper fade-pop delay-1">
+            <div class="gwo-scroll-mask">
+                <div class="gwo-grid-container" id="gwo-container">
+                </div>
             </div>
         </div>
     </section>
@@ -1384,6 +1431,82 @@
                     }
                 });
             }
+
+            // =========================================
+            // 4. FETCH GAMES WORKED ON (GWO)
+            // =========================================
+            function renderGWO(game, index) {
+                const staggerDelay = (index % 4) * 0.1; 
+                
+                const tagsArray = game.tags && game.tags.length > 0 ? game.tags : ["GAME"];
+                const tagsHtml = tagsArray.map(tag => `<span class="project-tag">${tag}</span>`).join('');
+
+                return `
+                    <a href="gwo-details.html?id=${index}" rel="noopener noreferrer" class="project-card fade-pop" draggable="false" style="transition-delay: ${staggerDelay}s">
+                        <div class="project-image" style="background-image: url('${game.image}'); background-color: ${game.bgColor || '#1a252f'};"></div>
+                        <div class="project-info">
+                            <div class="project-tags-container">
+                                ${tagsHtml}
+                            </div>
+                            <h3 class="project-title">${game.title}</h3>
+                            <p class="project-desc">${game.description}</p>
+                            <span class="project-link">READ BLOG &rarr;</span>
+                        </div>
+                    </a>
+                `;
+            }
+
+            const gwoSlider = document.getElementById('gwo-container');
+            let isGwoDown = false;
+            let isDraggingGwo = false;
+            let startXGwo;
+            let scrollLeftGwo;
+
+            gwoSlider.addEventListener('mousedown', (e) => {
+                isGwoDown = true;
+                isDraggingGwo = false;
+                startXGwo = e.pageX - gwoSlider.offsetLeft;
+                scrollLeftGwo = gwoSlider.scrollLeft;
+            });
+            gwoSlider.addEventListener('mouseleave', () => { isGwoDown = false; });
+            gwoSlider.addEventListener('mouseup', () => { isGwoDown = false; });
+            gwoSlider.addEventListener('mousemove', (e) => {
+                if (!isGwoDown) return;
+                isDraggingGwo = true;
+                e.preventDefault();
+                const x = e.pageX - gwoSlider.offsetLeft;
+                const walk = (x - startXGwo) * 2; 
+                gwoSlider.scrollLeft = scrollLeftGwo - walk;
+            });
+
+            gwoSlider.addEventListener('click', (e) => {
+                if (isDraggingGwo) {
+                    e.preventDefault();
+                }
+            });
+
+            gwoSlider.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                gwoSlider.scrollLeft += e.deltaY;
+            }, { passive: false });
+
+            fetch('GWO.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(games => {
+                    let htmlString = "";
+                    games.forEach((game, index) => {
+                        htmlString += renderGWO(game, index);
+                    });
+                    gwoSlider.innerHTML = htmlString;
+                    observeElements();
+                })
+                .catch(error => {
+                    console.warn('Error loading GWO.json:', error);
+                    document.getElementById('gwo').style.display = 'none'; // Hide section if no data
+                });
         });
     </script>
 </body>
