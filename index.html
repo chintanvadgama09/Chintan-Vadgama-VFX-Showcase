@@ -951,6 +951,106 @@
                 gap: 1.5rem;
                 text-align: center;
             }
+
+            /* ================================================
+               MOBILE-ONLY FIXES (added for responsive layout)
+               Desktop CSS above is untouched.
+               ================================================ */
+
+            /* --- Reduce section vertical breathing room --- */
+            section {
+                padding: 50px 0;
+            }
+
+            /* --- Section header slightly smaller --- */
+            .section-header-centered h2 {
+                font-size: 1.6rem;
+            }
+
+            /* --- Hero stats numbers tighter --- */
+            .stat-item h3 {
+                font-size: 1.5rem;
+            }
+
+            /* --- What I Do: tighter wrapper & smaller heading --- */
+            .what-i-do-wrapper {
+                padding: 1.5rem 1rem;
+            }
+            .skill-item h4 {
+                font-size: 1rem;
+            }
+
+            /* --- PROJECTS: Force 2-column grid on mobile ---
+               minmax(260px) only allows 1 col on ~390px screens.
+               This explicitly gives 2 equal columns instead.    */
+            .projects-wrapper {
+                padding: 0.75rem;
+            }
+            .projects-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+            .project-image {
+                height: 110px;
+            }
+            .project-info {
+                padding: 0.75rem;
+            }
+            .project-title {
+                font-size: 0.95rem;
+                margin-bottom: 0.4rem;
+            }
+            .project-desc {
+                font-size: 0.78rem;
+                line-height: 1.4;
+                margin-bottom: 0.6rem;
+            }
+            .project-link {
+                font-size: 0.65rem;
+            }
+            .project-tag {
+                font-size: 0.62rem;
+                padding: 0.02rem 0.4rem;
+            }
+            .projects-footer {
+                margin-top: 1.5rem;
+            }
+
+            /* --- GWO scroll cards: slightly smaller on mobile --- */
+            .gwo-grid-container .project-card {
+                flex: 0 0 260px;
+            }
+
+            /* --- Tool icons: compact on mobile --- */
+            .tool-icon-box {
+                width: 80px;
+                height: 80px;
+                gap: 0.5rem;
+            }
+            .tool-icon-box img {
+                width: 34px;
+                height: 34px;
+            }
+            .tool-icon-box span {
+                font-size: 0.65rem;
+            }
+
+            /* --- About section: tighter padding & smaller fonts --- */
+            .about-content {
+                padding: 1rem;
+                gap: 2rem;
+            }
+            .about-text p,
+            .about-text li {
+                font-size: 0.95rem;
+            }
+            .about-text h4 {
+                font-size: 1.2rem;
+                margin-top: 1.5rem;
+            }
+            .collage-img:nth-child(1) { height: 200px; }
+            .collage-img:nth-child(2) { height: 170px; }
+            .collage-img:nth-child(3) { height: 155px; }
         }
     </style>
 </head>
@@ -992,13 +1092,13 @@
             <a href="https://www.artstation.com/batboy18" target="_blank" aria-label="ArtStation">
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M.014 19.264l2.932 4.736h13.084l-2.333-4.048H4.63l-3.467-6.171-.384-.667zm10.741-17.264l-6.834 11.846h4.298l3.435-5.952 3.447 5.952h4.301zM15.932 14.39l-3.235 5.61h6.817l3.235-5.61z"/></svg>
             </a>
-            <a href="tel:+917600440447" aria-label="Phone">
+            <a href="mailto:chintan.vadgama09@gmail.com" aria-label="Mail">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.03 21c.76 0 .99-.67.99-1.21v-3.42c0-.55-.46-1-.99-1z"/>
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                 </svg>
             </a>
             <div class="social-line"></div>
-            <a href="mailto:chintan.vadgama09@gmail.com" class="hero-contact-text">CONTACT</a>
+            <a href="tel:+917600440447" class="hero-contact-text">CONTACT</a>
         </div>
         <div class="container hero-content">
             <div class="hero-tag fade-pop delay-1">Game VFX & Technical Artist</div>
