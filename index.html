@@ -577,6 +577,134 @@
             gap: 1.5rem; 
         }
 
+        .projects-scroll-mask {
+            -webkit-mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+            width: 100%;
+            overflow: hidden;
+            padding: 1rem 0;
+            transition: height 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        
+        .projects-scroll-mask.mask-disabled {
+            -webkit-mask-image: none;
+            mask-image: none;
+        }
+
+        .projects-scroll-container {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 1.5rem;
+            align-items: stretch;
+            overflow-x: auto;
+            overflow-y: hidden;
+            cursor: all-scroll;
+            padding: 0rem 2%; 
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+            scroll-snap-type: x mandatory;
+            user-select: none;
+        }
+
+        .projects-scroll-container.dragging {
+            scroll-snap-type: none;
+            cursor: grabbing;
+        }
+
+        .projects-scroll-container.dragging .project-card {
+            pointer-events: none;
+        }
+
+        .projects-scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .projects-scroll-container:active {
+            cursor: grabbing;
+        }
+
+        .projects-scroll-container .project-card {
+            flex: 0 0 412px;
+            scroll-snap-align: start;
+        }
+
+        .projects-carousel-container {
+            position: relative;
+        }
+
+        .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(10, 17, 23, 0.85);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            opacity: 0;
+            visibility: hidden;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .scroll-btn:hover {
+            background: var(--accent);
+            color: var(--bg-main);
+            border-color: var(--accent);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .scroll-btn.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-btn-left {
+            left: -1rem;
+            transform: translateY(-50%) translateX(-15px);
+        }
+        .scroll-btn-left.visible {
+            transform: translateY(-50%) translateX(0);
+        }
+        .scroll-btn-left.visible:hover {
+            transform: translateY(-50%) translateX(0) scale(1.1);
+        }
+
+        .scroll-btn-right {
+            right: -1rem;
+            transform: translateY(-50%) translateX(15px);
+        }
+        .scroll-btn-right.visible {
+            transform: translateY(-50%) translateX(0);
+        }
+        .scroll-btn-right.visible:hover {
+            transform: translateY(-50%) translateX(0) scale(1.1);
+        }
+
+        .scroll-progress-bar {
+            width: 60px;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 4px;
+            margin: 0 auto 1.5rem;
+            overflow: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        .scroll-progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
         .project-card {
             background-color: var(--bg-main);
             border: 1px solid var(--border-color);
@@ -1018,7 +1146,8 @@
             }
 
             /* --- GWO scroll cards: slightly smaller on mobile --- */
-            .gwo-grid-container .project-card {
+            .gwo-grid-container .project-card,
+            .projects-scroll-container .project-card {
                 flex: 0 0 260px;
             }
 
@@ -1185,12 +1314,26 @@
             <span class="section-tag">Featured Works</span>
             </div>
         <div class="projects-wrapper fade-pop delay-1">
-            <div class="projects-grid" id="projects-container">
+            <div class="projects-carousel-container">
+                <button class="scroll-btn scroll-btn-left" id="proj-scroll-left">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <button class="scroll-btn scroll-btn-right" id="proj-scroll-right">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+                <div class="projects-scroll-mask" id="projects-scroll-mask">
+                    <div class="projects-scroll-container" id="projects-container">
+                    </div>
                 </div>
+            </div>
+            
+            <div class="scroll-progress-bar" id="projects-progress-bar">
+                <div class="scroll-progress-fill" id="projects-scroll-fill"></div>
+            </div>
             
             <div class="projects-footer fade-pop delay-2">
                 <button id="view-all-btn" class="btn-outline" style="margin: 0 auto; background: transparent;">
-                    VIEW ALL PROJECTS &darr;
+                    EXPAND PROJECTS &darr;
                 </button>
             </div>
         </div>
@@ -1437,13 +1580,12 @@
             // Reusable render function for project cards
             function renderProject(project, index) {
                 const staggerDelay = (index % 4) * 0.1; 
-                const hiddenClass = index >= 4 ? 'hidden-project' : '';
                 
                 const tagsArray = project.tools && project.tools.length > 0 ? project.tools : ["PROJECT"];
                 const tagsHtml = tagsArray.map(tag => `<span class="project-tag">${tag}</span>`).join('');
 
                 return `
-                    <a href="${project.link || '#'}" target="_blank" rel="noopener noreferrer" class="project-card fade-pop ${hiddenClass}" style="transition-delay: ${staggerDelay}s">
+                    <a href="${project.link || '#'}" target="_blank" rel="noopener noreferrer" class="project-card fade-pop" style="transition-delay: ${staggerDelay}s">
                         <div class="project-image" style="background-image: url('${project.image}'); background-color: ${project.bgColor || '#1a252f'};"></div>
                         <div class="project-info">
                             <div class="project-tags-container">
@@ -1498,89 +1640,180 @@
                 
             function setupExpandButton() {
                 const viewAllBtn = document.getElementById('view-all-btn');
-                const projectsGrid = document.getElementById('projects-container');
+                const projectsContainer = document.getElementById('projects-container');
+                const scrollMask = document.getElementById('projects-scroll-mask');
+                const progressBar = document.getElementById('projects-progress-bar');
                 
                 viewAllBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     
-                    const hiddenProjects = document.querySelectorAll('.project-card.hidden-project, .project-card.was-hidden');
                     const isExpanded = viewAllBtn.classList.contains('expanded');
                     
                     if (!isExpanded) {
-                        // 1. Get current height
-                        const startHeight = projectsGrid.offsetHeight;
+                        // Expand to grid
+                        const startHeight = scrollMask.offsetHeight;
                         
-                        // 2. Remove hidden classes to calculate full height
-                        hiddenProjects.forEach(p => {
-                            p.classList.remove('hidden-project');
-                            p.classList.add('was-hidden'); 
-                        });
+                        // Temporarily switch to grid to get target height
+                        projectsContainer.classList.remove('projects-scroll-container');
+                        projectsContainer.classList.add('projects-grid');
+                        const endHeight = scrollMask.scrollHeight;
                         
-                        // 3. Get new full height
-                        const endHeight = projectsGrid.offsetHeight;
+                        // Switch back to flex to set start height for animation
+                        projectsContainer.classList.add('projects-scroll-container');
+                        projectsContainer.classList.remove('projects-grid');
+                        scrollMask.style.height = startHeight + 'px';
                         
-                        // 4. Force grid to start height, trigger reflow
-                        projectsGrid.style.height = startHeight + 'px';
-                        projectsGrid.style.overflow = 'hidden';
-                        projectsGrid.style.transition = 'height 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
-                        void projectsGrid.offsetWidth;
+                        void scrollMask.offsetWidth; // Force reflow
                         
-                        // 5. Animate to new height
-                        projectsGrid.style.height = endHeight + 'px';
+                        // Switch to grid permanently and animate height
+                        projectsContainer.classList.remove('projects-scroll-container');
+                        projectsContainer.classList.add('projects-grid');
+                        scrollMask.classList.add('mask-disabled');
+                        progressBar.style.opacity = '0';
                         
-                        // 6. Handle elements fade-in
-                        hiddenProjects.forEach(p => {
-                            void p.offsetWidth;
-                            p.classList.add('is-visible');
-                        });
+                        scrollMask.style.height = endHeight + 'px';
                         
                         viewAllBtn.classList.add('expanded');
-                        viewAllBtn.innerHTML = 'SHOW LESS &uarr;';
-                        observeElements(); 
+                        viewAllBtn.innerHTML = 'COLLAPSE PROJECTS &uarr;';
                         
-                        // 7. Cleanup after animation
                         setTimeout(() => {
-                            projectsGrid.style.height = '';
-                            projectsGrid.style.overflow = '';
-                            projectsGrid.style.transition = '';
+                            scrollMask.style.height = '';
+                            progressBar.style.display = 'none';
                         }, 500);
                         
                     } else {
-                        // Collapse back
-                        const startHeight = projectsGrid.offsetHeight;
+                        // Collapse to scroll
+                        const startHeight = scrollMask.offsetHeight;
                         
-                        // Temporarily add hidden to calculate target height
-                        hiddenProjects.forEach(p => p.classList.add('hidden-project'));
-                        const endHeight = projectsGrid.offsetHeight;
-                        hiddenProjects.forEach(p => p.classList.remove('hidden-project'));
+                        // Temporarily switch to scroll to get target height
+                        projectsContainer.classList.add('projects-scroll-container');
+                        projectsContainer.classList.remove('projects-grid');
+                        const endHeight = scrollMask.offsetHeight;
                         
-                        // Trigger fade out
-                        hiddenProjects.forEach(p => {
-                            p.classList.remove('is-visible');
-                            p.classList.remove('was-hidden');
-                        });
+                        // Switch back to grid to set start height
+                        projectsContainer.classList.remove('projects-scroll-container');
+                        projectsContainer.classList.add('projects-grid');
+                        scrollMask.style.height = startHeight + 'px';
                         
-                        // Force start height
-                        projectsGrid.style.height = startHeight + 'px';
-                        projectsGrid.style.overflow = 'hidden';
-                        projectsGrid.style.transition = 'height 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
-                        void projectsGrid.offsetWidth;
+                        void scrollMask.offsetWidth; // Force reflow
                         
-                        // Animate to end height
-                        projectsGrid.style.height = endHeight + 'px';
+                        // Switch to scroll and animate height
+                        projectsContainer.classList.add('projects-scroll-container');
+                        projectsContainer.classList.remove('projects-grid');
+                        scrollMask.classList.remove('mask-disabled');
+                        progressBar.style.display = 'block';
+                        void progressBar.offsetWidth;
+                        progressBar.style.opacity = '1';
+                        
+                        scrollMask.style.height = endHeight + 'px';
                         
                         viewAllBtn.classList.remove('expanded');
-                        viewAllBtn.innerHTML = 'VIEW ALL PROJECTS &darr;';
+                        viewAllBtn.innerHTML = 'EXPAND PROJECTS &darr;';
                         
                         setTimeout(() => {
-                            hiddenProjects.forEach(p => p.classList.add('hidden-project'));
-                            projectsGrid.style.height = '';
-                            projectsGrid.style.overflow = '';
-                            projectsGrid.style.transition = '';
+                            scrollMask.style.height = '';
                             document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
+                            updateProgress();
                         }, 500);
                     }
                 });
+
+                // Scroll events for the projects container
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+
+                projectsContainer.addEventListener('mousedown', (e) => {
+                    if (projectsContainer.classList.contains('projects-grid')) return;
+                    isDown = true;
+                    projectsContainer.classList.add('dragging');
+                    startX = e.pageX - projectsContainer.offsetLeft;
+                    scrollLeft = projectsContainer.scrollLeft;
+                });
+                projectsContainer.addEventListener('mouseleave', () => { 
+                    isDown = false; 
+                    projectsContainer.classList.remove('dragging');
+                });
+                projectsContainer.addEventListener('mouseup', () => { 
+                    isDown = false; 
+                    projectsContainer.classList.remove('dragging');
+                });
+                projectsContainer.addEventListener('mousemove', (e) => {
+                    if (!isDown || projectsContainer.classList.contains('projects-grid')) return;
+                    e.preventDefault();
+                    const x = e.pageX - projectsContainer.offsetLeft;
+                    const walk = (x - startX) * 2; 
+                    projectsContainer.scrollLeft = scrollLeft - walk;
+                });
+
+                projectsContainer.addEventListener('wheel', (e) => {
+                    if (projectsContainer.classList.contains('projects-grid')) return;
+                    e.preventDefault();
+                    projectsContainer.scrollLeft += e.deltaY;
+                }, { passive: false });
+
+                const scrollFill = document.getElementById('projects-scroll-fill');
+                const leftBtn = document.getElementById('proj-scroll-left');
+                const rightBtn = document.getElementById('proj-scroll-right');
+
+                const getCardWidth = () => {
+                    const card = projectsContainer.querySelector('.project-card');
+                    if (card) {
+                        const style = window.getComputedStyle(card);
+                        const gap = parseFloat(window.getComputedStyle(projectsContainer).gap) || 0;
+                        return card.offsetWidth + gap;
+                    }
+                    return 344;
+                };
+
+                leftBtn.addEventListener('click', () => {
+                    projectsContainer.scrollBy({ left: -getCardWidth(), behavior: 'smooth' });
+                });
+
+                rightBtn.addEventListener('click', () => {
+                    projectsContainer.scrollBy({ left: getCardWidth(), behavior: 'smooth' });
+                });
+                
+                const updateProgress = () => {
+                    if (projectsContainer.classList.contains('projects-grid')) {
+                        leftBtn.classList.remove('visible');
+                        rightBtn.classList.remove('visible');
+                        return;
+                    }
+                    
+                    const maxScrollLeft = projectsContainer.scrollWidth - projectsContainer.clientWidth;
+                    if (maxScrollLeft > 0) {
+                        const progress = (projectsContainer.scrollLeft / maxScrollLeft) * 100;
+                        scrollFill.style.width = progress + '%';
+                        
+                        // Show/Hide buttons smoothly
+                        if (projectsContainer.scrollLeft <= 10) {
+                            leftBtn.classList.remove('visible');
+                        } else {
+                            leftBtn.classList.add('visible');
+                        }
+                        
+                        if (projectsContainer.scrollLeft >= maxScrollLeft - 10) {
+                            rightBtn.classList.remove('visible');
+                        } else {
+                            rightBtn.classList.add('visible');
+                        }
+                    } else {
+                        scrollFill.style.width = '0%';
+                        leftBtn.classList.remove('visible');
+                        rightBtn.classList.remove('visible');
+                    }
+                };
+
+                projectsContainer.addEventListener('scroll', updateProgress);
+                window.addEventListener('resize', updateProgress);
+                
+                // Tie updateProgress to Expand button toggles
+                viewAllBtn.addEventListener('click', () => {
+                    setTimeout(updateProgress, 100);
+                });
+                
+                setTimeout(updateProgress, 100);
             }
 
             // =========================================
