@@ -8,7 +8,7 @@
       "Blender",
       "Substance Designer"
     ],
-    "link": "http://localhost:8760/video.html?id=0"
+    "link": "video.html?id=0"
   },
   {
     "image": "images/Reel.jpg",
@@ -21,7 +21,7 @@
       "C#",
       "Photoshop"
     ],
-    "link": "http://localhost:8760/video.html?id=1"
+    "link": "video.html?id=1"
   },
   {
     "image": "images/TD.jpg",
