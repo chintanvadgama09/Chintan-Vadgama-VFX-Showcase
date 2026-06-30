@@ -1,5 +1,29 @@
 [
   {
+    "image": "images/Backrooms.jpg",
+    "title": "Backrooms: Liminal Spaces",
+    "description": "Explore an eerie liminal world built in Unreal Engine with cinematic visuals and VHS horror.",
+    "tools": [
+      "Unreal Engine",
+      "Blender",
+      "Substance Designer"
+    ],
+    "link": "http://localhost:8760/video.html?id=0"
+  },
+  {
+    "image": "images/Reel.jpg",
+    "title": "Tools & VFX Showreel",
+    "description": "Showcasing custom Unreal Engine tools, shaders, and real-time VFX built for modern game development.",
+    "tools": [
+      "Unity",
+      "Blender",
+      "Shader Graph",
+      "C#",
+      "Photoshop"
+    ],
+    "link": "http://localhost:8760/video.html?id=1"
+  },
+  {
     "image": "images/TD.jpg",
     "title": "TD Art & Animation",
     "description": "For Call of Legends, we streamlined the character pipeline from initial concept art to chibi versions, animations, and VFX for absolute visual consistency.",

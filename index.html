@@ -573,7 +573,7 @@
 
         .projects-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+            grid-template-columns: repeat(4, 1fr); 
             gap: 1.5rem; 
         }
 
@@ -846,6 +846,7 @@
                 padding: 0 !important;
             }
             .projects-wrapper { padding: 1.5rem; }
+            .projects-grid { grid-template-columns: repeat(3, 1fr); }
             .about-content { grid-template-columns: 1fr; }
         }
 
@@ -1497,6 +1498,8 @@
                 
             function setupExpandButton() {
                 const viewAllBtn = document.getElementById('view-all-btn');
+                const projectsGrid = document.getElementById('projects-container');
+                
                 viewAllBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     
@@ -1504,30 +1507,78 @@
                     const isExpanded = viewAllBtn.classList.contains('expanded');
                     
                     if (!isExpanded) {
-                        // Expand down to show all
+                        // 1. Get current height
+                        const startHeight = projectsGrid.offsetHeight;
+                        
+                        // 2. Remove hidden classes to calculate full height
                         hiddenProjects.forEach(p => {
                             p.classList.remove('hidden-project');
                             p.classList.add('was-hidden'); 
-                            
-                            // Trigger reflow to restart transition
+                        });
+                        
+                        // 3. Get new full height
+                        const endHeight = projectsGrid.offsetHeight;
+                        
+                        // 4. Force grid to start height, trigger reflow
+                        projectsGrid.style.height = startHeight + 'px';
+                        projectsGrid.style.overflow = 'hidden';
+                        projectsGrid.style.transition = 'height 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+                        void projectsGrid.offsetWidth;
+                        
+                        // 5. Animate to new height
+                        projectsGrid.style.height = endHeight + 'px';
+                        
+                        // 6. Handle elements fade-in
+                        hiddenProjects.forEach(p => {
                             void p.offsetWidth;
                             p.classList.add('is-visible');
                         });
+                        
                         viewAllBtn.classList.add('expanded');
                         viewAllBtn.innerHTML = 'SHOW LESS &uarr;';
-                        observeElements(); // ensure observer catches the newly visible elements
+                        observeElements(); 
+                        
+                        // 7. Cleanup after animation
+                        setTimeout(() => {
+                            projectsGrid.style.height = '';
+                            projectsGrid.style.overflow = '';
+                            projectsGrid.style.transition = '';
+                        }, 500);
+                        
                     } else {
                         // Collapse back
+                        const startHeight = projectsGrid.offsetHeight;
+                        
+                        // Temporarily add hidden to calculate target height
+                        hiddenProjects.forEach(p => p.classList.add('hidden-project'));
+                        const endHeight = projectsGrid.offsetHeight;
+                        hiddenProjects.forEach(p => p.classList.remove('hidden-project'));
+                        
+                        // Trigger fade out
                         hiddenProjects.forEach(p => {
-                            p.classList.add('hidden-project');
-                            p.classList.remove('was-hidden');
                             p.classList.remove('is-visible');
+                            p.classList.remove('was-hidden');
                         });
+                        
+                        // Force start height
+                        projectsGrid.style.height = startHeight + 'px';
+                        projectsGrid.style.overflow = 'hidden';
+                        projectsGrid.style.transition = 'height 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+                        void projectsGrid.offsetWidth;
+                        
+                        // Animate to end height
+                        projectsGrid.style.height = endHeight + 'px';
+                        
                         viewAllBtn.classList.remove('expanded');
                         viewAllBtn.innerHTML = 'VIEW ALL PROJECTS &darr;';
                         
-                        // Scroll nicely back up to projects start
-                        document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
+                        setTimeout(() => {
+                            hiddenProjects.forEach(p => p.classList.add('hidden-project'));
+                            projectsGrid.style.height = '';
+                            projectsGrid.style.overflow = '';
+                            projectsGrid.style.transition = '';
+                            document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
+                        }, 500);
                     }
                 });
             }

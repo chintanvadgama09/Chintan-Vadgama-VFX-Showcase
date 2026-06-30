@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Viewer | Chintan Vadgama</title>
+    <style>
+        /* --- Local Fonts --- */
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-Light.ttf') format('truetype');
+            font-weight: 300;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-SemiBold.ttf') format('truetype');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('fonts/Inter-ExtraBold.ttf') format('truetype');
+            font-weight: 800;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* --- Color Palette & Variables --- */
+        :root {
+            --bg-main: #05090d;
+            --bg-card: #0a1117;
+            --bg-card-hover: #111a22;
+            --border-color: rgba(255, 255, 255, 0.08);
+            
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --text-dark: #64748b;
+            
+            --sectionTitle: #82f0cf;
+            --accent: #38d9a9;
+            --accent-hover: #72dfbe;
+            --secondaryaccent: #38d9a9;
+            --secondaryaccent-hover: #3863d9;
+            --accent-transparent: rgba(56, 217, 169, 0.15);
+            
+            --transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* --- Global Styles --- */
+        html {
+            scroll-padding-top: 100px; 
+            scroll-behavior: smooth;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden; 
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+        }
+
+        .container {
+            max-width: 1900px;
+            margin: 0 auto;
+            padding: 0 5%;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 5%;
+            background: rgba(5, 9, 13, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 0px 50px rgba(5, 9, 13, 0.85);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .cv-logo-img {
+            height: 30px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .logo-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .logo-title {
+            font-size: 0.8rem;
+            color: var(--text-dark);
+            letter-spacing: 0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            color: var(--text-muted);
+            position: relative;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent);
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            background: var(--accent-transparent);
+        }
+
+        /* --- Video Viewer Specific Styles --- */
+        #video-viewer-section {
+            padding-top: 130px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 80px;
+        }
+
+        .video-container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.6s ease forwards;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            width: 100%;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-info {
+            padding: 2.5rem;
+        }
+
+        .video-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .video-desc {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            align-self: flex-start;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+            transform: translateX(-5px);
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .video-title {
+                font-size: 1.5rem;
+            }
+            #video-viewer-section {
+                padding-top: 100px;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .video-info {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <img src="images/CVLogo.png" alt="CV Logo" class="cv-logo-img">
+            <div class="logo-text">
+                <span class="logo-name">CHINTAN VADGAMA</span>
+                <span class="logo-title">GAME VFX & TECHNICAL ARTIST</span>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="index.html#hero">HOME</a>
+            <a href="index.html#tools">TOOLS</a>
+            <a href="index.html#projects">WORK</a>
+            <a href="index.html#gwo">GAMES</a>
+            <a href="index.html#about">ABOUT</a>
+            <a href="photography.html">PHOTOGRAPHY</a>
+        </div>
+        <a href="mailto:chintan.vadgama09@gmail.com" class="btn-outline">LET'S CONNECT ↗</a>
+    </nav>
+
+    <section id="video-viewer-section" class="container">
+        <a href="javascript:history.back()" class="back-link">&larr; BACK</a>
+        
+        <div class="error-message" id="error-msg">Video not found.</div>
+
+        <div class="video-container" id="video-content" style="display: none;">
+            <div class="video-wrapper">
+                <iframe id="yt-iframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+            <div class="video-info">
+                <h1 class="video-title" id="video-title">Loading...</h1>
+                <p class="video-desc" id="video-desc">Loading description...</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idParam = urlParams.get('id');
+            const errorMsg = document.getElementById('error-msg');
+            const videoContent = document.getElementById('video-content');
+
+            if (idParam === null || isNaN(idParam) || idParam.trim() === '') {
+                errorMsg.textContent = 'No video ID specified.';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            const videoIndex = parseInt(idParam, 10);
+
+            fetch('videos.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load video data.');
+                    }
+                    return response.json();
+                })
+                .then(videos => {
+                    if (videoIndex >= 0 && videoIndex < videos.length) {
+                        const videoData = videos[videoIndex];
+                        
+                        document.getElementById('video-title').textContent = videoData.title;
+                        document.getElementById('video-desc').innerHTML = videoData.description;
+                        if (videoData.video) {
+                            document.getElementById('yt-iframe').src = videoData.video;
+                        } else {
+                            document.getElementById('yt-iframe').style.display = 'none';
+                        }
+                        
+                        document.title = videoData.title + ' | Chintan Vadgama';
+                        
+                        videoContent.style.display = 'block';
+                    } else {
+                        errorMsg.textContent = 'Video not found. Invalid ID.';
+                        errorMsg.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching videos.json:', error);
+                    errorMsg.textContent = 'An error occurred while loading video data.';
+                    errorMsg.style.display = 'block';
+                });
+        });
+    </script>
+</body>
+</html>
