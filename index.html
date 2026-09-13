@@ -1241,7 +1241,6 @@
 
             <div class="hero-actions fade-pop delay-4">
                 <a href="#projects" class="btn-solid">VIEW MY WORK &rarr;</a>
-                <a href="https://drive.google.com/file/d/1cGN3kB0PjDtJlgpRIE0R5pOUum7MQtiD/view?usp=sharing" class="btn-solidoutline">DOWNLOAD CV &darr;</a>
             </div>
 
             <div class="hero-stats">
@@ -1720,13 +1719,14 @@
 
                 // Scroll events for the projects container
                 let isDown = false;
+                let isDraggingProjects = false;
                 let startX;
                 let scrollLeft;
 
                 projectsContainer.addEventListener('mousedown', (e) => {
                     if (projectsContainer.classList.contains('projects-grid')) return;
                     isDown = true;
-                    projectsContainer.classList.add('dragging');
+                    isDraggingProjects = false;
                     startX = e.pageX - projectsContainer.offsetLeft;
                     scrollLeft = projectsContainer.scrollLeft;
                 });
@@ -1743,7 +1743,17 @@
                     e.preventDefault();
                     const x = e.pageX - projectsContainer.offsetLeft;
                     const walk = (x - startX) * 2; 
+                    if (Math.abs(walk) > 5) {
+                        isDraggingProjects = true;
+                        projectsContainer.classList.add('dragging');
+                    }
                     projectsContainer.scrollLeft = scrollLeft - walk;
+                });
+
+                projectsContainer.addEventListener('click', (e) => {
+                    if (isDraggingProjects) {
+                        e.preventDefault();
+                    }
                 });
 
                 projectsContainer.addEventListener('wheel', (e) => {
