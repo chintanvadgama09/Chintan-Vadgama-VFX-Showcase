@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SnackCheck Pro — Nutrition & Fat Loss Scanner</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+:root {
+  --bg-core: #090d11;
+  --bg-surface: #11171d;
+  --bg-surface-elevated: #161e27;
+  --bg-subtle: #1c2631;
+  --border-dim: #222e3b;
+  --border-strong: #2f3f50;
+  
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --accent-dim: rgba(16, 185, 129, 0.12);
+  
+  --text-main: #f1f5f9;
+  --text-muted: #8b9bb0;
+  --text-dim: #5c6c80;
+  
+  --good: #10b981;
+  --good-bg: rgba(16, 185, 129, 0.12);
+  --mid: #f59e0b;
+  --mid-bg: rgba(245, 158, 11, 0.12);
+  --bad: #f43f5e;
+  --bad-bg: rgba(244, 63, 94, 0.12);
+  
+  --radius-btn: 8px;
+  --radius-card: 12px;
+  --radius-field: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background-color: var(--bg-core);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.45;
+  padding: 16px 12px 64px;
+}
+
+.app-container {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* APP HEADER */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 4px 6px;
+}
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.app-logo {
+  width: 34px;
+  height: 34px;
+  background: var(--accent);
+  color: #04140e;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 18px;
+  border-radius: var(--radius-btn);
+}
+.app-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.app-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: var(--radius-btn);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-dim);
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* APP CARDS */
+.app-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-card);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* SQUARE BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: var(--radius-btn);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  user-select: none;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary {
+  background: var(--accent);
+  color: #03140e;
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary {
+  background: var(--bg-surface-elevated);
+  color: var(--text-main);
+  border-color: var(--border-dim);
+}
+.btn-secondary:hover {
+  background: var(--bg-subtle);
+  border-color: var(--border-strong);
+}
+.btn-danger {
+  background: rgba(244, 63, 94, 0.12);
+  color: var(--bad);
+  border-color: rgba(244, 63, 94, 0.3);
+}
+.btn-danger:hover { background: rgba(244, 63, 94, 0.22); }
+.btn-square {
+  padding: 11px;
+  aspect-ratio: 1;
+}
+.btn-full { width: 100%; }
+
+/* INPUTS & SELECTS */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+.field-label span { color: var(--text-dim); }
+.input-box {
+  width: 100%;
+  background: var(--bg-core);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-field);
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input-box:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* SEGMENTED CONTROL */
+.segmented-control {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--bg-core);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-btn);
+  padding: 3px;
+  gap: 4px;
+}
+.segment-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: calc(var(--radius-btn) - 2px);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.segment-btn.active {
+  background: var(--bg-surface-elevated);
+  color: var(--text-main);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* STAT PILLS */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+.stat-pill {
+  background: var(--bg-core);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-btn);
+  padding: 9px 12px;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.stat-val {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-top: 2px;
+}
+
+/* SCANNER SECTION */
+.scanner-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.scan-preview-box {
+  background: var(--bg-core);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-field);
+  padding: 8px;
+  text-align: center;
+  position: relative;
+}
+.scan-preview-img {
+  max-height: 220px;
+  width: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.ocr-progress-bar {
+  height: 4px;
+  width: 100%;
+  background: var(--bg-subtle);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.ocr-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.2s;
+}
+
+/* SCORE VERDICT CARDS */
+.verdict-box {
+  border-radius: var(--radius-card);
+  padding: 20px 16px;
+  text-align: center;
+  border: 1px solid var(--border-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.verdict-box.good { background: var(--good-bg); border-color: rgba(16, 185, 129, 0.4); }
+.verdict-box.good .verdict-badge { color: var(--good); }
+.verdict-box.mid { background: var(--mid-bg); border-color: rgba(245, 158, 11, 0.4); }
+.verdict-box.mid .verdict-badge { color: var(--mid); }
+.verdict-box.bad { background: var(--bad-bg); border-color: rgba(244, 63, 94, 0.4); }
+.verdict-box.bad .verdict-badge { color: var(--bad); }
+
+.verdict-subtitle {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.verdict-badge {
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+.verdict-meta {
+  font-size: 13px;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+/* METRICS GRID */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+.metric-card {
+  background: var(--bg-core);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-btn);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.metric-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.metric-num {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+.metric-status {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.tag-good { color: var(--good); }
+.tag-mid { color: var(--mid); }
+.tag-bad { color: var(--bad); }
+
+/* IMPACT WIDGETS */
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.impact-widget {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-btn);
+  padding: 12px 10px;
+  text-align: center;
+}
+.impact-title {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.impact-value {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text-main);
+  margin-top: 3px;
+}
+.impact-sub {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* ADVICE CARD */
+.advice-box {
+  background: var(--bg-core);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-btn);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+/* UTILITY / TOAST */
+.hidden { display: none !important; }
+.btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+#toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  padding: 10px 18px;
+  border-radius: var(--radius-btn);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 9999;
+  pointer-events: none;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* COLLAPSIBLE */
+details {
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-btn);
+  padding: 10px 12px;
+  background: var(--bg-core);
+}
+summary {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+
+/* =============================================================
+   SNACKCHECK PRO — DASHBOARD REDESIGN
+   Visual-only redesign. Existing IDs, controls and JS behavior
+   intentionally remain unchanged.
+   ============================================================= */
+:root {
+  --bg-core: #eef0fb;
+  --bg-surface: rgba(255,255,255,0.94);
+  --bg-surface-elevated: #f8f7fd;
+  --bg-subtle: #f0eff8;
+  --border-dim: #e5e3ef;
+  --border-strong: #d8d4e7;
+
+  --accent: #6d56c8;
+  --accent-hover: #5d46b5;
+  --accent-dim: rgba(109,86,200,0.12);
+  --accent-soft: #eeeafd;
+  --pink: #f28eaa;
+  --pink-soft: #fde8ef;
+
+  --text-main: #29273a;
+  --text-muted: #7f7b91;
+  --text-dim: #aaa6b7;
+
+  --good: #36a979;
+  --good-bg: rgba(54,169,121,0.10);
+  --mid: #d99b43;
+  --mid-bg: rgba(217,155,67,0.11);
+  --bad: #df657b;
+  --bad-bg: rgba(223,101,123,0.10);
+
+  --radius-btn: 13px;
+  --radius-card: 24px;
+  --radius-field: 13px;
+}
+
+html { background: #eef0fb; }
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(117,99,206,.14), transparent 27%),
+    radial-gradient(circle at 92% 18%, rgba(242,142,170,.12), transparent 24%),
+    linear-gradient(135deg, #eef0fb 0%, #e8ebf8 48%, #f1eef8 100%);
+  color: var(--text-main);
+  padding: 34px 28px 70px;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 18px;
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 34px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.app-container {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.app-header {
+  grid-column: 1 / -1;
+  padding: 6px 8px 10px;
+  min-height: 70px;
+}
+.brand-group { gap: 13px; }
+.app-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #765fd1, #5e49b5);
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(90,68,170,.24), inset 0 1px rgba(255,255,255,.28);
+  font-size: 21px;
+}
+.app-title {
+  font-size: 24px;
+  line-height: 1.05;
+  color: #302c43;
+  letter-spacing: -0.8px;
+}
+.brand-group > div:last-child::after {
+  content: "Nutrition • Portion • Fat-Loss Dashboard";
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .35px;
+  color: #9691a8;
+}
+.app-badge {
+  background: rgba(255,255,255,.75);
+  border: 1px solid #e1deec;
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 7px 12px;
+  box-shadow: 0 5px 16px rgba(73,65,105,.06);
+}
+
+.app-card {
+  position: relative;
+  background: rgba(255,255,255,.88);
+  border: 1px solid rgba(220,218,232,.92);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  gap: 15px;
+  box-shadow: 0 14px 35px rgba(73,69,105,.09), 0 2px 5px rgba(73,69,105,.04);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+}
+.app-card::after {
+  content: "";
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  right: -78px;
+  top: -78px;
+  border-radius: 50%;
+  background: rgba(109,86,200,.06);
+  pointer-events: none;
+}
+
+/* Profile becomes the dashboard's top summary panel. */
+.app-container > .app-card:nth-of-type(1) {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(247,245,253,.94));
+}
+.app-container > .app-card:nth-of-type(2) { grid-column: 1; }
+.app-container > .app-card:nth-of-type(3) { grid-column: 2; }
+.app-container > .app-card:nth-of-type(4) { grid-column: 1 / -1; }
+.app-container > .app-card:nth-of-type(5) { grid-column: 1; }
+.app-container > .app-card:nth-of-type(6) { grid-column: 2; }
+
+.card-header { position: relative; z-index: 1; }
+.card-title {
+  color: #625e75;
+  font-size: 12px;
+  letter-spacing: .9px;
+}
+.card-title:first-letter { color: var(--accent); }
+
+.btn {
+  border-radius: 12px;
+  min-height: 42px;
+  border: 1px solid transparent;
+  box-shadow: 0 5px 12px rgba(65,57,104,.06);
+  font-size: 13px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #765fd1, #614bb9);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 9px 18px rgba(102,78,187,.22);
+}
+.btn-primary:hover { background: linear-gradient(135deg, #6b53c3, #5741ab); }
+.btn-secondary {
+  background: #f5f4fa;
+  color: #59546c;
+  border-color: #e3e0eb;
+}
+.btn-secondary:hover { background: #eeecf6; border-color: #d6d1e4; }
+.btn-danger {
+  background: var(--pink-soft);
+  color: #c85670;
+  border-color: #f3c8d4;
+}
+
+.field-grid { gap: 11px; }
+.field-label { color: #807b91; font-size: 11px; }
+.field-label span { color: #aaa5b5; }
+.input-box {
+  background: #f8f7fb;
+  border: 1px solid #e5e2ed;
+  color: #393549;
+  border-radius: 12px;
+  min-height: 43px;
+  padding: 10px 12px;
+  box-shadow: inset 0 1px 2px rgba(60,54,87,.025);
+}
+.input-box:focus {
+  border-color: #9b8bdd;
+  box-shadow: 0 0 0 3px rgba(109,86,200,.10);
+}
+
+.stat-strip { gap: 9px; }
+.stat-pill {
+  background: #f7f6fb;
+  border: 1px solid #e6e3ee;
+  border-radius: 16px;
+  padding: 12px 13px;
+  box-shadow: inset 0 1px rgba(255,255,255,.8);
+}
+.stat-label { color: #aaa5b6; font-size: 9px; letter-spacing: .7px; }
+.stat-val { color: #3b374d; font-size: 15px; }
+
+.segmented-control {
+  background: #f2f0f8;
+  border: 1px solid #e1deea;
+  border-radius: 14px;
+  padding: 4px;
+}
+.segment-btn { border-radius: 10px; color: #918c9f; }
+.segment-btn.active {
+  background: #fff;
+  color: var(--accent);
+  box-shadow: 0 3px 9px rgba(71,64,104,.10);
+}
+
+/* Scanner / library receive compact dashboard tiles. */
+.app-container > .app-card:nth-of-type(2) .scanner-actions { grid-template-columns: 1fr 1fr; }
+.app-container > .app-card:nth-of-type(2) .btn-secondary:first-child {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: #ddd6fa;
+}
+.app-container > .app-card:nth-of-type(2) .btn-secondary:last-child {
+  background: var(--pink-soft);
+  color: #c75e78;
+  border-color: #f2cdd8;
+}
+.scan-preview-box {
+  background: #f7f6fb;
+  border: 1px solid #e3e0ec;
+  border-radius: 16px;
+}
+.ocr-progress-bar { background: #e7e4ef; }
+.ocr-progress-fill { background: linear-gradient(90deg,#6d56c8,#f28eaa); }
+
+/* Food library selector gets the soft dashboard treatment. */
+.app-container > .app-card:nth-of-type(3) .input-box { background: #faf9fc; }
+
+/* Nutrition area: visually dominant without changing its interaction model. */
+.app-container > .app-card:nth-of-type(4) {
+  background: linear-gradient(180deg, rgba(255,255,255,.97), rgba(249,248,253,.96));
+}
+.app-container > .app-card:nth-of-type(4) .field-grid:last-of-type {
+  padding: 14px;
+  background: #f8f7fb;
+  border: 1px solid #e9e6f0;
+  border-radius: 18px;
+}
+
+/* Result cards become the reference's colorful data panels. */
+.verdict-box {
+  border-radius: 19px;
+  padding: 18px 16px;
+  box-shadow: inset 0 1px rgba(255,255,255,.7);
+}
+.verdict-box.good { background: linear-gradient(135deg,#edf9f3,#f5fbf8); border-color: #ccebdc; }
+.verdict-box.mid { background: linear-gradient(135deg,#fff8eb,#fffbf3); border-color: #f0dfbe; }
+.verdict-box.bad { background: linear-gradient(135deg,#fff0f3,#fff7f8); border-color: #f1cdd6; }
+.verdict-badge { font-size: 34px; }
+
+.impact-grid { gap: 10px; }
+.impact-widget {
+  background: #f7f6fb;
+  border: 1px solid #e6e3ee;
+  border-radius: 16px;
+  padding: 13px 10px;
+}
+.impact-title { color: #8d889c; }
+.impact-value { color: #403b51; }
+
+.metric-grid { gap: 9px; }
+.metric-card {
+  background: #faf9fc;
+  border: 1px solid #e8e5ef;
+  border-radius: 14px;
+  padding: 11px 12px;
+}
+.metric-name { color: #a09bab; }
+.metric-num { color: #403c50; }
+
+.advice-box {
+  background: #f8f7fb;
+  border: 1px solid #e6e3ee;
+  border-radius: 15px;
+  color: #676276;
+}
+
+details {
+  border-color: #e6e3ee;
+  background: #f8f7fb;
+  border-radius: 13px;
+}
+summary { color: #8d889d; }
+
+#toast {
+  background: #3d3654;
+  border: 1px solid #514968;
+  border-radius: 999px;
+  box-shadow: 0 12px 28px rgba(53,45,81,.25);
+}
+
+/* Small dashboard accents. */
+#saveProfileBtn { color: var(--accent); background: var(--accent-soft); border-color: #ddd6fa; }
+#calculateBtn { min-height: 48px; }
+#resetBtn { min-height: 48px; }
+
+/* When only one result panel is visible, let it breathe across the dashboard. */
+.app-container:has(#portionResultsSection.hidden) > #benchmarkResultsSection { grid-column: 1 / -1; }
+.app-container:has(#portionResultsSection:not(.hidden)) > #portionResultsSection { grid-column: 1; }
+.app-container:has(#portionResultsSection:not(.hidden)) > #benchmarkResultsSection { grid-column: 2; }
+
+@media (max-width: 900px) {
+  body { padding: 20px 14px 55px; }
+  body::before { inset: 8px; border-radius: 25px; }
+  .app-container { grid-template-columns: 1fr; }
+  .app-container > .app-card:nth-of-type(n) { grid-column: 1 / -1; }
+  .app-container:has(#portionResultsSection:not(.hidden)) > #portionResultsSection,
+  .app-container:has(#portionResultsSection:not(.hidden)) > #benchmarkResultsSection { grid-column: 1 / -1; }
+}
+
+@media (max-width: 560px) {
+  body { padding: 12px 10px 45px; }
+  .app-header { padding: 4px 4px 7px; }
+  .app-title { font-size: 21px; }
+  .app-logo { width: 43px; height: 43px; }
+  .app-badge { font-size: 9px; padding: 6px 9px; }
+  .app-card { padding: 16px 13px; border-radius: 20px; }
+  .field-grid { grid-template-columns: 1fr 1fr; }
+  .stat-strip { grid-template-columns: 1fr 1fr; }
+  .impact-grid { grid-template-columns: 1fr; }
+  .metric-grid { grid-template-columns: 1fr 1fr; }
+  .btn-row { grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="app-logo">⚡</div>
+      <div>
+        <h1 class="app-title">SnackCheck Pro</h1>
+      </div>
+    </div>
+    <span class="app-badge">Fat-Loss Engine</span>
+  </header>
+
+  <!-- 1. PROFILE SECTION -->
+  <section class="app-card">
+    <div class="card-header">
+      <div class="card-title">👤 Body Profile & Targets</div>
+      <button id="saveProfileBtn" class="btn btn-secondary" style="padding:6px 12px; font-size:12px;">Save to Memory</button>
+    </div>
+
+    <div class="field-grid">
+      <div class="field-group">
+        <label class="field-label" for="userHeight">Height (cm) <span id="ftConverterBtn" style="cursor:pointer; color:var(--accent);">ft/in?</span></label>
+        <input id="userHeight" type="number" class="input-box" placeholder="173" value="173">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="userWeight">Weight (kg)</label>
+        <input id="userWeight" type="number" step="0.1" class="input-box" placeholder="65.5" value="65.5">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="userGender">Gender</label>
+        <select id="userGender" class="input-box">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="userAge">Age</label>
+        <input id="userAge" type="number" class="input-box" placeholder="25" value="25">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="userActivity">Activity Level</label>
+        <select id="userActivity" class="input-box">
+          <option value="1.2">Sedentary (desk job)</option>
+          <option value="1.375" selected>Light active (1-3 days)</option>
+          <option value="1.55">Moderate (3-5 days)</option>
+          <option value="1.725">Very active (6-7 days)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="stat-strip">
+      <div class="stat-pill">
+        <div class="stat-label">BMI (Asian)</div>
+        <div class="stat-val" id="dispBmi">21.9</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-label">BMR</div>
+        <div class="stat-val" id="dispBmr">1590 kcal</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-label">Deficit Target</div>
+        <div class="stat-val" id="dispTarget">1700 kcal</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-label">Snack Cap (12%)</div>
+        <div class="stat-val" id="dispSnackCap">204 kcal</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-label">Protein Target</div>
+        <div class="stat-val" id="dispProteinGoal">98 g</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. SCANNER SECTION -->
+  <section class="app-card">
+    <div class="card-header">
+      <div class="card-title">📷 Label Scanner</div>
+      <span id="ocrStatusBadge" style="font-size:11px; color:var(--text-dim); font-weight:700;">Ready</span>
+    </div>
+
+    <!-- Hidden file inputs -->
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+    <input type="file" id="galleryInput" accept="image/*" class="hidden">
+
+    <div class="scanner-actions">
+      <button type="button" id="triggerCamBtn" class="btn btn-secondary">
+        📸 Take Photo
+      </button>
+      <button type="button" id="triggerGalleryBtn" class="btn btn-secondary">
+        🖼️ Upload Photo
+      </button>
+    </div>
+
+    <div id="scanPreviewBox" class="scan-preview-box hidden">
+      <img id="scanPreview" class="scan-preview-img" alt="Label Preview">
+      <div class="ocr-progress-bar">
+        <div id="ocrProgressBar" class="ocr-progress-fill"></div>
+      </div>
+      <div id="ocrStatusMsg" style="font-size:12px; color:var(--text-muted); margin-top:6px; font-weight:600;"></div>
+      <button id="runOcrBtn" type="button" class="btn btn-primary btn-full" style="margin-top:10px;">
+        Scan & Auto-Fill Facts
+      </button>
+    </div>
+
+    <details>
+      <summary>View raw OCR detected text</summary>
+      <pre id="rawOcrText" style="margin-top:8px; font-size:11px; color:var(--text-dim); white-space:pre-wrap; max-height:120px; overflow-y:auto;">No scan performed yet.</pre>
+    </details>
+  </section>
+
+  <!-- 3. FOOD LIBRARY SECTION -->
+  <section class="app-card">
+    <div class="card-header">
+      <div class="card-title">📦 Food Library</div>
+      <div style="display:flex; gap:6px;">
+        <button id="exportJsonBtn" class="btn btn-secondary" style="padding:6px 10px; font-size:11px;">Export</button>
+        <button id="importJsonBtn" class="btn btn-secondary" style="padding:6px 10px; font-size:11px;">Import</button>
+        <input type="file" id="importFileInput" accept=".json" class="hidden">
+      </div>
+    </div>
+
+    <div class="field-grid">
+      <div class="field-group" style="grid-column: span 2;">
+        <label class="field-label" for="foodTitle">Snack / Food Name</label>
+        <input id="foodTitle" type="text" class="input-box" placeholder="e.g. Kurkure Masala Munch">
+      </div>
+      <div class="field-group" style="grid-column: span 2;">
+        <label class="field-label" for="savedFoodSelect">Load Saved / Indian Snack</label>
+        <select id="savedFoodSelect" class="input-box">
+          <option value="">— Select an Indian Snack / Saved Item —</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="saveFoodBtn" type="button" class="btn btn-secondary">💾 Save / Update Food</button>
+      <button id="deleteFoodBtn" type="button" class="btn btn-danger">🗑️ Delete Food</button>
+    </div>
+  </section>
+
+  <!-- 4. NUTRITION FACTS -->
+  <section class="app-card">
+    <div class="card-header">
+      <div class="card-title">📊 Nutrition Facts</div>
+      <span style="font-size:11px; color:var(--accent); font-weight:700;">No fields mandatory</span>
+    </div>
+
+    <!-- Basis Switch -->
+    <div class="segmented-control">
+      <button type="button" class="segment-btn active" id="btnBasis100" data-basis="100">Per 100 g / ml</button>
+      <button type="button" class="segment-btn" id="btnBasisServing" data-basis="serving">Per Serving</button>
+    </div>
+    <input type="hidden" id="basis" value="100">
+
+    <div class="field-grid">
+      <div class="field-group hidden" id="servingBox">
+        <label class="field-label" for="serving">Serving Size <span>(g or ml)</span></label>
+        <input id="serving" type="number" step="0.1" class="input-box" placeholder="e.g. 30">
+      </div>
+      <div class="field-group" style="grid-column: 1 / -1;">
+        <label class="field-label" for="portion">Planned Portion to Eat <span>(optional, g or ml)</span></label>
+        <input id="portion" type="number" step="0.1" class="input-box" placeholder="e.g. 40 (leave empty if unsure)">
+      </div>
+    </div>
+
+    <!-- Nutritional Inputs (Zero Mandatory) -->
+    <div class="field-grid">
+      <div class="field-group">
+        <label class="field-label" for="cal">Calories <span>(kcal)</span></label>
+        <input id="cal" type="number" step="0.1" class="input-box" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="protein">Protein <span>(g)</span></label>
+        <input id="protein" type="number" step="0.1" class="input-box" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="fiber">Dietary Fiber <span>(g)</span></label>
+        <input id="fiber" type="number" step="0.1" class="input-box" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="fat">Total Fat <span>(g)</span></label>
+        <input id="fat" type="number" step="0.1" class="input-box" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="sat">Saturated Fat <span>(g)</span></label>
+        <input id="sat" type="number" step="0.1" class="input-box" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="sugar">Added Sugar <span>(g)</span></label>
+        <input id="sugar" type="number" step="0.1" class="input-box" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="sodium">Sodium <span>(mg)</span></label>
+        <input id="sodium" type="number" step="1" class="input-box" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="trans">Trans Fat <span>(g)</span></label>
+        <input id="trans" type="number" step="0.1" class="input-box" placeholder="0">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="carbs">Total Carbs <span>(g)</span></label>
+        <input id="carbs" type="number" step="0.1" class="input-box" placeholder="0">
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-top:6px;">
+      <button id="calculateBtn" type="button" class="btn btn-primary">⚡ Calculate All Scores</button>
+      <button id="resetBtn" type="button" class="btn btn-secondary">↺ Reset</button>
+    </div>
+  </section>
+
+  <!-- ================= RESULTS AREA ================= -->
+
+  <!-- 5. PLANNED PORTION DETAILED RESULTS -->
+  <section id="portionResultsSection" class="app-card hidden" style="border-color: var(--border-strong);">
+    <div class="card-header">
+      <div class="card-title">🎯 Planned Portion Deep-Dive</div>
+      <span id="portionGramBadge" class="app-badge">0 g Portion</span>
+    </div>
+
+    <!-- Big Portion Verdict -->
+    <div id="portionVerdictBox" class="verdict-box good">
+      <div class="verdict-subtitle">Portion Fitness Verdict</div>
+      <div id="portionVerdictWord" class="verdict-badge">GOOD</div>
+      <div id="portionScoreMeta" class="verdict-meta">Portion Score: 85/100</div>
+    </div>
+
+    <!-- Impact Widgets (Personalized to user) -->
+    <div class="impact-grid">
+      <div class="impact-widget">
+        <div class="impact-title">Snack Budget</div>
+        <div id="portionBudgetVal" class="impact-value">0%</div>
+        <div id="portionBudgetSub" class="impact-sub">of 204 kcal cap</div>
+      </div>
+      <div class="impact-widget">
+        <div class="impact-title">Walk-Off Time</div>
+        <div id="portionWalkVal" class="impact-value">0 min</div>
+        <div class="impact-sub">@ 5 km/h brisk pace</div>
+      </div>
+      <div class="impact-widget">
+        <div class="impact-title">Protein Goal</div>
+        <div id="portionProteinVal" class="impact-value">0%</div>
+        <div id="portionProteinSub" class="impact-sub">of 98g daily</div>
+      </div>
+    </div>
+
+    <!-- Portion Metrics Breakdown Grid -->
+    <div class="card-title" style="font-size:12px; margin-top:4px;">Portion Nutrient Load</div>
+    <div id="portionMetricsGrid" class="metric-grid"></div>
+
+    <!-- Portion Specific Explanation & Action Items -->
+    <div id="portionAdviceBox" class="advice-box"></div>
+  </section>
+
+  <!-- 6. PER 100G BENCHMARK SCORE -->
+  <section id="benchmarkResultsSection" class="app-card hidden">
+    <div class="card-header">
+      <div class="card-title">⚖️ Normalized Food Benchmark</div>
+      <span class="app-badge">Per 100 g</span>
+    </div>
+
+    <!-- Benchmark Verdict -->
+    <div id="benchmarkVerdictBox" class="verdict-box good">
+      <div class="verdict-subtitle">Density & Nutritional Quality</div>
+      <div id="benchmarkVerdictWord" class="verdict-badge">GOOD</div>
+      <div id="benchmarkScoreMeta" class="verdict-meta">Food Quality Score: 78/100</div>
+    </div>
+
+    <!-- Benchmark Metrics Breakdown Grid -->
+    <div class="card-title" style="font-size:12px; margin-top:4px;">Per 100 g Standard Metrics</div>
+    <div id="benchmarkMetricsGrid" class="metric-grid"></div>
+
+    <!-- Benchmark Insights -->
+    <div id="benchmarkAdviceBox" class="advice-box"></div>
+  </section>
+
+</div>
+
+<div id="toast">Saved successfully!</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const $ = id => document.getElementById(id);
+
+  // -------------------------------------------------------------
+  // TOAST NOTIFICATION
+  // -------------------------------------------------------------
+  let toastTimer;
+  function showToast(msg) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+  }
+
+  // -------------------------------------------------------------
+  // USER PROFILE & PERSONAL TARGETS
+  // -------------------------------------------------------------
+  const PROFILE_STORAGE_KEY = "snackCheck_userProfile";
+
+  function loadUserProfile() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY));
+      if (saved) {
+        if (saved.height) $("userHeight").value = saved.height;
+        if (saved.weight) $("userWeight").value = saved.weight;
+        if (saved.gender) $("userGender").value = saved.gender;
+        if (saved.age) $("userAge").value = saved.age;
+        if (saved.activity) $("userActivity").value = saved.activity;
+      }
+    } catch(e) {}
+    recalcProfileStats();
+  }
+
+  function saveUserProfile() {
+    const profile = {
+      height: parseFloat($("userHeight").value) || 173,
+      weight: parseFloat($("userWeight").value) || 65.5,
+      gender: $("userGender").value,
+      age: parseFloat($("userAge").value) || 25,
+      activity: parseFloat($("userActivity").value) || 1.375
+    };
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+    recalcProfileStats();
+    showToast("Profile & calorie targets saved!");
+  }
+
+  function recalcProfileStats() {
+    const h = parseFloat($("userHeight").value) || 173;
+    const w = parseFloat($("userWeight").value) || 65.5;
+    const g = $("userGender").value;
+    const a = parseFloat($("userAge").value) || 25;
+    const act = parseFloat($("userActivity").value) || 1.375;
+
+    // BMI
+    const bmi = w / ((h / 100) * (h / 100));
+    let bmiTag = "Normal";
+    if (bmi < 18.5) bmiTag = "Under";
+    else if (bmi >= 25) bmiTag = "High";
+    else if (bmi >= 23) bmiTag = "Over";
+    $("dispBmi").textContent = `${bmi.toFixed(1)} (${bmiTag})`;
+
+    // BMR (Mifflin-St Jeor)
+    let bmr = (10 * w) + (6.25 * h) - (5 * a);
+    bmr += (g === "female" ? -161 : 5);
+    $("dispBmr").textContent = `${Math.round(bmr)} kcal`;
+
+    // Maintenance & Fat-Loss Deficit (approx 20% deficit)
+    const maintenance = bmr * act;
+    const fatLossTarget = Math.max(1200, Math.round(maintenance - 400));
+    $("dispTarget").textContent = `${fatLossTarget} kcal`;
+
+    // Snack Cap (12% of daily budget)
+    const snackCap = Math.round(fatLossTarget * 0.12);
+    $("dispSnackCap").textContent = `${snackCap} kcal`;
+
+    // Protein Target: 1.5g per kg for fat retention
+    const proteinTarget = Math.round(w * 1.5);
+    $("dispProteinGoal").textContent = `${proteinTarget} g`;
+
+    return { height: h, weight: w, bmr, fatLossTarget, snackCap, proteinTarget };
+  }
+
+  $("saveProfileBtn").addEventListener("click", saveUserProfile);
+  ["userHeight", "userWeight", "userGender", "userAge", "userActivity"].forEach(id => {
+    $(id).addEventListener("input", recalcProfileStats);
+  });
+
+  // Height converter modal / prompt
+  $("ftConverterBtn").addEventListener("click", () => {
+    const feet = prompt("Enter Feet:", "5");
+    if (feet === null) return;
+    const inches = prompt("Enter Inches:", "8");
+    if (inches === null) return;
+    const totalCm = Math.round((parseFloat(feet) * 30.48) + (parseFloat(inches) * 2.54));
+    if (!isNaN(totalCm) && totalCm > 0) {
+      $("userHeight").value = totalCm;
+      recalcProfileStats();
+      showToast(`Height set to ${totalCm} cm`);
+    }
+  });
+
+  // -------------------------------------------------------------
+  // PRELOADED INDIAN SNACKS & LIBRARY STORAGE
+  // -------------------------------------------------------------
+  const FOOD_STORAGE_KEY = "snackCheck_savedFoods_v2";
+
+  const PRELOADED_SNACKS = [
+    {
+      id: "pre_1",
+      title: "Haldiram's Aloo Bhujia",
+      data: { basis: "100", serving: "30", portion: "35", cal: "580", protein: "8.5", fiber: "4.5", fat: "42.0", sat: "18.0", sugar: "1.5", sodium: "680", trans: "0.1", carbs: "42.0" }
+    },
+    {
+      id: "pre_2",
+      title: "Kurkure Masala Munch",
+      data: { basis: "100", serving: "20", portion: "30", cal: "558", protein: "6.0", fiber: "1.8", fat: "35.0", sat: "15.0", sugar: "2.0", sodium: "840", trans: "0.1", carbs: "55.0" }
+    },
+    {
+      id: "pre_3",
+      title: "Lay's India's Magic Masala",
+      data: { basis: "100", serving: "30", portion: "30", cal: "544", protein: "7.0", fiber: "3.7", fat: "33.5", sat: "12.8", sugar: "3.5", sodium: "790", trans: "0.1", carbs: "53.6" }
+    },
+    {
+      id: "pre_4",
+      title: "Epigamia Greek Yogurt (Plain)",
+      data: { basis: "100", serving: "100", portion: "100", cal: "95", protein: "7.5", fiber: "0.0", fat: "3.5", sat: "2.2", sugar: "0.0", sodium: "55", trans: "0.0", carbs: "6.0" }
+    },
+    {
+      id: "pre_5",
+      title: "RiteBite Max Protein Bar (Choco Slim)",
+      data: { basis: "100", serving: "50", portion: "50", cal: "380", protein: "30.0", fiber: "10.0", fat: "11.0", sat: "5.0", sugar: "2.0", sodium: "210", trans: "0.0", carbs: "40.0" }
+    },
+    {
+      id: "pre_6",
+      title: "Roasted Salted Chana (Gram)",
+      data: { basis: "100", serving: "30", portion: "40", cal: "385", protein: "19.0", fiber: "15.0", fat: "6.0", sat: "1.0", sugar: "0.0", sodium: "320", trans: "0.0", carbs: "58.0" }
+    },
+    {
+      id: "pre_7",
+      title: "Roasted Makhana (Foxnuts - Mild Salt)",
+      data: { basis: "100", serving: "30", portion: "30", cal: "360", protein: "9.5", fiber: "7.5", fat: "2.0", sat: "0.5", sugar: "0.0", sodium: "280", trans: "0.0", carbs: "76.0" }
+    },
+    {
+      id: "pre_8",
+      title: "Amul High Protein Lassi (Rose)",
+      data: { basis: "100", serving: "200", portion: "200", cal: "68", protein: "7.5", fiber: "0.0", fat: "0.8", sat: "0.5", sugar: "0.0", sodium: "45", trans: "0.0", carbs: "7.7" }
+    },
+    {
+      id: "pre_9",
+      title: "Britannia NutriChoice Digestive",
+      data: { basis: "100", serving: "25", portion: "25", cal: "485", protein: "8.0", fiber: "6.0", fat: "21.0", sat: "10.0", sugar: "14.5", sodium: "450", trans: "0.0", carbs: "66.0" }
+    },
+    {
+      id: "pre_10",
+      title: "Maggi 2-Minute Masala Noodles",
+      data: { basis: "100", serving: "70", portion: "70", cal: "427", protein: "8.0", fiber: "3.5", fat: "15.7", sat: "6.8", sugar: "2.2", sodium: "1020", trans: "0.1", carbs: "63.5" }
+    },
+    {
+      id: "pre_11",
+      title: "Too Yumm! Karare (Munchy Masala)",
+      data: { basis: "100", serving: "25", portion: "35", cal: "468", protein: "6.5", fiber: "4.5", fat: "19.5", sat: "8.5", sugar: "4.0", sodium: "720", trans: "0.0", carbs: "66.5" }
+    }
+  ];
+
+  function getStoredFoods() {
+    try {
+      const stored = localStorage.getItem(FOOD_STORAGE_KEY);
+      if (!stored) {
+        localStorage.setItem(FOOD_STORAGE_KEY, JSON.stringify(PRELOADED_SNACKS));
+        return PRELOADED_SNACKS;
+      }
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : PRELOADED_SNACKS;
+    } catch(e) {
+      return PRELOADED_SNACKS;
+    }
+  }
+
+  function setStoredFoods(list) {
+    localStorage.setItem(FOOD_STORAGE_KEY, JSON.stringify(list));
+    renderSavedFoodDropdown();
+  }
+
+  function renderSavedFoodDropdown(selectedId) {
+    const list = getStoredFoods();
+    const select = $("savedFoodSelect");
+    select.innerHTML = '<option value="">— Select an Indian Snack / Saved Item —</option>';
+    list.forEach(item => {
+      const opt = document.createElement("option");
+      opt.value = item.id;
+      opt.textContent = item.title;
+      select.appendChild(opt);
+    });
+    if (selectedId) select.value = selectedId;
+  }
+
+  function getFormData() {
+    return {
+      basis: $("basis").value,
+      serving: $("serving").value,
+      portion: $("portion").value,
+      cal: $("cal").value,
+      protein: $("protein").value,
+      fiber: $("fiber").value,
+      fat: $("fat").value,
+      sat: $("sat").value,
+      sugar: $("sugar").value,
+      sodium: $("sodium").value,
+      trans: $("trans").value,
+      carbs: $("carbs").value
+    };
+  }
+
+  function populateFormData(d) {
+    if (!d) return;
+    setBasis(d.basis || "100");
+    $("serving").value = d.serving || "";
+    $("portion").value = d.portion || "";
+    $("cal").value = d.cal || "";
+    $("protein").value = d.protein || "";
+    $("fiber").value = d.fiber || "";
+    $("fat").value = d.fat || "";
+    $("sat").value = d.sat || "";
+    $("sugar").value = d.sugar || "";
+    $("sodium").value = d.sodium || "";
+    $("trans").value = d.trans || "";
+    $("carbs").value = d.carbs || "";
+  }
+
+  // Save / Update Food
+  $("saveFoodBtn").addEventListener("click", () => {
+    const title = $("foodTitle").value.trim();
+    if (!title) {
+      showToast("Please enter a food title first!");
+      $("foodTitle").focus();
+      return;
+    }
+    const list = getStoredFoods();
+    const activeId = $("savedFoodSelect").value;
+    const existingIdx = list.findIndex(x => x.id === activeId);
+
+    const item = {
+      id: existingIdx >= 0 ? activeId : "item_" + Date.now(),
+      title: title,
+      data: getFormData(),
+      updatedAt: new Date().toISOString()
+    };
+
+    if (existingIdx >= 0) {
+      list[existingIdx] = item;
+      setStoredFoods(list);
+      renderSavedFoodDropdown(item.id);
+      showToast(`Updated "${title}"`);
+    } else {
+      list.unshift(item);
+      setStoredFoods(list);
+      renderSavedFoodDropdown(item.id);
+      showToast(`Saved "${title}" to library`);
+    }
+  });
+
+  // Load selected
+  $("savedFoodSelect").addEventListener("change", (e) => {
+    const id = e.target.value;
+    if (!id) return;
+    const item = getStoredFoods().find(x => x.id === id);
+    if (!item) return;
+    $("foodTitle").value = item.title;
+    populateFormData(item.data);
+    showToast(`Loaded ${item.title}`);
+    calculateAll();
+  });
+
+  // Delete selected
+  $("deleteFoodBtn").addEventListener("click", () => {
+    const id = $("savedFoodSelect").value;
+    if (!id) {
+      showToast("Choose an item to delete");
+      return;
+    }
+    const list = getStoredFoods();
+    const item = list.find(x => x.id === id);
+    if (!item) return;
+    if (!confirm(`Delete "${item.title}"?`)) return;
+
+    const filtered = list.filter(x => x.id !== id);
+    setStoredFoods(filtered);
+    $("foodTitle").value = "";
+    showToast("Item deleted");
+  });
+
+  // Export JSON
+  $("exportJsonBtn").addEventListener("click", () => {
+    const list = getStoredFoods();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(list, null, 2));
+    const dlAnchor = document.createElement("a");
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `snackcheck_library_${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+    showToast("Exported JSON file!");
+  });
+
+  // Import JSON
+  $("importJsonBtn").addEventListener("click", () => $("importFileInput").click());
+  $("importFileInput").addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (!Array.isArray(imported)) throw new Error("Invalid structure");
+        const current = getStoredFoods();
+        // Merge without duplicate IDs
+        const currentIds = new Set(current.map(x => x.id));
+        let count = 0;
+        imported.forEach(item => {
+          if (item.title && item.data) {
+            if (!item.id || currentIds.has(item.id)) item.id = "imp_" + Math.random().toString(36).substr(2, 9);
+            current.unshift(item);
+            count++;
+          }
+        });
+        setStoredFoods(current);
+        showToast(`Imported ${count} snacks successfully!`);
+      } catch(err) {
+        showToast("Failed to parse JSON file.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  // -------------------------------------------------------------
+  // SEGMENTED BASIS SWITCH
+  // -------------------------------------------------------------
+  function setBasis(val) {
+    $("basis").value = val;
+    if (val === "serving") {
+      $("btnBasisServing").classList.add("active");
+      $("btnBasis100").classList.remove("active");
+      $("servingBox").classList.remove("hidden");
+    } else {
+      $("btnBasis100").classList.add("active");
+      $("btnBasisServing").classList.remove("active");
+      $("servingBox").classList.add("hidden");
+    }
+  }
+
+  $("btnBasis100").addEventListener("click", () => setBasis("100"));
+  $("btnBasisServing").addEventListener("click", () => setBasis("serving"));
+
+  // -------------------------------------------------------------
+  // CAMERA & GALLERY SCANNER (TESSERACT OCR)
+  // -------------------------------------------------------------
+  let selectedScanFile = null;
+
+  $("triggerCamBtn").addEventListener("click", () => $("cameraInput").click());
+  $("triggerGalleryBtn").addEventListener("click", () => $("galleryInput").click());
+
+  function handleFileSelected(file) {
+    if (!file) return;
+    selectedScanFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      $("scanPreview").src = e.target.result;
+      $("scanPreviewBox").classList.remove("hidden");
+      $("ocrStatusMsg").textContent = "Image ready. Tap 'Scan & Auto-Fill Facts'";
+      $("ocrStatusBadge").textContent = "Image loaded";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  $("cameraInput").addEventListener("change", (e) => handleFileSelected(e.target.files[0]));
+  $("galleryInput").addEventListener("change", (e) => handleFileSelected(e.target.files[0]));
+
+  function extractRegexVal(text, regexList) {
+    for (const rx of regexList) {
+      const match = text.match(rx);
+      if (match && match[1]) {
+        const n = parseFloat(match[1].replace(",", "."));
+        if (!isNaN(n)) return n;
+      }
+    }
+    return null;
+  }
+
+  function parseIndianNutritionLabel(raw) {
+    // Normalization
+    const t = raw.replace(/[|]/g, " ").replace(/,/g, ".").replace(/\u00a0/g, " ");
+    const num = "([0-9]+(?:\\.[0-9]+)?)";
+    const found = {};
+
+    found.cal = extractRegexVal(t, [
+      new RegExp(`(?:energy|calories|calorie|approx\\. energy)[^0-9]{0,20}${num}\\s*(?:kcal)?`, "i"),
+      new RegExp(`${num}\\s*kcal`, "i")
+    ]);
+    found.protein = extractRegexVal(t, [
+      new RegExp(`(?:protein|protien)[^0-9]{0,15}${num}\\s*g`, "i"),
+      new RegExp(`(?:protein|protien)[^0-9]{0,15}${num}`, "i")
+    ]);
+    found.carbs = extractRegexVal(t, [
+      new RegExp(`(?:carbohydrate|total carbohydrate|carbs)[^0-9]{0,15}${num}\\s*g`, "i"),
+      new RegExp(`(?:carbohydrate|carbs)[^0-9]{0,15}${num}`, "i")
+    ]);
+    found.fiber = extractRegexVal(t, [
+      new RegExp(`(?:dietary\\s+)?(?:fibre|fiber)[^0-9]{0,15}${num}\\s*g`, "i"),
+      new RegExp(`(?:fibre|fiber)[^0-9]{0,15}${num}`, "i")
+    ]);
+    found.fat = extractRegexVal(t, [
+      new RegExp(`(?:total\\s+fat|fat)[^0-9]{0,15}${num}\\s*g`, "i"),
+      new RegExp(`fat[^0-9]{0,15}${num}`, "i")
+    ]);
+    found.sat = extractRegexVal(t, [
+      new RegExp(`(?:saturated\\s+fat|saturated\\s+fatty\\s+acids|saturated|saturates)[^0-9]{0,15}${num}\\s*g`, "i"),
+      new RegExp(`saturated[^0-9]{0,15}${num}`, "i")
+    ]);
+    found.trans = extractRegexVal(t, [
+      new RegExp(`(?:trans\\s+fat|trans\\s+fatty\\s+acids|transfat)[^0-9]{0,15}${num}\\s*g`, "i")
+    ]);
+    found.sugar = extractRegexVal(t, [
+      new RegExp(`(?:added\\s+sugars?|added\\s+sugar)[^0-9]{0,15}${num}\\s*g`, "i"),
+      new RegExp(`(?:total\\s+sugars?|sugars?)[^0-9]{0,15}${num}\\s*g`, "i")
+    ]);
+    found.sodium = extractRegexVal(t, [
+      new RegExp(`(?:sodium)[^0-9]{0,15}${num}\\s*mg`, "i"),
+      new RegExp(`(?:sodium)[^0-9]{0,15}${num}`, "i")
+    ]);
+
+    // Serving size detect
+    const servingMatch = t.match(/(?:serving\s*size|per\s*serving)[^0-9]{0,10}([0-9]+(?:\.[0-9]+)?)\s*(?:g|ml)/i);
+    const servingVal = servingMatch ? parseFloat(servingMatch[1]) : null;
+
+    return { found, servingVal, text: t };
+  }
+
+  $("runOcrBtn").addEventListener("click", async () => {
+    if (!selectedScanFile) return;
+    if (typeof Tesseract === "undefined") {
+      showToast("OCR engine offline. Check your internet.");
+      return;
+    }
+
+    $("runOcrBtn").disabled = true;
+    $("ocrStatusBadge").textContent = "Processing...";
+    $("ocrProgressBar").style.width = "0%";
+    $("ocrStatusMsg").textContent = "Initializing OCR model...";
+
+    try {
+      const worker = await Tesseract.createWorker("eng", 1, {
+        logger: m => {
+          if (m.status && typeof m.progress === "number") {
+            const pct = Math.round(m.progress * 100);
+            $("ocrProgressBar").style.width = `${pct}%`;
+            $("ocrStatusMsg").textContent = `${m.status.replace(/_/g, " ")} (${pct}%)`;
+          }
+        }
+      });
+
+      const res = await worker.recognize(selectedScanFile);
+      const rawText = res.data.text || "";
+      await worker.terminate();
+
+      $("rawOcrText").textContent = rawText || "No text recognized.";
+      const parsed = parseIndianNutritionLabel(rawText);
+
+      let autoFilled = [];
+      Object.entries(parsed.found).forEach(([field, val]) => {
+        if (val !== null && $(field)) {$(field).value = val;
+          autoFilled.push(field);
+        }
+      });
+
+      if (parsed.servingVal) {
+        setBasis("serving");
+        $("serving").value = parsed.servingVal;
+        autoFilled.push("serving");
+      }
+
+      if (autoFilled.length > 0) {
+        showToast(`Auto-filled: ${autoFilled.join(", ")}`);
+        $("ocrStatusMsg").textContent = `Detected & filled ${autoFilled.length} values. Please double-check!`;
+        $("ocrStatusBadge").textContent = "Complete";
+      } else {
+        showToast("No clear numbers found. Try a closer photo.");
+        $("ocrStatusMsg").textContent = "Could not map fields cleanly. Please type values manually.";
+        $("ocrStatusBadge").textContent = "Unclear";
+      }
+
+    } catch(err) {
+      console.error(err);
+      $("ocrStatusMsg").textContent = "Error scanning image.";
+      showToast("Scan error. Please try again.");
+    } finally {
+      $("runOcrBtn").disabled = false;
+    }
+  });
+
+  // -------------------------------------------------------------
+  // RESET LOGIC
+  // -------------------------------------------------------------
+  $("resetBtn").addEventListener("click", () => {
+    ["foodTitle", "cal", "protein", "fiber", "fat", "sat", "sugar", "sodium", "trans", "carbs", "portion", "serving"].forEach(id => {
+      $(id).value = "";
+    });
+    setBasis("100");
+    $("savedFoodSelect").value = "";
+    $("portionResultsSection").classList.add("hidden");
+    $("benchmarkResultsSection").classList.add("hidden");
+    showToast("Form cleared");
+  });
+
+  // -------------------------------------------------------------
+  // COMPREHENSIVE SCORING ENGINE (PORTION & BENCHMARK)
+  // -------------------------------------------------------------
+  function getNum(id) {
+    const v = parseFloat($(id).value);
+    return (!isNaN(v) && v >= 0) ? v : 0;
+  }
+
+  function normalizeTo100g(val, basis, serving) {
+    if (basis === "100") return val;
+    return serving > 0 ? (val * 100) / serving : val;
+  }
+
+  $("calculateBtn").addEventListener("click", calculateAll);
+
+  function calculateAll() {
+    const user = recalcProfileStats();
+    const basis = $("basis").value;
+    const serving = getNum("serving");
+    const portion = getNum("portion");
+
+    // Read values (NON-MANDATORY: Defaults cleanly to 0)
+    const raw = {
+      cal: getNum("cal"),
+      protein: getNum("protein"),
+      fiber: getNum("fiber"),
+      fat: getNum("fat"),
+      sat: getNum("sat"),
+      sugar: getNum("sugar"),
+      sodium: getNum("sodium"),
+      trans: getNum("trans"),
+      carbs: getNum("carbs")
+    };
+
+    // Calculate normalized per 100g values
+    const norm = {};
+    Object.keys(raw).forEach(k => {
+      norm[k] = normalizeTo100g(raw[k], basis, serving);
+    });
+
+    // 1. CALCULATE NORMALIZED 100G BENCHMARK
+    renderBenchmarkScore(norm, user);
+
+    // 2. CALCULATE PLANNED PORTION DEEP-DIVE (IF ENTERED)
+    if (portion > 0) {
+      renderPortionDeepDive(norm, portion, user);
+      $("portionResultsSection").classList.remove("hidden");
+      $("portionResultsSection").scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      $("portionResultsSection").classList.add("hidden");
+      $("benchmarkResultsSection").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  // -------------------------------------------------------------
+  // DETAILED PORTION EVALUATION ENGINE
+  // -------------------------------------------------------------
+  function renderPortionDeepDive(norm, portionGrams, user) {
+    $("portionGramBadge").textContent = `${portionGrams} g Planned`;
+
+    // Compute exact portion values
+    const p = {};
+    Object.keys(norm).forEach(k => {
+      p[k] = (norm[k] * portionGrams) / 100;
+    });
+
+    // Personalized Portion Threshold Rules
+    const portionRules = {
+      cal:     { good: user.snackCap * 0.75, mid: user.snackCap, isLowerBetter: true, weight: 3.5, name: "Calories", unit: "kcal" },
+      protein: { good: 10, mid: 5, isLowerBetter: false, weight: 2.5, name: "Protein", unit: "g" },
+      fiber:   { good: 4, mid: 2, isLowerBetter: false, weight: 1.8, name: "Dietary Fiber", unit: "g" },
+      fat:     { good: 8, mid: 14, isLowerBetter: true, weight: 1.3, name: "Total Fat", unit: "g" },
+      sat:     { good: 2.0, mid: 4.5, isLowerBetter: true, weight: 1.1, name: "Saturated Fat", unit: "g" },
+      sugar:   { good: 4.0, mid: 9.0, isLowerBetter: true, weight: 1.0, name: "Added Sugar", unit: "g" },
+      sodium:  { good: 250, mid: 500, isLowerBetter: true, weight: 0.8, name: "Sodium", unit: "mg" },
+      trans:   { good: 0.1, mid: 0.3, isLowerBetter: true, weight: 1.5, name: "Trans Fat", unit: "g" }
+    };
+
+    let pEarned = 0;
+    let pMax = 0;
+    const cardsHtml = [];
+    const strengths = [];
+    const watchouts = [];
+
+    Object.entries(portionRules).forEach(([key, rule]) => {
+      const val = p[key] || 0;
+      let status = "mid";
+
+      if (rule.isLowerBetter) {
+        if (val <= rule.good) status = "good";
+        else if (val <= rule.mid) status = "mid";
+        else status = "bad";
+      } else {
+        if (val >= rule.good) status = "good";
+        else if (val >= rule.mid) status = "mid";
+        else status = "bad";
+      }
+
+      const pts = status === "good" ? 2 : status === "mid" ? 1 : 0;
+      pEarned += pts * rule.weight;
+      pMax += 2 * rule.weight;
+
+      if (status === "good") strengths.push(rule.name);
+      if (status === "bad") watchouts.push(rule.name);
+
+      const formattedVal = key === "sodium" || key === "cal" ? Math.round(val) : val.toFixed(1);
+
+      cardsHtml.push(`
+        <div class="metric-card">
+          <div class="metric-name">${rule.name}</div>
+          <div class="metric-num">${formattedVal} ${rule.unit}</div>
+          <div class="metric-status tag-${status}">${status.toUpperCase()}</div>
+        </div>
+      `);
+    });
+
+    const portionScore = Math.round((pEarned / pMax) * 100);
+
+    let vWord = "MID";
+    let vClass = "mid";
+    if (portionScore >= 70) { vWord = "EXCELLENT"; vClass = "good"; }
+    else if (portionScore < 45) { vWord = "WATCH OUT"; vClass = "bad"; }
+
+    // Verdict Box
+    const vBox = $("portionVerdictBox");
+    vBox.className = `verdict-box ${vClass}`;
+    $("portionVerdictWord").textContent = vWord;
+    $("portionScoreMeta").textContent = `Portion Score: ${portionScore}/100 • Evaluated for ${portionGrams} g`;
+
+    // Impact Calculations
+    // 1. % of Snack Cap
+    const capPct = Math.round((p.cal / user.snackCap) * 100);
+    $("portionBudgetVal").textContent = `${capPct}%`;
+    $("portionBudgetSub").textContent = `${Math.round(p.cal)} / ${user.snackCap} kcal cap`;
+    $("portionBudgetVal").style.color = capPct > 100 ? "var(--bad)" : (capPct <= 75 ? "var(--good)" : "var(--mid)");
+
+    // 2. Brisk Walk-off time (Weight-specific: MET = 3.5 -> Burn = 3.5 * 3.5 * W / 200 kcal/min)
+    const burnPerMin = (3.5 * 3.5 * user.weight) / 200;
+    const walkMins = Math.round(p.cal / Math.max(burnPerMin, 1));
+    $("portionWalkVal").textContent = `${walkMins} min`;
+
+    // 3. % of Daily Protein Target
+    const proteinPct = Math.round((p.protein / user.proteinTarget) * 100);
+    $("portionProteinVal").textContent = `${proteinPct}%`;
+    $("portionProteinSub").textContent = `${p.protein.toFixed(1)}g of ${user.proteinTarget}g goal`;
+
+    // Render Metrics Grid
+    $("portionMetricsGrid").innerHTML = cardsHtml.join("");
+
+    // Actionable Portion Advice
+    let advice = `<b>Portion Assessment for ${portionGrams} g:</b> Eating this amounts to <b>${Math.round(p.cal)} kcal</b>, providing <b>${p.protein.toFixed(1)} g protein</b> and <b>${p.fiber.toFixed(1)} g fiber</b>.`;
+
+    if (capPct > 100) {
+      advice += `<br><br><span style="color:var(--bad); font-weight:700;">⚠️ Calorie Overflow:</span> This single portion exceeds your recommended snack limit of ${user.snackCap} kcal by <b>${Math.round(p.cal - user.snackCap)} kcal</b>. Consider reducing portion to <b>${Math.floor((portionGrams * user.snackCap) / p.cal)} g</b>.`;
+    }
+
+    if (strengths.length > 0) {
+      advice += `<br><br><span style="color:var(--good); font-weight:700;">✓ Portion Strengths:</span> Well-managed ${strengths.slice(0, 4).join(", ")}.`;
+    }
+
+    if (watchouts.length > 0) {
+      advice += `<br><span style="color:var(--bad); font-weight:700;">✕ Watch Outs:</span> Elevated levels of ${watchouts.slice(0, 4).join(", ")}. Balance this out by keeping your subsequent meals low in sodium and saturated fats.`;
+    }
+
+    $("portionAdviceBox").innerHTML = advice;
+  }
+
+  // -------------------------------------------------------------
+  // BENCHMARK 100G SCORING ENGINE
+  // -------------------------------------------------------------
+  function renderBenchmarkScore(norm, user) {
+    const benchmarkRules = {
+      cal:     { good: 250, mid: 400, isLowerBetter: true, weight: 2.2, name: "Calories", unit: "kcal" },
+      protein: { good: 10.0, mid: 5.0, isLowerBetter: false, weight: 2.4, name: "Protein", unit: "g" },
+      fiber:   { good: 5.0, mid: 2.5, isLowerBetter: false, weight: 1.8, name: "Fiber", unit: "g" },
+      fat:     { good: 10.0, mid: 18.0, isLowerBetter: true, weight: 1.4, name: "Total Fat", unit: "g" },
+      sat:     { good: 2.5, mid: 5.0, isLowerBetter: true, weight: 1.0, name: "Saturated Fat", unit: "g" },
+      sugar:   { good: 5.0, mid: 10.0, isLowerBetter: true, weight: 0.8, name: "Added Sugar", unit: "g" },
+      sodium:  { good: 350, mid: 650, isLowerBetter: true, weight: 0.7, name: "Sodium", unit: "mg" },
+      trans:   { good: 0.1, mid: 0.4, isLowerBetter: true, weight: 1.2, name: "Trans Fat", unit: "g" }
+    };
+
+    let earned = 0;
+    let max = 0;
+    const cardsHtml = [];
+    const pros = [];
+    const cons = [];
+
+    Object.entries(benchmarkRules).forEach(([key, rule]) => {
+      const val = norm[key] || 0;
+      let status = "mid";
+
+      if (rule.isLowerBetter) {
+        if (val <= rule.good) status = "good";
+        else if (val <= rule.mid) status = "mid";
+        else status = "bad";
+      } else {
+        if (val >= rule.good) status = "good";
+        else if (val >= rule.mid) status = "mid";
+        else status = "bad";
+      }
+
+      const pts = status === "good" ? 2 : status === "mid" ? 1 : 0;
+      earned += pts * rule.weight;
+      max += 2 * rule.weight;
+
+      if (status === "good") pros.push(rule.name);
+      if (status === "bad") cons.push(rule.name);
+
+      const formattedVal = key === "sodium" || key === "cal" ? Math.round(val) : val.toFixed(1);
+
+      cardsHtml.push(`
+        <div class="metric-card">
+          <div class="metric-name">${rule.name} / 100g</div>
+          <div class="metric-num">${formattedVal} ${rule.unit}</div>
+          <div class="metric-status tag-${status}">${status.toUpperCase()}</div>
+        </div>
+      `);
+    });
+
+    const score = Math.round((earned / max) * 100);
+
+    let vWord = "MID QUALITY";
+    let vClass = "mid";
+    if (score >= 70) { vWord = "CLEAN & LEAN"; vClass = "good"; }
+    else if (score < 45) { vWord = "CALORIE DENSE"; vClass = "bad"; }
+
+    const vBox = $("benchmarkVerdictBox");
+    vBox.className = `verdict-box ${vClass}`;
+    $("benchmarkVerdictWord").textContent = vWord;
+    $("benchmarkScoreMeta").textContent = `Food Density Score: ${score}/100 • Standardized Per 100 g`;
+
+    $("benchmarkMetricsGrid").innerHTML = cardsHtml.join("");
+
+    // Safe Portion Recommendation
+    const safePortionGrams = norm.cal > 0 ? Math.min(100, Math.round((user.snackCap / norm.cal) * 100)) : 100;
+
+    let text = `<b>Food Density Profile:</b> Standardized at 100g, this item contains <b>${Math.round(norm.cal)} kcal</b> with <b>${norm.protein.toFixed(1)}g protein</b>.`;
+    text += `<br><br>💡 <b>Max Recommended Portion:</b> To stay strictly within your <b>${user.snackCap} kcal</b> snack allowance, keep your portion below <b>${safePortionGrams} grams</b>.`;
+
+    if (pros.length) text += `<br><br><span style="color:var(--good); font-weight:700;">Positive Highlights:</span> ${pros.slice(0, 3).join(", ")}.`;
+    if (cons.length) text += `<br><span style="color:var(--bad); font-weight:700;">Keep Under Control:</span> High in ${cons.slice(0, 3).join(", ")}.`;
+
+    $("benchmarkAdviceBox").innerHTML = text;
+    $("benchmarkResultsSection").classList.remove("hidden");
+  }
+
+  // -------------------------------------------------------------
+  // INITIAL BOOTSTRAP
+  // -------------------------------------------------------------
+  loadUserProfile();
+  renderSavedFoodDropdown();
+});
+</script>
+
+</body>
+</html>
