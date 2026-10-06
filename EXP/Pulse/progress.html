@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pulse — Progress</title><link rel="stylesheet" href="styles.css"></head>
+<body data-page="progress">
+<div class="app-shell"><aside class="sidebar"><div class="brand"><div class="brand-mark">P</div><div><strong>Pulse</strong><span>health, with momentum</span></div></div><nav class="nav">
+<a href="index.html" data-nav="dashboard"><span class="nav-icon">⌂</span>Today</a><a href="nutrition.html" data-nav="nutrition"><span class="nav-icon">◔</span>Nutrition</a><a href="food-log.html" data-nav="food"><span class="nav-icon">▤</span>Food log</a><a href="activities.html" data-nav="activities"><span class="nav-icon">✓</span>Activities</a><a href="progress.html" data-nav="progress"><span class="nav-icon">↗</span>Progress</a><a href="settings.html" data-nav="settings"><span class="nav-icon">⚙</span>Settings</a>
+</nav><div class="sidebar-bottom"><button class="theme-toggle" id="themeToggle">Theme · System</button><div class="account-mini"><div class="name" data-account-name>You</div><div class="meta" data-level>Level 1</div></div></div></aside>
+<main class="main"><div class="content"><div class="mobile-nav"><a href="index.html" data-nav="dashboard">Today</a><a href="nutrition.html" data-nav="nutrition">Nutrition</a><a href="food-log.html" data-nav="food">Food</a><a href="activities.html" data-nav="activities">Activities</a><a href="progress.html" data-nav="progress">Progress</a><a href="settings.html" data-nav="settings">Settings</a></div>
+<header class="topbar"><div><div class="eyebrow">Progress</div><h1>Make progress <span class="accent">visible.</span></h1><div class="page-subtitle">The point of gamification is to make the next action feel worth returning for.</div></div><div class="top-actions"><button class="btn btn-primary" id="shareProgressBtn">Share accountability</button></div></header>
+
+<section class="grid grid-4">
+<div class="card tight"><div class="tiny">Current streak</div><div class="stat" id="currentStreak">0</div><div class="tiny">days</div></div>
+<div class="card tight"><div class="tiny">Best streak</div><div class="stat" id="bestStreak">0</div><div class="tiny">days</div></div>
+<div class="card tight"><div class="tiny">Lifetime XP</div><div class="stat" id="lifetimeXp">0</div><div class="tiny" id="nextLevel">250 to next level</div></div>
+<div class="card tight"><div class="tiny">Streak shield</div><div class="stat" id="shield">1</div><div class="tiny">one-day recovery left</div></div>
+</section>
+
+<section class="grid grid-2 section-gap">
+<div class="card">
+<div class="card-header"><div><h2>Consistency by day</h2><div class="label">Last 14 days, based on planned actions completed.</div></div></div>
+<div id="consistencyChart"></div>
+</div>
+<div class="card">
+<div class="card-header"><div><h2>Weekly rhythm</h2><div class="label">A simple accountability loop.</div></div><span class="pill accent" id="commitmentPill">0/5</span></div>
+<div class="streak"><div class="streak-number" id="weekDone">0</div><div><div class="row-title">planned actions completed</div><div class="row-meta">This week. Momentum increases through repeatable wins.</div></div></div>
+<div class="section-gap">
+<div class="small" style="margin-bottom:6px">Level progress</div><div class="progress"><span id="levelBar" style="width:0%"></span></div>
+<div class="tiny" id="levelLabel" style="margin-top:6px"></div>
+</div>
+</div>
+</section>
+
+<section class="card section-gap">
+<div class="card-header"><div><h2>Achievements</h2><div class="label">Milestones that recognize behavior, not body size.</div></div></div>
+<div id="achievementList" class="tag-list"></div>
+</section>
+</div></main></div>
+<div class="toast"></div>
+<script src="data.js"></script><script src="app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+ const P=Pulse; render(); P.subscribe(render);
+ function render(){
+  const s=P.getState(),g=s.gamification; P.recalcStreak();
+  document.getElementById("currentStreak").textContent=g.currentStreak;
+  document.getElementById("bestStreak").textContent=g.bestStreak;
+  document.getElementById("lifetimeXp").textContent=g.lifetimeXp;
+  const next=(g.level*250); document.getElementById("nextLevel").textContent=`${Math.max(0,next-g.lifetimeXp)} XP to level ${g.level+1}`;
+  const weekly=P.getWeeklyConsistency();document.getElementById("momentum").textContent=`${weekly}%`;
+  document.getElementById("weekDone").textContent=P.weekDates().reduce((n,d)=>n+P.getActivityForDate(d).filter(a=>a.completed).length,0);
+  document.getElementById("commitmentPill").textContent=`${countWeekCompleted()}/${g.weeklyCommitment}`;
+  const levelStart=(g.level-1)*250,progress=((g.lifetimeXp-levelStart)/250)*100;
+  document.getElementById("levelBar").style.width=`${P.clamp(progress,0,100)}%`;
+  document.getElementById("levelLabel").textContent=`Level ${g.level} · ${g.lifetimeXp-levelStart}/250 XP`;
+  renderAchievements();renderConsistency();
+ } 
+
+ document.getElementById("shareProgressBtn").addEventListener("click", async ()=>{
+   const s=P.getState(), g=s.gamification, weekly=P.getWeeklyConsistency(), streak=g.currentStreak;
+   const text=`My Pulse check-in: ${streak}-day streak, ${weekly}% weekly consistency, Level ${g.level}. One more healthy action today.`;
+   try{
+     if(navigator.share) await navigator.share({title:"My Pulse check-in", text});
+     else { await navigator.clipboard.writeText(text); P.showToast("Accountability message copied"); }
+   }catch(err){ if(err?.name!=="AbortError") P.showToast("Couldn’t share right now"); }
+ });
+ function countWeekCompleted(){return P.weekDates().reduce((n,d)=>n+P.getActivityForDate(d).filter(a=>a.completed).length,0)}
+ function renderAchievements(){
+  const labels={first_step:"First step",ten_actions:"10 completed actions",twenty_five:"25 completed actions",seven_day:"7-day streak",level_5:"Reached level 5",food_library_5:"Saved 5 foods",weight_log_7:"Logged weight 7 times"};
+  const earned=new Set(P.getState().gamification.achievements);
+  document.getElementById("achievementList").innerHTML=Object.entries(labels).map(([id,name])=>`<span class="pill ${earned.has(id)?"accent":""}">${earned.has(id)?"✓ ":""}${name}</span>`).join("");
+ }
+ function renderConsistency(){
+  const W=920,H=220,p=28,dates=Array.from({length:14},(_,i)=>P.addDays(P.today(),-13+i));
+  const vals=dates.map(d=>P.getDaySummary(d).consistency), max=100;
+  const barW=(W-p*2)/14-7;
+  const bars=vals.map((v,i)=>{const x=p+i*((W-p*2)/14)+3,y=H-p-(v/max)*(H-p*2);return `<rect x="${x}" y="${y}" width="${barW}" height="${(H-p)-y}" rx="5" fill="var(--accent)" opacity="${.18+(v/100)*.82}"><title>${dates[i]}: ${v}%</title></rect>`}).join("");
+  const labels=dates.map((d,i)=>i%2===0?`<text x="${p+i*((W-p*2)/14)+barW/2}" y="${H-6}" text-anchor="middle">${P.parseDate(d).getDate()}</text>`:"").join("");
+  document.getElementById("consistencyChart").innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="gridline" x1="${p}" y1="${H-p}" x2="${W-p}" y2="${H-p}"/><line class="gridline" x1="${p}" y1="${H/2}" x2="${W-p}" y2="${H/2}"/><text x="6" y="${p+4}">100</text><text x="10" y="${H/2+4}">50</text>${bars}${labels}</svg>`;
+ }
+});
+</script>
+</body></html>

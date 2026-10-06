@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pulse — Daily</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="dashboard">
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">P</div>
+      <div><strong>Pulse</strong><span>health, with momentum</span></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html" data-nav="dashboard"><span class="nav-icon">⌂</span>Today</a>
+      <a href="nutrition.html" data-nav="nutrition"><span class="nav-icon">◔</span>Nutrition</a>
+      <a href="food-log.html" data-nav="food"><span class="nav-icon">▤</span>Food log</a>
+      <a href="activities.html" data-nav="activities"><span class="nav-icon">✓</span>Activities</a>
+      <a href="progress.html" data-nav="progress"><span class="nav-icon">↗</span>Progress</a>
+      <a href="settings.html" data-nav="settings"><span class="nav-icon">⚙</span>Settings</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="theme-toggle" id="themeToggle">Theme · System</button>
+      <div class="account-mini"><div class="name" data-account-name>You</div><div class="meta" data-level>Level 1</div></div>
+    </div>
+  </aside>
+
+  <main class="main"><div class="content">
+    <div class="mobile-nav">
+      <a href="index.html" data-nav="dashboard">Today</a>
+      <a href="nutrition.html" data-nav="nutrition">Nutrition</a>
+      <a href="food-log.html" data-nav="food">Food</a>
+      <a href="activities.html" data-nav="activities">Activities</a>
+      <a href="progress.html" data-nav="progress">Progress</a>
+      <a href="settings.html" data-nav="settings">Settings</a>
+    </div>
+
+    <header class="topbar">
+      <div>
+        <div class="eyebrow" id="dateLabel"></div>
+        <h1>Keep your <span class="accent">momentum.</span></h1>
+        <div class="page-subtitle">A small set of actions today beats a perfect plan you stop using next week.</div>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="globalImportBtn">Import</button>
+        <input id="globalImportInput" type="file" accept="application/json" hidden>
+        <button class="btn" id="globalExportBtn">Export JSON</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <div class="pill accent">CONSISTENCY OVER PERFECTION</div>
+        <div class="big" id="heroStreak">0 days</div>
+        <div class="muted">current streak · best <span id="bestStreak">0</span> days</div>
+        <div style="height:12px"></div>
+        <div class="progress"><span id="heroProgress" style="width:0%"></span></div>
+        <div class="small muted" style="margin-top:7px"><span id="weeklyText">0%</span> weekly consistency · <span id="commitmentText">0/5</span> commitment</div>
+      </div>
+      <div style="display:flex;justify-content:center">
+        <div class="ring" id="todayRing" style="--value:0">
+          <div class="ring-inner"><strong id="todayPct">0%</strong><span>today</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="kpi-strip">
+      <div class="kpi"><div class="label">XP</div><div class="value" id="xpValue">0</div></div>
+      <div class="kpi"><div class="label">Level</div><div class="value" id="levelValue">1</div></div>
+      <div class="kpi"><div class="label">Calories</div><div class="value" id="calValue">0</div></div>
+      <div class="kpi"><div class="label">Recovery token</div><div class="value" id="tokenValue">1</div></div>
+    </div>
+
+    <div class="grid grid-2">
+      <section class="card">
+        <div class="card-header">
+          <div><h2>Today’s quests</h2><div class="label">Three small wins that keep the loop alive.</div></div>
+          <span class="pill" id="questBonusState">bonus available</span>
+        </div>
+        <div id="questList"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div><h2>Today’s plan</h2><div class="label">Your scheduled health actions.</div></div>
+          <a class="btn btn-sm" href="activities.html">Plan</a>
+        </div>
+        <div id="todayActivities"></div>
+      </section>
+    </div>
+
+    <div class="grid grid-3 section-gap">
+      <section class="card">
+        <div class="card-header"><div><h2>Nutrition</h2><div class="label">Daily target vs logged.</div></div><a href="nutrition.html" class="btn btn-sm">Open</a></div>
+        <div class="stat"><span id="nutritionLogged">0</span><span class="muted" style="font-size:14px"> kcal</span></div>
+        <div class="progress" style="margin-top:10px"><span id="nutritionBar" style="width:0%"></span></div>
+        <div class="tiny" id="nutritionTarget" style="margin-top:7px">Target not set</div>
+      </section>
+
+      <section class="card">
+        <div class="card-header"><div><h2>Weight</h2><div class="label">Latest logged trend point.</div></div><a href="nutrition.html" class="btn btn-sm">Log</a></div>
+        <div class="stat"><span id="weightValue">—</span><span class="muted" style="font-size:14px"> kg</span></div>
+        <div class="tiny" id="weightChange" style="margin-top:6px">No previous point</div>
+      </section>
+
+      <section class="card">
+        <div class="card-header"><div><h2>Momentum</h2><div class="label">This week’s planned actions.</div></div><a href="progress.html" class="btn btn-sm">View</a></div>
+        <div class="stat"><span id="momentumValue">0</span><span class="muted" style="font-size:14px">%</span></div>
+        <div class="tiny" id="momentumHint" style="margin-top:6px">Make the next action easy.</div>
+      </section>
+    </div>
+  </div></main>
+</div>
+<div class="toast"></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const P=Pulse, s=P.getState(), t=P.today();
+  document.getElementById("dateLabel").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+  render();
+
+  P.subscribe(render);
+  document.getElementById("globalImportBtn").addEventListener("click",()=>document.getElementById("globalImportInput").click());
+
+  function render(){
+    const st=P.getState(), sum=P.getDaySummary(t), g=st.gamification;
+    P.recalcStreak();
+    document.getElementById("heroStreak").textContent=`${g.currentStreak} day${g.currentStreak===1?"":"s"}`;
+    document.getElementById("bestStreak").textContent=g.bestStreak;
+    document.getElementById("todayRing").style.setProperty("--value",sum.consistency);
+    document.getElementById("todayPct").textContent=`${sum.consistency}%`;
+    document.getElementById("weeklyText").textContent=`${P.getWeeklyConsistency(t)}%`;
+    document.getElementById("commitmentText").textContent=`${st.gamification.weeklyCompleted}/${st.gamification.weeklyCommitment}`;
+    document.getElementById("heroProgress").style.width=`${P.clamp(P.getWeeklyConsistency(t),0,100)}%`;
+    document.getElementById("xpValue").textContent=g.lifetimeXp;
+    document.getElementById("levelValue").textContent=g.level;
+    document.getElementById("calValue").textContent=sum.calories;
+    document.getElementById("tokenValue").textContent=g.streakRecoveryTokens;
+
+    const target=Number(st.profile.dailyCalorieTarget)||0;
+    document.getElementById("nutritionLogged").textContent=sum.calories;
+    document.getElementById("nutritionTarget").textContent=target?`Target ${target.toLocaleString()} kcal`:"Set a target in Nutrition";
+    document.getElementById("nutritionBar").style.width=target?`${P.clamp(sum.calories/target*100,0,100)}%`:"0%";
+
+    const last=st.weightLogs.at(-1), prev=st.weightLogs.at(-2);
+    document.getElementById("weightValue").textContent=last?last.weightKg.toFixed(1):"—";
+    document.getElementById("weightChange").textContent=last&&prev?`${(last.weightKg-prev.weightKg)>0?"+":""}${(last.weightKg-prev.weightKg).toFixed(1)} kg vs previous`:"No previous point";
+
+    const consistency=P.getWeeklyConsistency(t);
+    document.getElementById("momentumValue").textContent=consistency;
+    document.getElementById("momentumHint").textContent=consistency>=80?"Strong week. Protect the routine.":consistency>=50?"Good. One more small win.":"Make the next action easy.";
+
+    renderQuests(); renderActivities();
+  }
+
+  function renderQuests(){
+    const q=P.getQuestState();
+    document.getElementById("questList").innerHTML=q.map(item=>`
+      <div class="quest">
+        <div class="check ${item.done?"done":""}">${item.done?"✓":"·"}</div>
+        <div><div class="quest-title">${escapeHtml(item.title)}</div><div class="quest-meta">${escapeHtml(item.meta)} · +${item.xp} XP</div></div>
+        <span class="badge ${item.done?"done":""}">${item.done?"done":"open"}</span>
+      </div>`).join("");
+    const claimed=P.getState().gamification.dailyQuestBonusClaimed[P.today()];
+    const bonus=document.getElementById("questBonusState");
+    bonus.textContent=claimed?"bonus claimed":"bonus available";
+    bonus.className=`pill ${claimed?"":"accent"}`;
+  }
+  function renderActivities(){
+    const items=P.getActivityForDate(t);
+    const host=document.getElementById("todayActivities");
+    if(!items.length){host.innerHTML='<div class="empty">No activities planned yet.<br><a href="activities.html" style="color:var(--accent);font-weight:800">Create today’s plan →</a></div>';return}
+    host.innerHTML=items.slice(0,6).map(a=>`
+      <div class="activity-row">
+        <div class="row-main"><div class="row-title">${a.icon||"•"} ${escapeHtml(a.name)}</div><div class="row-meta">${a.goal?`${a.goal} ${escapeHtml(a.unit)}`:""} ${a.scheduledTime?`· ${escapeHtml(a.scheduledTime)}`:""}</div></div>
+        <div class="row-actions"><span class="badge ${a.completed?"done":""}">${a.completed?"done":"planned"}</span><a class="btn btn-sm" href="activities.html">Manage</a></div>
+      </div>`).join("");
+  }
+  function escapeHtml(x){return String(x).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+  // Claiming is event-driven from the Activity / Nutrition pages, so the dashboard never auto-awards on every render.
+});
+</script>
+</body>
+</html>

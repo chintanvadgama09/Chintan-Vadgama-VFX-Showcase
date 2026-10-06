@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pulse — Settings</title><link rel="stylesheet" href="styles.css"></head>
+<body data-page="settings">
+<div class="app-shell"><aside class="sidebar"><div class="brand"><div class="brand-mark">P</div><div><strong>Pulse</strong><span>health, with momentum</span></div></div><nav class="nav">
+<a href="index.html" data-nav="dashboard"><span class="nav-icon">⌂</span>Today</a><a href="nutrition.html" data-nav="nutrition"><span class="nav-icon">◔</span>Nutrition</a><a href="food-log.html" data-nav="food"><span class="nav-icon">▤</span>Food log</a><a href="activities.html" data-nav="activities"><span class="nav-icon">✓</span>Activities</a><a href="progress.html" data-nav="progress"><span class="nav-icon">↗</span>Progress</a><a href="settings.html" data-nav="settings"><span class="nav-icon">⚙</span>Settings</a>
+</nav><div class="sidebar-bottom"><button class="theme-toggle" id="themeToggle">Theme · System</button><div class="account-mini"><div class="name" data-account-name>You</div><div class="meta" data-level>Level 1</div></div></div></aside>
+<main class="main"><div class="content"><div class="mobile-nav"><a href="index.html" data-nav="dashboard">Today</a><a href="nutrition.html" data-nav="nutrition">Nutrition</a><a href="food-log.html" data-nav="food">Food</a><a href="activities.html" data-nav="activities">Activities</a><a href="progress.html" data-nav="progress">Progress</a><a href="settings.html" data-nav="settings">Settings</a></div>
+<header class="topbar"><div><div class="eyebrow">Settings & data</div><h1>Keep control of <span class="accent">your data.</span></h1><div class="page-subtitle">The app is local-first. Export a JSON backup whenever you want, import it on another device, or reset everything.</div></div></header>
+
+<section class="grid grid-2">
+<div class="card">
+<div class="card-header"><div><h2>Profile</h2><div class="label">Used for personalization and calorie estimation.</div></div></div>
+<form id="settingsForm" class="grid" style="gap:12px">
+<div class="field"><label>Display name</label><input id="name" class="input"></div>
+<div class="form-grid"><div class="field"><label>Goal weight (kg)</label><input id="goalWeight" class="input" type="number" min="20" max="300" step=".1"></div><div class="field"><label>Weekly commitment</label><select id="weeklyCommitment" class="select"><option value="3">3 actions</option><option value="5">5 actions</option><option value="7">7 actions</option><option value="10">10 actions</option></select></div></div>
+<div class="field"><label>Theme</label><select id="themeMode" class="select"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+<div><button class="btn btn-primary" type="submit">Save settings</button></div>
+</form>
+</div>
+
+<div class="card">
+<div class="card-header"><div><h2>Data safety</h2><div class="label">One JSON document contains the complete app state.</div></div><span class="pill accent">local-first</span></div>
+<div class="grid" style="gap:10px">
+<div class="kpi"><div class="label">Schema</div><div class="value" id="schema">v1</div></div>
+<div class="small muted">Saved locally under <code>pulseFitnessData</code>. Exported files are regular JSON, so they are easy to archive or inspect.</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" id="exportBtn">Export full JSON</button><button class="btn" id="importBtn">Import JSON</button><input id="importInput" type="file" accept="application/json" hidden></div>
+<div class="tiny" id="updatedAt"></div>
+</div></div>
+</section>
+
+<section class="card section-gap">
+<div class="card-header"><div><h2>Reset app data</h2><div class="label">This permanently clears local data for Pulse on this device.</div></div></div>
+<button class="btn btn-danger" id="resetBtn">Reset everything</button>
+</section>
+</div></main></div>
+<div class="toast"></div>
+<script src="data.js"></script><script src="app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+ const P=Pulse;load(); 
+ document.getElementById("settingsForm").addEventListener("submit",e=>{
+  e.preventDefault();const s=P.getState();
+  s.profile.name=document.getElementById("name").value.trim()||"You";
+  s.profile.goalWeightKg=document.getElementById("goalWeight").value;
+  s.gamification.weeklyCommitment=Number(document.getElementById("weeklyCommitment").value)||5;
+  s.settings.theme=document.getElementById("themeMode").value;
+  P.saveState({immediate:true});document.documentElement.dataset.theme=s.settings.theme==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):s.settings.theme;
+  document.getElementById("themeToggle").textContent=`Theme · ${s.settings.theme==="system"?"System":s.settings.theme[0].toUpperCase()+s.settings.theme.slice(1)}`;
+  load();P.showToast("Settings saved");
+ });
+ document.getElementById("exportBtn").onclick=()=>P.downloadJSON(`pulse-backup-${P.today()}.json`);
+ document.getElementById("importBtn").onclick=()=>document.getElementById("importInput").click();
+ document.getElementById("importInput").addEventListener("change",async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  try{await P.importJSONFile(file);P.showToast("Import complete");setTimeout(load,250)}catch(err){alert(`Import failed: ${err.message}`)}e.target.value="";
+ });
+ document.getElementById("resetBtn").onclick=()=>{
+  if(confirm("Reset all Pulse data on this device? Export a backup first if you may need it later.")){P.resetState();setTimeout(()=>location.href="index.html",300)}
+ };
+ function load(){
+  const s=P.getState();
+  document.getElementById("name").value=s.profile.name||"";
+  document.getElementById("goalWeight").value=s.profile.goalWeightKg||"";
+  document.getElementById("weeklyCommitment").value=s.gamification.weeklyCommitment||5;
+  document.getElementById("themeMode").value=s.settings.theme||"system";
+  document.getElementById("schema").textContent=`v${s.schemaVersion}`;
+  document.getElementById("updatedAt").textContent=`Last saved: ${new Date(s.updatedAt).toLocaleString()}`;
+ }
+});
+</script>
+</body></html>

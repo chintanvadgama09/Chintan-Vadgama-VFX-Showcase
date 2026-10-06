@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pulse — Nutrition</title><link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="nutrition">
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-mark">P</div><div><strong>Pulse</strong><span>health, with momentum</span></div></div>
+  <nav class="nav">
+    <a href="index.html" data-nav="dashboard"><span class="nav-icon">⌂</span>Today</a>
+    <a href="nutrition.html" data-nav="nutrition"><span class="nav-icon">◔</span>Nutrition</a>
+    <a href="food-log.html" data-nav="food"><span class="nav-icon">▤</span>Food log</a>
+    <a href="activities.html" data-nav="activities"><span class="nav-icon">✓</span>Activities</a>
+    <a href="progress.html" data-nav="progress"><span class="nav-icon">↗</span>Progress</a>
+    <a href="settings.html" data-nav="settings"><span class="nav-icon">⚙</span>Settings</a>
+  </nav>
+  <div class="sidebar-bottom"><button class="theme-toggle" id="themeToggle">Theme · System</button><div class="account-mini"><div class="name" data-account-name>You</div><div class="meta" data-level>Level 1</div></div></div>
+</aside>
+<main class="main"><div class="content">
+<div class="mobile-nav"><a href="index.html" data-nav="dashboard">Today</a><a href="nutrition.html" data-nav="nutrition">Nutrition</a><a href="food-log.html" data-nav="food">Food</a><a href="activities.html" data-nav="activities">Activities</a><a href="progress.html" data-nav="progress">Progress</a><a href="settings.html" data-nav="settings">Settings</a></div>
+<header class="topbar"><div><div class="eyebrow">Nutrition</div><h1>Know your numbers. <span class="accent">Don’t worship them.</span></h1><div class="page-subtitle">Use a calorie target as a planning tool, then use your weight trend and consistency to judge how the plan is actually working.</div></div></header>
+
+<section class="grid grid-2">
+  <div class="card">
+    <div class="card-header"><div><h2>Daily calorie target</h2><div class="label">Estimate a maintenance target from your profile.</div></div></div>
+    <form id="profileForm" class="grid" style="gap:12px">
+      <div class="form-grid-3">
+        <div class="field"><label>Age</label><input class="input" id="age" type="number" min="13" max="100" placeholder="e.g. 26"></div>
+        <div class="field"><label>Sex</label><select class="select" id="sex"><option value="">Prefer not to say</option><option value="male">Male</option><option value="female">Female</option></select></div>
+        <div class="field"><label>Height (cm)</label><input class="input" id="height" type="number" min="120" max="230"></div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>Activity level</label><select class="select" id="activityLevel"><option value="sedentary">Sedentary</option><option value="light">Lightly active</option><option value="moderate">Moderately active</option><option value="high">Very active</option><option value="athlete">Athlete / very high</option></select></div>
+        <div class="field"><label>Manual target (optional)</label><input class="input" id="manualTarget" type="number" min="0" placeholder="Leave blank to use estimate"></div>
+      </div>
+      <div class="small muted" id="estimateText">Fill your profile to calculate an estimate.</div>
+      <div><button class="btn btn-primary" type="submit">Save target</button></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><h2>Today</h2><div class="label" id="todayLabel"></div></div><a class="btn btn-sm" href="food-log.html">Open food log</a></div>
+    <div class="stat"><span id="todayCalories">0</span><span class="muted" style="font-size:14px"> kcal logged</span></div>
+    <div class="progress" style="margin-top:12px"><span id="todayBar" style="width:0%"></span></div>
+    <div class="small muted" id="todayTarget" style="margin-top:8px">Target not set</div>
+    <div class="hr"></div>
+    <div class="grid grid-3">
+      <div><div class="tiny">Protein</div><div class="stat-sm"><span id="protein">0</span> g</div></div>
+      <div><div class="tiny">Carbs</div><div class="stat-sm"><span id="carbs">0</span> g</div></div>
+      <div><div class="tiny">Fat</div><div class="stat-sm"><span id="fat">0</span> g</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="grid grid-2 section-gap">
+  <div class="card">
+    <div class="card-header"><div><h2>Daily weight log</h2><div class="label">One data point at a time. Trends matter more than single readings.</div></div></div>
+    <form id="weightForm" class="form-grid">
+      <div class="field"><label>Date</label><input class="input" id="weightDate" type="date"></div>
+      <div class="field"><label>Weight (kg)</label><input class="input" id="weightKg" type="number" min="20" max="300" step="0.1" placeholder="65.5"></div>
+      <div class="field" style="grid-column:1/-1"><label>Note (optional)</label><input class="input" id="weightNote" placeholder="Morning, after waking, etc."></div>
+      <div style="grid-column:1/-1"><button class="btn btn-primary" type="submit">Save weight</button></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><h2>Recent entries</h2><div class="label">Your last 10 logs.</div></div></div>
+    <div id="weightTable"></div>
+  </div>
+</section>
+
+<section class="card section-gap">
+  <div class="card-header"><div><h2>Weight trend</h2><div class="label">Simple trend line from saved entries.</div></div></div>
+  <div id="weightChartHost"></div>
+</section>
+</div></main>
+</div>
+<div class="toast"></div>
+<script src="data.js"></script><script src="app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const P=Pulse,s=P.getState();
+  document.getElementById("todayLabel").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+  document.getElementById("weightDate").value=P.today();
+  loadProfile(); render();
+  P.subscribe(()=>render());
+
+  document.getElementById("profileForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const st=P.getState(); st.profile.age=document.getElementById("age").value; st.profile.sex=document.getElementById("sex").value;
+    st.profile.heightCm=Number(document.getElementById("height").value)||st.profile.heightCm;
+    st.profile.activityLevel=document.getElementById("activityLevel").value;
+    const manual=Number(document.getElementById("manualTarget").value);
+    st.profile.dailyCalorieTarget=manual>0?manual:P.calculateDailyCalories(st.profile);
+    P.saveState({immediate:true}); loadProfile(); render(); P.showToast("Nutrition settings saved");
+  });
+
+  document.getElementById("weightForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    try{P.addWeight(document.getElementById("weightDate").value,document.getElementById("weightKg").value,document.getElementById("weightNote").value); P.updateAchievements(); render(); P.maybeClaimQuestBonus();}
+    catch(err){alert(err.message)}
+  });
+
+  function loadProfile(){
+    const p=P.getState().profile;
+    document.getElementById("age").value=p.age||"";
+    document.getElementById("sex").value=p.sex||"";
+    document.getElementById("height").value=p.heightCm||"";
+    document.getElementById("activityLevel").value=p.activityLevel||"moderate";
+    document.getElementById("manualTarget").value=p.dailyCalorieTarget||"";
+    const est=P.calculateDailyCalories(p);
+    document.getElementById("estimateText").textContent=`Estimated maintenance: ${est.toLocaleString()} kcal/day (rough estimate). Manual target overrides it.`;
+  }
+  function render(){
+    const st=P.getState(), sum=P.getDaySummary();
+    const target=Number(st.profile.dailyCalorieTarget)||0;
+    document.getElementById("todayCalories").textContent=sum.calories.toLocaleString();
+    document.getElementById("todayTarget").textContent=target?`Target ${target.toLocaleString()} kcal`:"Target not set";
+    document.getElementById("todayBar").style.width=target?`${P.clamp(sum.calories/target*100,0,100)}%`:"0%";
+    document.getElementById("protein").textContent=sum.protein;
+    document.getElementById("carbs").textContent=sum.carbs;
+    document.getElementById("fat").textContent=sum.fat;
+    const logs=[...st.weightLogs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10);
+    document.getElementById("weightTable").innerHTML=logs.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Date</th><th>Weight</th><th>Note</th><th></th></tr></thead><tbody>${logs.map(x=>`<tr><td>${P.formatDate(x.date)}</td><td>${Number(x.weightKg).toFixed(1)} kg</td><td>${escapeHtml(x.note||"—")}</td><td><button class="btn btn-sm btn-danger" data-del-weight="${x.id}">Delete</button></td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">No weight entries yet.</div>';
+    document.querySelectorAll("[data-del-weight]").forEach(b=>b.onclick=()=>{P.deleteWeight(b.dataset.delWeight);render()});
+    renderChart();
+  }
+  function renderChart(){
+    const items=[...P.getState().weightLogs].sort((a,b)=>a.date.localeCompare(b.date));
+    if(items.length<2){document.getElementById("weightChartHost").innerHTML='<div class="empty">Add at least two weight entries to see a trend.</div>';return}
+    const W=920,H=220,pad=28; const vals=items.map(x=>Number(x.weightKg));
+    const min=Math.min(...vals),max=Math.max(...vals),span=Math.max(1,max-min);
+    const pts=items.map((x,i)=>{
+      const px=pad+i*(W-pad*2)/(items.length-1);
+      const py=H-pad-(Number(x.weightKg)-min)/span*(H-pad*2);
+      return [px,py];
+    });
+    const path=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+    const dots=pts.map((p,i)=>`<circle class="dot" cx="${p[0]}" cy="${p[1]}" r="4"><title>${items[i].date}: ${items[i].weightKg} kg</title></circle>`).join("");
+    document.getElementById("weightChartHost").innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="gridline" x1="${pad}" y1="${pad}" x2="${W-pad}" y2="${pad}"/><line class="gridline" x1="${pad}" y1="${H/2}" x2="${W-pad}" y2="${H/2}"/><line class="gridline" x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}"/><path class="line" d="${path}"/>${dots}</svg>`;
+  }
+  function escapeHtml(x){return String(x).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+});
+</script>
+</body>
+</html>

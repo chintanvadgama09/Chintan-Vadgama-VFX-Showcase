@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pulse — Food log</title><link rel="stylesheet" href="styles.css"></head>
+<body data-page="food">
+<div class="app-shell">
+<aside class="sidebar"><div class="brand"><div class="brand-mark">P</div><div><strong>Pulse</strong><span>health, with momentum</span></div></div><nav class="nav">
+<a href="index.html" data-nav="dashboard"><span class="nav-icon">⌂</span>Today</a><a href="nutrition.html" data-nav="nutrition"><span class="nav-icon">◔</span>Nutrition</a><a href="food-log.html" data-nav="food"><span class="nav-icon">▤</span>Food log</a><a href="activities.html" data-nav="activities"><span class="nav-icon">✓</span>Activities</a><a href="progress.html" data-nav="progress"><span class="nav-icon">↗</span>Progress</a><a href="settings.html" data-nav="settings"><span class="nav-icon">⚙</span>Settings</a>
+</nav><div class="sidebar-bottom"><button class="theme-toggle" id="themeToggle">Theme · System</button><div class="account-mini"><div class="name" data-account-name>You</div><div class="meta" data-level>Level 1</div></div></div></aside>
+<main class="main"><div class="content">
+<div class="mobile-nav"><a href="index.html" data-nav="dashboard">Today</a><a href="nutrition.html" data-nav="nutrition">Nutrition</a><a href="food-log.html" data-nav="food">Food</a><a href="activities.html" data-nav="activities">Activities</a><a href="progress.html" data-nav="progress">Progress</a><a href="settings.html" data-nav="settings">Settings</a></div>
+<header class="topbar"><div><div class="eyebrow">Food log</div><h1>Make logging <span class="accent">frictionless.</span></h1><div class="page-subtitle">Save your repeat foods once, then log them with a few clicks. Every entry is stored in the same JSON state.</div></div></header>
+
+<div class="grid grid-2">
+<section class="card">
+<div class="card-header"><div><h2>Log a food</h2><div class="label">Select a saved food or enter a one-off item.</div></div></div>
+<form id="foodForm" class="grid" style="gap:12px">
+<div class="form-grid"><div class="field"><label>Date</label><input id="foodDate" class="input" type="date"></div><div class="field"><label>Saved food</label><select id="savedFood" class="select"><option value="">— One-off / choose below —</option></select></div></div>
+<div class="form-grid-3"><div class="field"><label>Food name</label><input id="foodName" class="input" placeholder="e.g. Oats"></div><div class="field"><label>Calories / serving</label><input id="foodCalories" class="input" type="number" min="0" step="1"></div><div class="field"><label>Quantity</label><input id="foodQuantity" class="input" type="number" min=".1" step=".1" value="1"></div></div>
+<div class="form-grid-3"><div class="field"><label>Protein (g)</label><input id="foodProtein" class="input" type="number" min="0" step=".1" value="0"></div><div class="field"><label>Carbs (g)</label><input id="foodCarbs" class="input" type="number" min="0" step=".1" value="0"></div><div class="field"><label>Fat (g)</label><input id="foodFat" class="input" type="number" min="0" step=".1" value="0"></div></div>
+<div class="form-grid"><div class="field"><label>Serving label</label><input id="foodUnit" class="input" value="serving"></div><div class="field"><label>Note</label><input id="foodNote" class="input" placeholder="Optional"></div></div>
+<div><button class="btn btn-primary" type="submit">Add to today’s log</button></div>
+</form>
+</section>
+
+<section class="card">
+<div class="card-header"><div><h2>Today’s total</h2><div class="label" id="foodDateLabel"></div></div><a class="btn btn-sm" href="nutrition.html">Nutrition</a></div>
+<div class="stat"><span id="dailyCalories">0</span><span class="muted" style="font-size:14px"> kcal</span></div>
+<div class="small muted" id="macroText" style="margin-top:5px">0 g protein · 0 g carbs · 0 g fat</div>
+<div class="hr"></div>
+<div class="grid grid-3"><div><div class="tiny">Saved foods</div><div class="stat-sm" id="savedCount">0</div></div><div><div class="tiny">Entries today</div><div class="stat-sm" id="entryCount">0</div></div><div><div class="tiny">Target</div><div class="stat-sm" id="foodTarget">—</div></div></div>
+</section>
+</div>
+
+<section class="card section-gap">
+<div class="card-header"><div><h2>Saved food library</h2><div class="label">Your reusable foods and their nutrition facts.</div></div><button class="btn btn-primary" id="newFoodBtn">Save new food</button></div>
+<div id="foodLibrary"></div>
+</section>
+
+<section class="card section-gap">
+<div class="card-header"><div><h2>Today’s entries</h2><div class="label">Delete mistakes without losing the rest of your history.</div></div></div>
+<div id="todayEntries"></div>
+</section>
+</div></main></div>
+<div class="toast"></div>
+
+<div class="modal-backdrop" id="foodModal"><div class="modal">
+<div class="modal-header"><div><h2>Save a food</h2><div class="label">Stored in your local JSON state.</div></div><button class="btn btn-sm" id="closeFoodModal">Close</button></div>
+<form id="saveFoodForm" class="grid" style="gap:12px">
+<div class="form-grid"><div class="field"><label>Name</label><input id="libName" class="input" required></div><div class="field"><label>Serving</label><input id="libServing" class="input" value="1 serving"></div></div>
+<div class="form-grid-3"><div class="field"><label>Calories</label><input id="libCalories" class="input" type="number" min="0" required></div><div class="field"><label>Protein</label><input id="libProtein" class="input" type="number" min="0" step=".1" value="0"></div><div class="field"><label>Carbs</label><input id="libCarbs" class="input" type="number" min="0" step=".1" value="0"></div></div>
+<div class="form-grid-3"><div class="field"><label>Fat</label><input id="libFat" class="input" type="number" min="0" step=".1" value="0"></div><div class="field"><label>Fiber</label><input id="libFiber" class="input" type="number" min="0" step=".1" value="0"></div><div class="field"><label>Notes</label><input id="libNotes" class="input"></div></div>
+<div class="modal-actions"><button class="btn" type="button" id="cancelFood">Cancel</button><button class="btn btn-primary" type="submit">Save food</button></div>
+</form></div></div>
+
+<script src="data.js"></script><script src="app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const P=Pulse; document.getElementById("foodDate").value=P.today(); render();
+  P.subscribe(()=>render());
+
+  document.getElementById("savedFood").addEventListener("change",e=>{
+    const f=P.getState().foodLibrary.find(x=>x.id===e.target.value); if(!f)return;
+    ["Name","Calories","Protein","Carbs","Fat","Unit"].forEach(k=>{const map={Name:"foodName",Calories:"foodCalories",Protein:"foodProtein",Carbs:"foodCarbs",Fat:"foodFat",Unit:"foodUnit"}; document.getElementById(map[k]).value=f[{Name:"name",Calories:"calories",Protein:"protein",Carbs:"carbs",Fat:"fat",Unit:"serving"}[k]]});
+  });
+
+  document.getElementById("foodForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    try{
+      const st=P.getState();
+      P.addFoodLog({
+        date:document.getElementById("foodDate").value,name:document.getElementById("foodName").value,
+        calories:document.getElementById("foodCalories").value,quantity:document.getElementById("foodQuantity").value,
+        protein:document.getElementById("foodProtein").value,carbs:document.getElementById("foodCarbs").value,fat:document.getElementById("foodFat").value,
+        unit:document.getElementById("foodUnit").value,notes:document.getElementById("foodNote").value
+      });
+      P.awardXP(10,"Food logged"); P.updateAchievements(); P.maybeClaimQuestBonus(); e.target.reset(); document.getElementById("foodDate").value=P.today(); render();
+    }catch(err){alert(err.message)}
+  });
+
+  document.getElementById("newFoodBtn").onclick=()=>document.getElementById("foodModal").classList.add("open");
+  ["closeFoodModal","cancelFood"].forEach(id=>document.getElementById(id).onclick=closeModal);
+  document.getElementById("saveFoodForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    try{
+      P.upsertFoodLibrary({name:libName.value,serving:libServing.value,calories:libCalories.value,protein:libProtein.value,carbs:libCarbs.value,fat:libFat.value,fiber:libFiber.value,notes:libNotes.value});
+      closeModal(); e.target.reset(); render(); P.updateAchievements(); P.showToast("Food saved");
+    }catch(err){alert(err.message)}
+  });
+
+  function closeModal(){document.getElementById("foodModal").classList.remove("open")}
+  function render(){
+    const st=P.getState(), selectedDate=document.getElementById("foodDate").value||P.today(), sum=P.getDaySummary(selectedDate);
+    document.getElementById("foodDateLabel").textContent=P.formatDate(selectedDate,{weekday:"long",month:"long",day:"numeric"});
+    document.getElementById("dailyCalories").textContent=sum.calories.toLocaleString();
+    document.getElementById("macroText").textContent=`${sum.protein} g protein · ${sum.carbs} g carbs · ${sum.fat} g fat`;
+    document.getElementById("savedCount").textContent=st.foodLibrary.length;
+    document.getElementById("entryCount").textContent=P.getFoodForDate(selectedDate).length;
+    document.getElementById("foodTarget").textContent=st.profile.dailyCalorieTarget?`${st.profile.dailyCalorieTarget}`:"—";
+    document.getElementById("savedFood").innerHTML='<option value="">— Choose saved food —</option>'+st.foodLibrary.map(f=>`<option value="${f.id}">${esc(f.name)} · ${f.calories} kcal</option>`).join("");
+    renderLibrary(); renderEntries();
+  }
+  function renderLibrary(){
+    const host=document.getElementById("foodLibrary"), list=P.getState().foodLibrary;
+    host.innerHTML=list.length?list.map(f=>`<div class="food-row"><div class="row-main"><div class="row-title">${esc(f.name)}</div><div class="row-meta">${f.calories} kcal · ${f.protein}g protein · ${f.carbs}g carbs · ${f.fat}g fat · ${esc(f.serving)}</div></div><div class="row-actions"><button class="btn btn-sm" data-use-food="${f.id}">Use</button><button class="btn btn-sm btn-danger" data-delete-food="${f.id}">Delete</button></div></div>`).join(""):'<div class="empty">Your saved food library is empty. Save the foods you repeat most often.</div>';
+    host.querySelectorAll("[data-use-food]").forEach(b=>b.onclick=()=>{document.getElementById("savedFood").value=b.dataset.useFood;document.getElementById("savedFood").dispatchEvent(new Event("change"));window.scrollTo({top:0,behavior:"smooth"})});
+    host.querySelectorAll("[data-delete-food]").forEach(b=>b.onclick=()=>{if(confirm("Delete this saved food? Existing logged entries stay intact.")){P.deleteFood(b.dataset.deleteFood);render()}});
+  }
+  function renderEntries(){
+    const date=document.getElementById("foodDate").value||P.today(), items=P.getFoodForDate(date), host=document.getElementById("todayEntries");
+    host.innerHTML=items.length?items.map(f=>`<div class="food-row"><div class="row-main"><div class="row-title">${esc(f.name)} <span class="badge">${f.quantity} ×</span></div><div class="row-meta">${Math.round(f.calories)} kcal · ${Math.round(f.protein)}g P · ${Math.round(f.carbs)}g C · ${Math.round(f.fat)}g F</div></div><div class="row-actions"><button class="btn btn-sm btn-danger" data-delete-entry="${f.id}">Delete</button></div></div>`).join(""):'<div class="empty">No food logged for this date.</div>';
+    host.querySelectorAll("[data-delete-entry]").forEach(b=>b.onclick=()=>{P.deleteFoodLog(b.dataset.deleteEntry);render()});
+  }
+  document.getElementById("foodDate").addEventListener("change",render);
+  function esc(x){return String(x).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+});
+</script>
+</body></html>

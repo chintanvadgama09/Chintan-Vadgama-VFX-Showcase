@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pulse — Activities</title><link rel="stylesheet" href="styles.css"></head>
+<body data-page="activities">
+<div class="app-shell">
+<aside class="sidebar"><div class="brand"><div class="brand-mark">P</div><div><strong>Pulse</strong><span>health, with momentum</span></div></div><nav class="nav">
+<a href="index.html" data-nav="dashboard"><span class="nav-icon">⌂</span>Today</a><a href="nutrition.html" data-nav="nutrition"><span class="nav-icon">◔</span>Nutrition</a><a href="food-log.html" data-nav="food"><span class="nav-icon">▤</span>Food log</a><a href="activities.html" data-nav="activities"><span class="nav-icon">✓</span>Activities</a><a href="progress.html" data-nav="progress"><span class="nav-icon">↗</span>Progress</a><a href="settings.html" data-nav="settings"><span class="nav-icon">⚙</span>Settings</a>
+</nav><div class="sidebar-bottom"><button class="theme-toggle" id="themeToggle">Theme · System</button><div class="account-mini"><div class="name" data-account-name>You</div><div class="meta" data-level>Level 1</div></div></div></aside>
+<main class="main"><div class="content">
+<div class="mobile-nav"><a href="index.html" data-nav="dashboard">Today</a><a href="nutrition.html" data-nav="nutrition">Nutrition</a><a href="food-log.html" data-nav="food">Food</a><a href="activities.html" data-nav="activities">Activities</a><a href="progress.html" data-nav="progress">Progress</a><a href="settings.html" data-nav="settings">Settings</a></div>
+<header class="topbar"><div><div class="eyebrow">Activities</div><h1>Choose the behavior. <span class="accent">Then make it happen.</span></h1><div class="page-subtitle">Pick from common health actions, set a goal and time, or create something completely custom.</div></div><div class="top-actions"><button class="btn btn-primary" id="addCustomBtn">+ Custom activity</button></div></header>
+
+<div class="grid grid-2">
+<section class="card">
+<div class="card-header"><div><h2>Activity library</h2><div class="label">Built-in actions you can add to any day.</div></div><select id="categoryFilter" class="select" style="width:auto"><option value="">All</option><option>Strength</option><option>Cardio</option><option>Recovery</option><option>Wellness</option><option>Mind</option></select></div>
+<div id="activityLibrary"></div>
+</section>
+<section class="card">
+<div class="card-header"><div><h2>Your day</h2><div class="label" id="selectedDayLabel"></div></div><input id="selectedDate" class="input" type="date" style="width:auto"></div>
+<div id="dailyActivities"></div>
+</section>
+</div>
+
+<section class="card section-gap">
+<div class="card-header"><div><h2>Weekly planning</h2><div class="label">Dots show how complete each day’s plan is.</div></div><div class="pill accent" id="weekConsistency">0%</div></div>
+<div id="calendar" class="calendar"></div>
+</section>
+</div></main></div>
+<div class="toast"></div>
+
+<div class="modal-backdrop" id="activityModal"><div class="modal">
+<div class="modal-header"><div><h2>Add activity</h2><div class="label">Set the smallest version you are willing to complete.</div></div><button class="btn btn-sm" id="closeActivityModal">Close</button></div>
+<form id="activityForm" class="grid" style="gap:12px">
+<div class="form-grid-3"><div class="field"><label>Date</label><input id="aDate" class="input" type="date"></div><div class="field"><label>Activity</label><input id="aName" class="input" required placeholder="e.g. 20-minute walk"></div><div class="field"><label>Category</label><select id="aCategory" class="select"><option>Strength</option><option>Cardio</option><option>Recovery</option><option>Wellness</option><option>Mind</option><option>Custom</option></select></div></div>
+<div class="form-grid-3"><div class="field"><label>Goal</label><input id="aGoal" class="input" type="number" min="0" step=".1" value="20"></div><div class="field"><label>Unit</label><select id="aUnit" class="select"><option>minutes</option><option>steps</option><option>glasses</option><option>km</option><option>hours</option><option>sessions</option></select></div><div class="field"><label>Time</label><input id="aTime" class="input" type="time"></div></div>
+<div class="field"><label>Notes</label><input id="aNotes" class="input" placeholder="Optional"></div>
+<div class="modal-actions"><button class="btn" type="button" id="cancelActivity">Cancel</button><button class="btn btn-primary" type="submit">Add activity</button></div>
+</form></div></div>
+
+<script src="data.js"></script><script src="app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const P=Pulse;
+  const dateInput=document.getElementById("selectedDate"); dateInput.value=P.today(); document.getElementById("aDate").value=P.today();
+  render();
+  P.subscribe(render);
+
+  document.getElementById("categoryFilter").addEventListener("change",renderLibrary);
+  dateInput.addEventListener("change",render);
+  document.getElementById("addCustomBtn").onclick=()=>openModal();
+  document.getElementById("closeActivityModal").onclick=closeModal;
+  document.getElementById("cancelActivity").onclick=closeModal;
+
+  document.getElementById("activityForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    P.addActivity({date:aDate.value,name:aName.value,category:aCategory.value,goal:aGoal.value,unit:aUnit.value,scheduledTime:aTime.value,notes:aNotes.value,source:"custom",xp:20});
+    closeModal(); e.target.reset(); aDate.value=dateInput.value; render(); P.showToast("Activity added");
+  });
+
+  function openModal(){
+    aDate.value=dateInput.value; document.getElementById("activityModal").classList.add("open");
+    setTimeout(()=>aName.focus(),50);
+  }
+  function closeModal(){document.getElementById("activityModal").classList.remove("open")}
+  function render(){ renderLibrary(); renderDay(); renderCalendar(); }
+  function renderLibrary(){
+    const filter=document.getElementById("categoryFilter").value;
+    const host=document.getElementById("activityLibrary");
+    const list=P.ACTIVITY_LIBRARY.filter(x=>!filter||x.category===filter);
+    host.innerHTML=list.map(a=>`<div class="activity-row"><div class="row-main"><div class="row-title">${a.icon} ${esc(a.name)}</div><div class="row-meta">${esc(a.category)} · default ${a.defaultGoal} ${esc(a.unit)} · +${a.xp} XP</div></div><div class="row-actions"><button class="btn btn-sm" data-add="${a.id}">Add</button></div></div>`).join("");
+    host.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{
+      const a=P.ACTIVITY_LIBRARY.find(x=>x.id===b.dataset.add);
+      P.addActivity({date:dateInput.value,name:a.name,category:a.category,goal:a.defaultGoal,unit:a.unit,scheduledTime:"",xp:a.xp,source:"library"});
+      render(); P.showToast(`${a.name} planned`);
+    });
+  }
+  function renderDay(){
+    const date=dateInput.value||P.today(); const items=P.getActivityForDate(date);
+    document.getElementById("selectedDayLabel").textContent=P.formatDate(date,{weekday:"long",month:"long",day:"numeric"});
+    const host=document.getElementById("dailyActivities");
+    if(!items.length){host.innerHTML='<div class="empty">Nothing planned for this date. Add one action from the library.</div>';return}
+    host.innerHTML=items.map(a=>`<div class="activity-row"><div class="row-main"><div class="row-title">${iconFor(a)} ${esc(a.name)}</div><div class="row-meta">${a.goal?`${a.goal} ${esc(a.unit)}`:""} ${a.scheduledTime?`· ${esc(a.scheduledTime)}`:""} · +${a.xp} XP</div></div><div class="row-actions"><button class="btn btn-sm ${a.completed?"":"btn-primary"}" data-toggle="${a.id}">${a.completed?"Completed":"Complete"}</button><button class="btn btn-sm btn-danger" data-delete="${a.id}">Delete</button></div></div>`).join("");
+    host.querySelectorAll("[data-toggle]").forEach(b=>b.onclick=()=>{
+      P.toggleActivity(b.dataset.toggle); P.recalcStreak();
+      P.getState().gamification.weeklyCompleted = countWeeklyCompleted();
+      P.getState().gamification.momentum=P.getWeeklyConsistency();
+      P.updateAchievements(); P.maybeClaimQuestBonus(); render();
+    });
+    host.querySelectorAll("[data-delete]").forEach(b=>b.onclick=()=>{P.deleteActivity(b.dataset.delete);render()});
+  }
+  function countWeeklyCompleted(){const dates=new Set(P.weekDates());return P.getState().activities.filter(a=>dates.has(a.date)&&a.completed).length}
+  function renderCalendar(){
+    const dates=P.weekDates(), host=document.getElementById("calendar");
+    let html=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(x=>`<div class="day-head">${x}</div>`).join("");
+    dates.forEach(d=>{
+      const s=P.getDaySummary(d); const cls=d===P.today()?"today":"";
+      const dot=s.planned===0?"":s.consistency>=80?"good":s.consistency>0?"mid":"";
+      html+=`<button class="day ${cls}" data-day="${d}" style="text-align:left;color:var(--text)"><div class="date">${P.parseDate(d).getDate()}</div><div class="tiny">${s.done}/${s.planned}</div><div class="dotline ${dot}"></div></button>`;
+    });
+    host.innerHTML=html;
+    host.querySelectorAll("[data-day]").forEach(b=>b.onclick=()=>{dateInput.value=b.dataset.day;render()});
+    document.getElementById("weekConsistency").textContent=`${P.getWeeklyConsistency()}%`;
+  }
+  function iconFor(a){const x=P.ACTIVITY_LIBRARY.find(z=>z.name===a.name);return x?.icon||"•"}
+  function esc(x){return String(x).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+});
+</script>
+</body></html>
