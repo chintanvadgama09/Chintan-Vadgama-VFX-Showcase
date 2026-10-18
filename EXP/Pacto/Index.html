@@ -1,0 +1,2089 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PACT // ₹100 — 1v1 Monthly Goal & Penalty Vault</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Space Grotesk, Plus Jakarta Sans, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#0B0C0E',
+            slateCard: '#131519',
+            slateElevated: '#181B21',
+            hairline: '#22262E',
+            alabaster: '#F4F5F7',
+            techGray: '#8A919E',
+            acidLime: '#D4FF33',
+            emeraldHit: '#10B981',
+            crimsonMiss: '#FF4D4D',
+            vaultGold: '#F59E0B',
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Space Grotesk"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    body {
+      background-color: #0B0C0E;
+      color: #F4F5F7;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    /* Subtle technical grid background */
+    .bg-tech-grid {
+      background-image: 
+        linear-gradient(to right, rgba(34, 38, 46, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(34, 38, 46, 0.35) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    /* Dot matrix pattern for Vault header */
+    .bg-dot-matrix {
+      background-image: radial-gradient(rgba(245, 158, 11, 0.22) 1px, transparent 1px);
+      background-size: 10px 10px;
+    }
+    .bg-lime-matrix {
+      background-image: radial-gradient(rgba(212, 255, 51, 0.16) 1px, transparent 1px);
+      background-size: 10px 10px;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0C0E;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #22262E;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #353B47;
+    }
+    /* Tactile button press */
+    .btn-tactile {
+      transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-tactile:active {
+      transform: translateY(1px) scale(0.99);
+    }
+    /* Number input spinner removal */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+    .animate-pulse-subtle {
+      animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-obsidian bg-tech-grid selection:bg-acidLime selection:text-obsidian flex flex-col">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-40 bg-obsidian/90 backdrop-blur-md border-b border-hairline">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <!-- Brand Identity -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-slateElevated border border-hairline flex items-center justify-center shadow-inner">
+          <span class="font-mono font-extrabold text-acidLime text-sm tracking-tighter">₹100</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-display font-bold text-base tracking-tight text-alabaster">PACT // VAULT</span>
+            <span id="syncStatusBadge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider bg-slateElevated border border-hairline text-techGray">
+              <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emeraldHit"></span>
+              <span id="syncText">LIVE</span>
+            </span>
+          </div>
+          <p class="text-[11px] font-mono text-techGray hidden sm:block">1V1 DAILY DISCIPLINE & PENALTY LEDGER</p>
+        </div>
+      </div>
+
+      <!-- Right Controls: Quick Perspective Switch, Sync/GitHub Config, Account -->
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- Instant Perspective Switcher (visible when logged in & paired) -->
+        <button id="btnSwapPerspective" onclick="window.app.swapPerspective()" class="hidden btn-tactile items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slateElevated hover:bg-[#1f242d] border border-hairline text-xs font-mono text-alabaster" title="Switch between your account and your partner's account to test or log from one device">
+          <svg class="w-3.5 h-3.5 text-acidLime" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          <span class="hidden md:inline">Switch View:</span>
+          <span id="swapPartnerName" class="text-acidLime font-semibold">Partner</span>
+        </button>
+
+        <!-- GitHub / Cloud Sync Modal Trigger -->
+        <button onclick="window.app.openModal('syncModal')" class="btn-tactile flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slateCard hover:bg-slateElevated border border-hairline text-xs font-mono text-techGray hover:text-alabaster" title="Cloud Sync & Shareable Pact Link for GitHub Pages">
+          <svg class="w-3.5 h-3.5 text-vaultGold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+          <span class="hidden sm:inline">Sync / Share</span>
+        </button>
+
+        <!-- Logged-In User Pill -->
+        <div id="headerUserArea" class="hidden items-center gap-2 pl-2 border-l border-hairline">
+          <div class="text-right hidden sm:block">
+            <div id="headerDisplayName" class="text-xs font-semibold text-alabaster leading-none">--</div>
+            <div id="headerUsername" class="text-[10px] font-mono text-techGray mt-0.5">@--</div>
+          </div>
+          <button onclick="window.app.logout()" class="btn-tactile px-2.5 py-1.5 rounded-lg bg-slateCard hover:bg-crimsonMiss/15 hover:border-crimsonMiss/40 hover:text-crimsonMiss border border-hairline text-xs font-mono text-techGray" title="Log Out / Switch User">
+            Log Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APPLICATION CONTAINER -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: AUTHENTICATION (LOGIN / SIGN UP)   -->
+    <!-- ========================================== -->
+    <section id="authView" class="max-w-md mx-auto my-4 sm:my-10">
+      <!-- Editorial Hero Header -->
+      <div class="mb-6 text-center sm:text-left">
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-slateElevated border border-hairline text-[11px] font-mono uppercase tracking-widest text-acidLime mb-3">
+          <span>PROTOCOL 01 // HIGH STAKES HABITS</span>
+        </div>
+        <h1 class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-alabaster">
+          Hit your daily target.<br/>Or pay <span class="text-vaultGold font-mono">₹100</span> to the Vault.
+        </h1>
+        <p class="text-sm text-techGray mt-2 leading-relaxed">
+          Create your account, pair with your partner or friend by username, and track your monthly goal head-to-head. Every missed EOD automatically adds ₹100 to the shared vault.
+        </p>
+      </div>
+
+      <!-- Auth Card -->
+      <div class="bg-slateCard border border-hairline rounded-2xl p-5 sm:p-6 shadow-2xl">
+        <!-- Mode Tabs -->
+        <div class="grid grid-cols-2 gap-1 p-1 bg-obsidian rounded-xl border border-hairline mb-5">
+          <button id="tabLogin" onclick="window.app.switchAuthTab('login')" class="py-2 rounded-lg text-xs font-mono font-semibold uppercase tracking-wider bg-slateElevated text-alabaster border border-hairline transition-all">
+            Log In
+          </button>
+          <button id="tabSignup" onclick="window.app.switchAuthTab('signup')" class="py-2 rounded-lg text-xs font-mono font-semibold uppercase tracking-wider text-techGray hover:text-alabaster transition-all">
+            Create Account
+          </button>
+        </div>
+
+        <!-- Auth Form -->
+        <form id="authForm" onsubmit="window.app.handleAuthSubmit(event)" class="space-y-4">
+          <div id="signupNameField" class="hidden">
+            <label class="block text-[11px] font-mono uppercase tracking-wider text-techGray mb-1.5">Your Display Name</label>
+            <input id="authDisplayName" type="text" placeholder="e.g. Rohan or Priya" class="w-full px-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline text-sm text-alabaster placeholder-techGray/50 focus:outline-none focus:border-acidLime transition-colors" />
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-mono uppercase tracking-wider text-techGray mb-1.5">Username</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center font-mono text-techGray text-sm">@</span>
+              <input id="authUsername" type="text" required placeholder="rohan" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline font-mono text-sm text-alabaster placeholder-techGray/50 focus:outline-none focus:border-acidLime transition-colors lowercase" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-mono uppercase tracking-wider text-techGray mb-1.5">Password / PIN</label>
+            <input id="authPassword" type="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline font-mono text-sm text-alabaster placeholder-techGray/50 focus:outline-none focus:border-acidLime transition-colors" />
+          </div>
+
+          <div id="signupPartnerField" class="hidden pt-1">
+            <label class="block text-[11px] font-mono uppercase tracking-wider text-techGray mb-1.5">
+              Partner's Username <span class="text-techGray/60">(Optional — can link later)</span>
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center font-mono text-techGray text-sm">@</span>
+              <input id="authPartnerUsername" type="text" placeholder="priya" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline font-mono text-sm text-alabaster placeholder-techGray/50 focus:outline-none focus:border-acidLime transition-colors lowercase" />
+            </div>
+          </div>
+
+          <div id="authErrorBox" class="hidden p-3 rounded-xl bg-crimsonMiss/10 border border-crimsonMiss/30 text-xs text-crimsonMiss font-mono"></div>
+
+          <button id="authSubmitBtn" type="submit" class="btn-tactile w-full py-3 rounded-xl bg-acidLime hover:bg-[#defc56] text-obsidian font-display font-bold text-sm tracking-wide uppercase shadow-lg shadow-acidLime/10">
+            Enter The Pact →
+          </button>
+        </form>
+
+        <!-- Instant Pre-loaded Couple Demo Accounts -->
+        <div class="mt-6 pt-5 border-t border-hairline">
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-techGray">Instant Couple Demo Accounts</span>
+            <span class="text-[10px] font-mono text-acidLime">1-Click Login</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <button type="button" onclick="window.app.quickLogin('kabir')" class="btn-tactile p-2.5 rounded-xl bg-obsidian hover:bg-slateElevated border border-hairline text-left group">
+              <div class="flex items-center justify-between">
+                <span class="font-display font-bold text-xs text-alabaster group-hover:text-acidLime">Kabir (You)</span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slateCard text-techGray">@kabir</span>
+              </div>
+              <p class="text-[11px] font-mono text-techGray mt-1">Paired w/ @meera</p>
+            </button>
+            <button type="button" onclick="window.app.quickLogin('meera')" class="btn-tactile p-2.5 rounded-xl bg-obsidian hover:bg-slateElevated border border-hairline text-left group">
+              <div class="flex items-center justify-between">
+                <span class="font-display font-bold text-xs text-alabaster group-hover:text-acidLime">Meera (GF)</span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slateCard text-techGray">@meera</span>
+              </div>
+              <p class="text-[11px] font-mono text-techGray mt-1">Paired w/ @kabir</p>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: MAIN COMPETITION DASHBOARD         -->
+    <!-- ========================================== -->
+    <section id="dashboardView" class="hidden space-y-6">
+
+      <!-- UNPAIRED BANNER (Shown if user hasn't added a friend/partner yet) -->
+      <div id="unpairedBanner" class="hidden bg-slateCard border border-vaultGold/40 rounded-2xl p-5 sm:p-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-vaultGold mb-1">
+              <span>● WAITING FOR COMPETITOR PAIRING</span>
+            </div>
+            <h2 class="font-display text-lg sm:text-xl font-bold text-alabaster">Link your Girlfriend or Friend to start the 1v1 Vault</h2>
+            <p class="text-xs sm:text-sm text-techGray mt-1">
+              Enter their username below. If they haven't signed up yet, we'll create a linked partner slot for <span class="text-alabaster font-mono">@username</span> so they can log in anytime!
+            </p>
+          </div>
+          <form onsubmit="window.app.handlePairFriend(event)" class="flex flex-col sm:flex-row gap-2 shrink-0">
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center font-mono text-techGray text-xs">@</span>
+              <input id="pairUsernameInput" type="text" required placeholder="partner_username" class="w-full sm:w-44 pl-7 pr-3 py-2.5 rounded-xl bg-obsidian border border-hairline font-mono text-xs text-alabaster focus:outline-none focus:border-acidLime lowercase" />
+            </div>
+            <input id="pairDisplayNameInput" type="text" placeholder="Their Name (e.g. Ananya)" class="w-full sm:w-44 px-3 py-2.5 rounded-xl bg-obsidian border border-hairline text-xs text-alabaster focus:outline-none focus:border-acidLime" />
+            <button type="submit" class="btn-tactile px-4 py-2.5 rounded-xl bg-acidLime text-obsidian font-display font-bold text-xs uppercase tracking-wider whitespace-nowrap">
+              Pair Friend →
+            </button>
+          </form>
+        </div>
+        <!-- Existing users directory pill list -->
+        <div class="mt-4 pt-3 border-t border-hairline flex flex-wrap items-center gap-2">
+          <span class="text-[11px] font-mono text-techGray">Available accounts to pair:</span>
+          <div id="availableUsersList" class="flex flex-wrap gap-1.5"></div>
+        </div>
+      </div>
+
+      <!-- TOP BAR: ACTIVE MONTHLY GOAL + EOD COUNTDOWN + EDIT GOAL BUTTON -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Active Monthly Goal Spec Card (8 cols) -->
+        <div class="lg:col-span-8 bg-slateCard border border-hairline rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-acidLime/10 border border-acidLime/30 font-mono text-[10px] font-semibold text-acidLime uppercase tracking-wider">ACTIVE MONTHLY PACT</span>
+                <span id="pactPeriodBadge" class="font-mono text-xs text-techGray">--</span>
+              </div>
+              <h1 id="goalTitleDisplay" class="font-display text-xl sm:text-2xl font-bold text-alabaster mt-2 tracking-tight">
+                Walk 3,000 Steps a Day
+              </h1>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="window.app.openModal('friendModal')" class="btn-tactile px-3 py-2 rounded-xl bg-obsidian hover:bg-slateElevated border border-hairline text-xs font-mono text-techGray hover:text-alabaster flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <span>Partner</span>
+              </button>
+              <button onclick="window.app.openGoalModal()" class="btn-tactile px-3.5 py-2 rounded-xl bg-slateElevated hover:bg-[#222731] border border-hairline text-xs font-mono font-semibold text-acidLime flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                <span>Edit / Increase Goal</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Goal Parameters Strip -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-hairline">
+            <div>
+              <div class="text-[10px] font-mono uppercase tracking-wider text-techGray">Daily Target</div>
+              <div id="goalTargetDisplay" class="font-mono text-sm sm:text-base font-bold text-alabaster mt-0.5">3,000 steps</div>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono uppercase tracking-wider text-techGray">EOD Miss Penalty</div>
+              <div id="goalPenaltyDisplay" class="font-mono text-sm sm:text-base font-bold text-crimsonMiss mt-0.5">₹100 / day</div>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono uppercase tracking-wider text-techGray">Days Tracked</div>
+              <div id="goalDaysElapsedDisplay" class="font-mono text-sm sm:text-base font-bold text-alabaster mt-0.5">8 Days</div>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono uppercase tracking-wider text-techGray">Quick Target Bump</div>
+              <div class="flex items-center gap-1.5 mt-1">
+                <button onclick="window.app.bumpGoalTarget(500)" class="btn-tactile px-2 py-0.5 rounded bg-obsidian hover:bg-slateElevated border border-hairline font-mono text-[11px] text-acidLime" title="Increase Daily Target by +500">+500</button>
+                <button onclick="window.app.bumpGoalTarget(1000)" class="btn-tactile px-2 py-0.5 rounded bg-obsidian hover:bg-slateElevated border border-hairline font-mono text-[11px] text-acidLime" title="Increase Daily Target by +1,000">+1k</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EOD Countdown Clock Card (4 cols) -->
+        <div class="lg:col-span-4 bg-slateCard border border-hairline rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-techGray">EOD DEADLINE CLOCK</span>
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-mono text-crimsonMiss">
+              <span class="w-2 h-2 rounded-full bg-crimsonMiss animate-pulse-subtle"></span>
+              23:59:59 CUTOFF
+            </span>
+          </div>
+          <div class="my-3">
+            <div id="eodCountdownDisplay" class="font-mono text-3xl sm:text-4xl font-extrabold tracking-tight text-alabaster">
+              00:00:00
+            </div>
+            <p id="todayDateFormatted" class="text-xs font-mono text-techGray mt-1">
+              Loading today's date...
+            </p>
+          </div>
+          <div class="pt-3 border-t border-hairline flex items-center justify-between text-xs font-mono">
+            <span class="text-techGray">Unlogged by midnight:</span>
+            <span id="eodRuleBadge" class="text-vaultGold font-semibold">Auto +₹100 to Vault</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================== -->
+      <!-- ROW 2: TODAY'S CHECK-IN (LEFT) + SHARED VAULT (RIGHT)-->
+      <!-- ==================================================== -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        <!-- TODAY'S CHECK-IN CARD (6 cols) -->
+        <div class="lg:col-span-6 bg-slateCard border border-hairline rounded-2xl p-5 sm:p-6 flex flex-col justify-between bg-lime-matrix">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <div>
+                <span class="text-[11px] font-mono uppercase tracking-wider text-acidLime font-semibold">TODAY'S LOG // CHECK-IN</span>
+                <h2 class="font-display text-lg sm:text-xl font-bold text-alabaster mt-0.5">
+                  Log <span id="checkinUserLabel" class="text-acidLime">Your</span> Progress Today
+                </h2>
+              </div>
+              <div id="todayUserStatusPill" class="px-3 py-1 rounded-full font-mono text-xs font-bold uppercase tracking-wider bg-obsidian border border-hairline text-techGray">
+                PENDING
+              </div>
+            </div>
+
+            <!-- Live Progress Bar for Today -->
+            <div class="bg-obsidian border border-hairline rounded-xl p-4 mb-4">
+              <div class="flex items-baseline justify-between mb-2">
+                <div>
+                  <span id="todayCurrentValue" class="font-mono text-2xl sm:text-3xl font-extrabold text-alabaster">0</span>
+                  <span id="todayTargetValue" class="font-mono text-xs text-techGray"> / 3,000 steps</span>
+                </div>
+                <span id="todayPercentLabel" class="font-mono text-xs font-bold text-acidLime">0%</span>
+              </div>
+              <div class="w-full h-2.5 bg-slateElevated rounded-full overflow-hidden">
+                <div id="todayProgressBar" class="h-full bg-acidLime transition-all duration-300 rounded-full" style="width: 0%"></div>
+              </div>
+              <!-- Partner's live status today sub-bar -->
+              <div class="mt-3 pt-3 border-t border-hairline/70 flex items-center justify-between text-xs font-mono">
+                <span class="text-techGray"><span id="partnerNameMini">Partner</span> today:</span>
+                <span id="partnerTodayMiniStatus" class="text-alabaster font-semibold">--</span>
+              </div>
+            </div>
+
+            <!-- Input + Quick Log Controls -->
+            <form onsubmit="window.app.handleTodayCheckinSubmit(event)" class="space-y-3">
+              <div class="flex gap-2">
+                <div class="relative flex-1">
+                  <input id="todayLogInput" type="number" min="0" step="any" required placeholder="Enter today's total..." class="w-full px-4 py-3 rounded-xl bg-obsidian border border-hairline font-mono text-base font-bold text-alabaster placeholder-techGray/40 focus:outline-none focus:border-acidLime" />
+                  <span id="todayInputUnit" class="absolute inset-y-0 right-0 pr-3.5 flex items-center font-mono text-xs text-techGray pointer-events-none">steps</span>
+                </div>
+                <button type="submit" class="btn-tactile px-5 py-3 rounded-xl bg-acidLime hover:bg-[#defc56] text-obsidian font-display font-bold text-xs sm:text-sm uppercase tracking-wider shrink-0 shadow-lg shadow-acidLime/10">
+                  Save Log
+                </button>
+              </div>
+
+              <!-- Quick Increment Pills -->
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-[11px] font-mono text-techGray mr-1">Quick Add:</span>
+                <button type="button" onclick="window.app.quickAddToday(500)" class="btn-tactile px-2.5 py-1.5 rounded-lg bg-obsidian hover:bg-slateElevated border border-hairline font-mono text-xs text-alabaster">+500</button>
+                <button type="button" onclick="window.app.quickAddToday(1000)" class="btn-tactile px-2.5 py-1.5 rounded-lg bg-obsidian hover:bg-slateElevated border border-hairline font-mono text-xs text-alabaster">+1,000</button>
+                <button type="button" onclick="window.app.quickHitTargetToday()" class="btn-tactile px-3 py-1.5 rounded-lg bg-emeraldHit/15 hover:bg-emeraldHit/25 border border-emeraldHit/40 font-mono text-xs font-semibold text-emeraldHit">
+                  ✓ Hit Target (<span id="quickHitTargetBtnNum">3,000</span>)
+                </button>
+                <button type="button" onclick="window.app.forfeitToday()" class="btn-tactile ml-auto px-2.5 py-1.5 rounded-lg bg-crimsonMiss/10 hover:bg-crimsonMiss/20 border border-crimsonMiss/30 font-mono text-[11px] text-crimsonMiss" title="Explicitly mark today as missed and add ₹100 to the Vault">
+                  Miss Today (+₹100)
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-hairline/80 flex items-center justify-between text-[11px] font-mono text-techGray">
+            <span>Forgot to log yesterday? Click any row below to edit.</span>
+            <button onclick="window.app.openLogForPartnerToday()" class="text-acidLime hover:underline">Log for <span id="logForPartnerBtnName">Partner</span> →</button>
+          </div>
+        </div>
+
+        <!-- THE SHARED PENALTY VAULT CARD (6 cols) -->
+        <div class="lg:col-span-6 bg-slateCard border border-hairline rounded-2xl p-5 sm:p-6 flex flex-col justify-between bg-dot-matrix relative overflow-hidden">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <div>
+                <span class="text-[11px] font-mono uppercase tracking-wider text-vaultGold font-semibold">SHARED PENALTY POOL // THE VAULT</span>
+                <h2 class="font-display text-lg sm:text-xl font-bold text-alabaster mt-0.5">
+                  Accumulated Vault Balance
+                </h2>
+              </div>
+              <div id="vaultLeaderBadge" class="px-2.5 py-1 rounded-lg bg-vaultGold/15 border border-vaultGold/40 font-mono text-[11px] font-semibold text-vaultGold">
+                TIED DISCIPLINE
+              </div>
+            </div>
+
+            <!-- Big Vault Amount Display -->
+            <div class="bg-obsidian/95 border border-hairline rounded-xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div class="text-[10px] font-mono uppercase tracking-widest text-techGray">TOTAL LOCKED IN VAULT</div>
+                <div id="totalVaultBalance" class="font-mono text-3xl sm:text-4xl font-extrabold text-vaultGold tracking-tight mt-0.5">
+                  ₹0
+                </div>
+              </div>
+              <div class="sm:text-right">
+                <div class="text-[10px] font-mono uppercase tracking-wider text-techGray">TOTAL MISSED DAYS</div>
+                <div id="totalVaultMissedDays" class="font-mono text-sm font-bold text-alabaster mt-0.5">0 combined misses</div>
+                <div id="vaultRewardText" class="text-[11px] font-mono text-techGray mt-0.5">Pact Reward: Date Night / Treat Pool</div>
+              </div>
+            </div>
+
+            <!-- Player 1 vs Player 2 Lost to Vault Breakdown -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+              <!-- My Vault Contribution -->
+              <div class="bg-obsidian/90 border border-hairline rounded-xl p-3.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-mono uppercase tracking-wider text-techGray">YOU LOST TO VAULT</span>
+                  <span id="myMissedDaysCount" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-crimsonMiss/15 text-crimsonMiss font-semibold">0 misses</span>
+                </div>
+                <div id="myVaultLostAmount" class="font-mono text-xl sm:text-2xl font-extrabold text-crimsonMiss mt-1">
+                  ₹0
+                </div>
+                <div id="myVaultNameSub" class="text-[11px] font-mono text-techGray mt-0.5 truncate">--</div>
+              </div>
+
+              <!-- Competitor Vault Contribution -->
+              <div class="bg-obsidian/90 border border-hairline rounded-xl p-3.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-mono uppercase tracking-wider text-techGray">THEY LOST TO VAULT</span>
+                  <span id="partnerMissedDaysCount" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-crimsonMiss/15 text-crimsonMiss font-semibold">0 misses</span>
+                </div>
+                <div id="partnerVaultLostAmount" class="font-mono text-xl sm:text-2xl font-extrabold text-crimsonMiss mt-1">
+                  ₹0
+                </div>
+                <div id="partnerVaultNameSub" class="text-[11px] font-mono text-techGray mt-0.5 truncate">--</div>
+              </div>
+            </div>
+
+            <!-- Vault Contribution Split Bar -->
+            <div>
+              <div class="flex justify-between text-[11px] font-mono text-techGray mb-1.5">
+                <span id="vaultSplitLeftLabel">You: 50%</span>
+                <span id="vaultSplitRightLabel">Partner: 50%</span>
+              </div>
+              <div class="w-full h-2.5 rounded-full bg-obsidian border border-hairline overflow-hidden flex">
+                <div id="vaultSplitMyBar" class="h-full bg-acidLime transition-all duration-300" style="width: 50%"></div>
+                <div id="vaultSplitPartnerBar" class="h-full bg-crimsonMiss transition-all duration-300" style="width: 50%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-hairline/80 flex items-center justify-between text-[11px] font-mono text-techGray">
+            <span>Every missed day before today auto-adds <span id="vaultRulePenaltyText" class="text-alabaster">₹100</span></span>
+            <span id="netVaultDiffText" class="text-vaultGold font-semibold">Evenly matched</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================================================== -->
+      <!-- ROW 3: HEAD-TO-HEAD PLAYER COMPARISON & HEATMAP      -->
+      <!-- ==================================================== -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Player 1 (You) Stats & Consistency Grid -->
+        <div class="bg-slateCard border border-hairline rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div id="p1Avatar" class="w-10 h-10 rounded-xl bg-acidLime/15 border border-acidLime/40 flex items-center justify-center font-display font-bold text-acidLime text-sm">
+                YO
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 id="p1CardName" class="font-display font-bold text-base text-alabaster">You</h3>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-acidLime/15 text-acidLime">YOU</span>
+                </div>
+                <div id="p1CardUsername" class="text-xs font-mono text-techGray">@user</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] font-mono uppercase text-techGray">Completion Rate</div>
+              <div id="p1WinRate" class="font-mono text-lg font-extrabold text-emeraldHit">100%</div>
+            </div>
+          </div>
+
+          <!-- 3 Mini Metrics -->
+          <div class="grid grid-cols-3 gap-2 p-3 rounded-xl bg-obsidian border border-hairline mb-4 font-mono">
+            <div>
+              <div class="text-[10px] text-techGray uppercase">Days Hit</div>
+              <div id="p1DaysHit" class="text-sm font-bold text-emeraldHit mt-0.5">0</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-techGray uppercase">Current Streak</div>
+              <div id="p1Streak" class="text-sm font-bold text-acidLime mt-0.5">0d</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-techGray uppercase">Total Volume</div>
+              <div id="p1TotalVolume" class="text-sm font-bold text-alabaster mt-0.5">0</div>
+            </div>
+          </div>
+
+          <!-- Consistency Heatmap Strip -->
+          <div>
+            <div class="flex items-center justify-between text-[10px] font-mono text-techGray uppercase mb-2">
+              <span>Monthly Consistency Strip</span>
+              <span>Click any day to inspect/edit</span>
+            </div>
+            <div id="p1HeatmapGrid" class="flex flex-wrap gap-1.5"></div>
+          </div>
+        </div>
+
+        <!-- Player 2 (Competitor / Girlfriend) Stats & Consistency Grid -->
+        <div class="bg-slateCard border border-hairline rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div id="p2Avatar" class="w-10 h-10 rounded-xl bg-vaultGold/15 border border-vaultGold/40 flex items-center justify-center font-display font-bold text-vaultGold text-sm">
+                PA
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 id="p2CardName" class="font-display font-bold text-base text-alabaster">Competitor</h3>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-vaultGold/15 text-vaultGold">COMPETITOR</span>
+                </div>
+                <div id="p2CardUsername" class="text-xs font-mono text-techGray">@partner</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] font-mono uppercase text-techGray">Completion Rate</div>
+              <div id="p2WinRate" class="font-mono text-lg font-extrabold text-emeraldHit">100%</div>
+            </div>
+          </div>
+
+          <!-- 3 Mini Metrics -->
+          <div class="grid grid-cols-3 gap-2 p-3 rounded-xl bg-obsidian border border-hairline mb-4 font-mono">
+            <div>
+              <div class="text-[10px] text-techGray uppercase">Days Hit</div>
+              <div id="p2DaysHit" class="text-sm font-bold text-emeraldHit mt-0.5">0</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-techGray uppercase">Current Streak</div>
+              <div id="p2Streak" class="text-sm font-bold text-acidLime mt-0.5">0d</div>
+            </div>
+            <div>
+              <div class="text-[10px] text-techGray uppercase">Total Volume</div>
+              <div id="p2TotalVolume" class="text-sm font-bold text-alabaster mt-0.5">0</div>
+            </div>
+          </div>
+
+          <!-- Consistency Heatmap Strip -->
+          <div>
+            <div class="flex items-center justify-between text-[10px] font-mono text-techGray uppercase mb-2">
+              <span>Monthly Consistency Strip</span>
+              <span>Click any day to inspect/edit</span>
+            </div>
+            <div id="p2HeatmapGrid" class="flex flex-wrap gap-1.5"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================== -->
+      <!-- ROW 4: DAY-BY-DAY HEAD-TO-HEAD LEDGER                -->
+      <!-- ==================================================== -->
+      <div class="bg-slateCard border border-hairline rounded-2xl overflow-hidden">
+        <!-- Ledger Header -->
+        <div class="p-5 sm:p-6 border-b border-hairline flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-mono uppercase tracking-wider text-acidLime">OFFICIAL AUDIT LOG</span>
+              <span class="text-xs font-mono text-techGray">•</span>
+              <span id="ledgerSubtitleCount" class="text-xs font-mono text-techGray">Every day from challenge start</span>
+            </div>
+            <h2 class="font-display text-lg sm:text-xl font-bold text-alabaster mt-0.5">
+              Day-by-Day Head-to-Head Record & Vault Ledger
+            </h2>
+          </div>
+
+          <!-- Filter Pills -->
+          <div class="flex items-center gap-1.5 bg-obsidian p-1 rounded-xl border border-hairline self-start sm:self-auto">
+            <button id="filterAllBtn" onclick="window.app.setLedgerFilter('all')" class="px-3 py-1.5 rounded-lg font-mono text-xs font-semibold bg-slateElevated text-alabaster">All Days</button>
+            <button id="filterMissedBtn" onclick="window.app.setLedgerFilter('missed')" class="px-3 py-1.5 rounded-lg font-mono text-xs text-techGray hover:text-alabaster">Vault Penalties (₹)</button>
+            <button id="filterHitBtn" onclick="window.app.setLedgerFilter('hit')" class="px-3 py-1.5 rounded-lg font-mono text-xs text-techGray hover:text-alabaster">Both Hit</button>
+          </div>
+        </div>
+
+        <!-- Responsive Ledger Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-hairline bg-obsidian/60 font-mono text-[11px] uppercase tracking-wider text-techGray">
+                <th class="py-3.5 px-4 sm:px-6">Date</th>
+                <th class="py-3.5 px-4" id="thPlayer1">You</th>
+                <th class="py-3.5 px-4" id="thPlayer2">Competitor</th>
+                <th class="py-3.5 px-4">Vault Impact</th>
+                <th class="py-3.5 px-4 sm:px-6 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="dailyLedgerBody" class="divide-y divide-hairline text-sm">
+              <!-- Populated dynamically via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-hairline py-6 mt-12 text-center text-xs font-mono text-techGray">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span>PACT // ₹100 — 1v1 ACCOUNTABILITY VAULT</span>
+      <span>EOD AUTO-EVALUATION ENGINE • ZERO EXCUSES</span>
+    </div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 1: EDIT / INCREASE MONTHLY GOAL                    -->
+  <!-- ======================================================== -->
+  <div id="goalModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slateCard border border-hairline rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-hairline">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-acidLime">CHALLENGE PARAMETERS</span>
+          <h3 class="font-display text-lg font-bold text-alabaster">Edit or Increase Monthly Goal</h3>
+        </div>
+        <button onclick="window.app.closeModal('goalModal')" class="text-techGray hover:text-alabaster p-1">✕</button>
+      </div>
+
+      <form onsubmit="window.app.handleSaveGoal(event)" class="space-y-4 mt-4">
+        <div>
+          <label class="block text-[11px] font-mono uppercase tracking-wider text-techGray mb-1.5">Goal Title</label>
+          <input id="modalGoalTitle" type="text" required placeholder="Walk 3,000 Steps a Day" class="w-full px-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline text-sm text-alabaster focus:outline-none focus:border-acidLime" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-mono uppercase tracking-wider text-techGray mb-1.5">Daily Target Number</label>
+            <input id="modalGoalTarget" type="number" min="1" step="any" required class="w-full px-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline font-mono text-sm font-bold text-alabaster focus:outline-none focus:border-acidLime" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-mono uppercase tracking-wider text-techGray mb-1.5">Unit</label>
+            <select id="modalGoalUnit" class="w-full px-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline font-mono text-sm text-alabaster focus:outline-none focus:border-acidLime">
+              <option value="steps">steps</option>
+              <option value="km">km</option>
+              <option value="mins">mins</option>
+              <option value="pages">pages</option>
+              <option value="reps">reps</option>
+              <option value="cal">calories</option>
+              <option value="hrs">hours</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Quick Step Presets -->
+        <div>
+          <span class="block text-[10px] font-mono uppercase tracking-wider text-techGray mb-1.5">Quick Presets (Steps / Progressive Overload)</span>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" onclick="window.app.applyGoalPreset('Walk 3,000 Steps a Day', 3000, 'steps')" class="px-2.5 py-1 rounded-lg bg-obsidian hover:bg-slateElevated border border-hairline font-mono text-xs text-alabaster">3,000 steps</button>
+            <button type="button" onclick="window.app.applyGoalPreset('Walk 5,000 Steps a Day', 5000, 'steps')" class="px-2.5 py-1 rounded-lg bg-obsidian hover:bg-slateElevated border border-hairline font-mono text-xs text-alabaster">5,000 steps</button>
+            <button type="button" onclick="window.app.applyGoalPreset('Walk 8,000 Steps a Day', 8000, 'steps')" class="px-2.5 py-1 rounded-lg bg-obsidian hover:bg-slateElevated border border-hairline font-mono text-xs text-alabaster">8,000 steps</button>
+            <button type="button" onclick="window.app.applyGoalPreset('Walk 10,000 Steps a Day', 10000, 'steps')" class="px-2.5 py-1 rounded-lg bg-obsidian hover:bg-slateElevated border border-hairline font-mono text-xs text-alabaster">10,000 steps</button>
+            <button type="button" onclick="window.app.applyGoalPreset('45 Mins Workout / Gym', 45, 'mins')" class="px-2.5 py-1 rounded-lg bg-obsidian hover:bg-slateElevated border border-hairline font-mono text-xs text-alabaster">45 mins workout</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-mono uppercase tracking-wider text-techGray mb-1.5">Missed EOD Penalty (₹)</label>
+            <input id="modalGoalPenalty" type="number" min="10" step="10" required value="100" class="w-full px-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline font-mono text-sm font-bold text-vaultGold focus:outline-none focus:border-acidLime" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-mono uppercase tracking-wider text-techGray mb-1.5">Challenge Start Date</label>
+            <input id="modalGoalStartDate" type="date" required class="w-full px-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline font-mono text-sm text-alabaster focus:outline-none focus:border-acidLime" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-mono uppercase tracking-wider text-techGray mb-1.5">Vault Reward / Stake Note</label>
+          <input id="modalGoalReward" type="text" placeholder="e.g. Winner picks Date Night spot paid from Vault" class="w-full px-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline text-sm text-alabaster focus:outline-none focus:border-acidLime" />
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2 border-t border-hairline">
+          <button type="button" onclick="window.app.closeModal('goalModal')" class="px-4 py-2.5 rounded-xl bg-obsidian border border-hairline font-mono text-xs text-techGray hover:text-alabaster">Cancel</button>
+          <button type="submit" class="btn-tactile px-5 py-2.5 rounded-xl bg-acidLime text-obsidian font-display font-bold text-xs uppercase tracking-wider">Update Monthly Pact</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 2: EDIT SPECIFIC DAY RECORD (RETROACTIVE LOGGING)  -->
+  <!-- ======================================================== -->
+  <div id="dayEditModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slateCard border border-hairline rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-hairline">
+        <div>
+          <span id="dayModalDateBadge" class="text-[10px] font-mono uppercase tracking-wider text-acidLime">2026-10-18</span>
+          <h3 class="font-display text-lg font-bold text-alabaster">Update Daily Record</h3>
+        </div>
+        <button onclick="window.app.closeModal('dayEditModal')" class="text-techGray hover:text-alabaster p-1">✕</button>
+      </div>
+
+      <form onsubmit="window.app.handleSaveDayEdit(event)" class="space-y-4 mt-4">
+        <input type="hidden" id="dayModalDateKey" />
+
+        <!-- Player 1 Input -->
+        <div class="p-3.5 rounded-xl bg-obsidian border border-hairline">
+          <div class="flex items-center justify-between mb-2">
+            <label id="dayModalP1Label" class="text-xs font-display font-bold text-alabaster">Your Logged Count</label>
+            <button type="button" onclick="window.app.fillDayModalTarget('p1')" class="text-[10px] font-mono text-acidLime hover:underline">Set to Target</button>
+          </div>
+          <input id="dayModalP1Value" type="number" min="0" step="any" required class="w-full px-3 py-2 rounded-lg bg-slateCard border border-hairline font-mono text-sm font-bold text-alabaster focus:outline-none focus:border-acidLime" />
+          <label class="inline-flex items-center gap-2 mt-2.5 text-xs font-mono text-techGray cursor-pointer">
+            <input id="dayModalP1Excused" type="checkbox" class="rounded border-hairline bg-slateCard text-acidLime focus:ring-0" />
+            <span>Excused / Rest Day (No ₹100 Penalty if below target)</span>
+          </label>
+        </div>
+
+        <!-- Player 2 Input -->
+        <div class="p-3.5 rounded-xl bg-obsidian border border-hairline">
+          <div class="flex items-center justify-between mb-2">
+            <label id="dayModalP2Label" class="text-xs font-display font-bold text-alabaster">Partner's Logged Count</label>
+            <button type="button" onclick="window.app.fillDayModalTarget('p2')" class="text-[10px] font-mono text-acidLime hover:underline">Set to Target</button>
+          </div>
+          <input id="dayModalP2Value" type="number" min="0" step="any" required class="w-full px-3 py-2 rounded-lg bg-slateCard border border-hairline font-mono text-sm font-bold text-alabaster focus:outline-none focus:border-acidLime" />
+          <label class="inline-flex items-center gap-2 mt-2.5 text-xs font-mono text-techGray cursor-pointer">
+            <input id="dayModalP2Excused" type="checkbox" class="rounded border-hairline bg-slateCard text-acidLime focus:ring-0" />
+            <span>Excused / Rest Day (No ₹100 Penalty if below target)</span>
+          </label>
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2 border-t border-hairline">
+          <button type="button" onclick="window.app.closeModal('dayEditModal')" class="px-4 py-2.5 rounded-xl bg-obsidian border border-hairline font-mono text-xs text-techGray hover:text-alabaster">Cancel</button>
+          <button type="submit" class="btn-tactile px-5 py-2.5 rounded-xl bg-acidLime text-obsidian font-display font-bold text-xs uppercase tracking-wider">Save Day Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 3: PARTNER / FRIEND PAIRING MANAGER                -->
+  <!-- ======================================================== -->
+  <div id="friendModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slateCard border border-hairline rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-hairline">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-acidLime">1V1 CONNECTION</span>
+          <h3 class="font-display text-lg font-bold text-alabaster">Partner & Friend Pairing</h3>
+        </div>
+        <button onclick="window.app.closeModal('friendModal')" class="text-techGray hover:text-alabaster p-1">✕</button>
+      </div>
+
+      <div class="space-y-4 mt-4">
+        <div class="p-3.5 rounded-xl bg-obsidian border border-hairline">
+          <div class="text-[10px] font-mono uppercase text-techGray">YOUR USERNAME (SHARE WITH YOUR PARTNER)</div>
+          <div class="flex items-center justify-between mt-1">
+            <span id="friendModalMyUsername" class="font-mono text-base font-bold text-acidLime">@user</span>
+            <button onclick="window.app.copyMyUsername()" class="px-2.5 py-1 rounded bg-slateElevated border border-hairline font-mono text-xs text-alabaster hover:border-acidLime">Copy</button>
+          </div>
+        </div>
+
+        <form onsubmit="window.app.handlePairFriendFromModal(event)" class="space-y-3">
+          <label class="block text-[11px] font-mono uppercase tracking-wider text-techGray">Pair or Switch Competitor by Username</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center font-mono text-techGray text-sm">@</span>
+            <input id="modalPairUsername" type="text" required placeholder="girlfriend_username" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline font-mono text-sm text-alabaster focus:outline-none focus:border-acidLime lowercase" />
+          </div>
+          <input id="modalPairDisplayName" type="text" placeholder="Partner Display Name (if new account)" class="w-full px-3.5 py-2.5 rounded-xl bg-obsidian border border-hairline text-sm text-alabaster focus:outline-none focus:border-acidLime" />
+          <button type="submit" class="btn-tactile w-full py-2.5 rounded-xl bg-acidLime text-obsidian font-display font-bold text-xs uppercase tracking-wider">
+            Connect / Switch Partner
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 4: GITHUB PAGES / CLOUD SYNC & SHARE LINK          -->
+  <!-- ======================================================== -->
+  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slateCard border border-hairline rounded-2xl max-w-lg w-full p-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-4 border-b border-hairline">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-vaultGold">PORTABILITY & CLOUD SYNC</span>
+          <h3 class="font-display text-lg font-bold text-alabaster">GitHub Pages & Multi-Device Sync</h3>
+        </div>
+        <button onclick="window.app.closeModal('syncModal')" class="text-techGray hover:text-alabaster p-1">✕</button>
+      </div>
+
+      <div class="space-y-4 mt-4 text-xs">
+        <div class="p-3.5 rounded-xl bg-obsidian border border-hairline">
+          <div class="flex items-center justify-between">
+            <span class="font-mono uppercase text-techGray">Active Storage Engine:</span>
+            <span id="modalStorageEngineLabel" class="font-mono font-bold text-emeraldHit">Cloud / URL State Sync</span>
+          </div>
+          <p class="text-techGray mt-1.5 leading-relaxed">
+            When hosted on GitHub Pages or shared with your partner, you can either sync live in the cloud or send an instant <strong>Shareable Pact Snapshot URL</strong> that embeds all accounts, goals, and daily logs right in the link!
+          </p>
+        </div>
+
+        <!-- Shareable Snapshot URL Generator -->
+        <div>
+          <label class="block font-mono uppercase tracking-wider text-techGray mb-1.5">1. Shareable Snapshot Link (Works anywhere on GitHub Pages)</label>
+          <div class="flex gap-2">
+            <input id="shareableUrlInput" type="text" readonly class="flex-1 px-3 py-2 rounded-xl bg-obsidian border border-hairline font-mono text-xs text-alabaster" />
+            <button onclick="window.app.copyShareableLink()" class="btn-tactile px-4 py-2 rounded-xl bg-acidLime text-obsidian font-mono font-bold text-xs shrink-0">
+              Copy Link
+            </button>
+          </div>
+        </div>
+
+        <!-- Import/Export Sync Code -->
+        <div>
+          <label class="block font-mono uppercase tracking-wider text-techGray mb-1.5">2. Or Paste a Partner's Sync Code</label>
+          <div class="flex gap-2">
+            <input id="importSyncCodeInput" type="text" placeholder="Paste sync code here..." class="flex-1 px-3 py-2 rounded-xl bg-obsidian border border-hairline font-mono text-xs text-alabaster focus:outline-none focus:border-acidLime" />
+            <button onclick="window.app.importSyncCode()" class="btn-tactile px-4 py-2 rounded-xl bg-slateElevated border border-hairline text-alabaster font-mono font-semibold text-xs shrink-0 hover:border-acidLime">
+              Import State
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NON-INTRUSIVE TOAST NOTIFICATION -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 pointer-events-none flex flex-col gap-2"></div>
+
+  <!-- ======================================================== -->
+  <!-- APPLICATION LOGIC & REALTIME CLOUD / PORTABLE ENGINE     -->
+  <!-- ======================================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // ============================================================================
+    // DATE UTILITIES (Local YYYY-MM-DD formatting and EOD calculations)
+    // ============================================================================
+    function toDateKey(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getTodayKey() {
+      return toDateKey(new Date());
+    }
+
+    function addDays(dateKey, offsetDays) {
+      const [y, m, d] = dateKey.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      dt.setDate(dt.getDate() + offsetDays);
+      return toDateKey(dt);
+    }
+
+    function formatDisplayDate(dateKey) {
+      const [y, m, d] = dateKey.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+      return {
+        shortDate: `${months[dt.getMonth()]} ${String(d).padStart(2, '0')}`,
+        weekday: days[dt.getDay()],
+        full: `${days[dt.getDay()]}, ${d} ${months[dt.getMonth()]} ${y}`
+      };
+    }
+
+    function getDaysListBetween(startKey, endKey) {
+      const list = [];
+      let curr = startKey;
+      let guard = 0;
+      while (curr <= endKey && guard < 90) {
+        list.push(curr);
+        curr = addDays(curr, 1);
+        guard++;
+      }
+      return list;
+    }
+
+    function makePactId(u1, u2) {
+      return [u1.toLowerCase().trim(), u2.toLowerCase().trim()].sort().join('__');
+    }
+
+    // ============================================================================
+    // INITIAL SEED DATA (Realistic 8-day history for Kabir & Meera so app is rich)
+    // ============================================================================
+    function buildInitialSeedState() {
+      const todayKey = getTodayKey();
+      const startKey = addDays(todayKey, -7); // 8 days total including today
+
+      // Pre-populate realistic daily logs for the past 7 days + today
+      // Kabir missed 1 past day (₹100 lost to vault)
+      // Meera missed 2 past days (₹200 lost to vault)
+      const logs = {};
+      const pastOffsets = [
+        { offset: -7, kabir: 3420, meera: 3180 },
+        { offset: -6, kabir: 3890, meera: 2150 }, // Meera missed (< 3000) -> +₹100
+        { offset: -5, kabir: 3120, meera: 3500 },
+        { offset: -4, kabir: 1900, meera: 3340 }, // Kabir missed (< 3000) -> +₹100
+        { offset: -3, kabir: 4100, meera: 3050 },
+        { offset: -2, kabir: 3600, meera: 1400 }, // Meera missed (< 3000) -> +₹100
+        { offset: -1, kabir: 3290, meera: 3610 },
+        { offset: 0,  kabir: 2250, meera: 3120 }  // Today: Meera already hit 3,120! Kabir is at 2,250 (Pending before EOD)
+      ];
+
+      pastOffsets.forEach(item => {
+        const k = addDays(todayKey, item.offset);
+        logs[k] = {
+          kabir: { value: item.kabir, excused: false, forcedMiss: false },
+          meera: { value: item.meera, excused: false, forcedMiss: false }
+        };
+      });
+
+      const pactId = makePactId('kabir', 'meera');
+
+      return {
+        users: {
+          kabir: {
+            username: 'kabir',
+            displayName: 'Kabir',
+            password: '123',
+            partnerUsername: 'meera'
+          },
+          meera: {
+            username: 'meera',
+            displayName: 'Meera',
+            password: '123',
+            partnerUsername: 'kabir'
+          }
+        },
+        pacts: {
+          [pactId]: {
+            id: pactId,
+            members: ['kabir', 'meera'],
+            goalTitle: 'Walk 3,000 Steps a Day',
+            target: 3000,
+            unit: 'steps',
+            penalty: 100,
+            startDate: startKey,
+            rewardNote: 'Sushi & Ramen Date Night funded by the Vault',
+            logs: logs
+          }
+        }
+      };
+    }
+
+    // ============================================================================
+    // MAIN APPLICATION CONTROLLER
+    // ============================================================================
+    class PactVaultApp {
+      constructor() {
+        this.state = buildInitialSeedState();
+        this.currentUser = null; // username string
+        this.authMode = 'login';
+        this.ledgerFilter = 'all';
+
+        // Firebase references
+        this.db = null;
+        this.auth = null;
+        this.firebaseUser = null;
+        this.isCloudConnected = false;
+        this.appId = typeof __app_id !== 'undefined' ? __app_id : 'pact-100-vault-app';
+
+        this.init();
+      }
+
+      async init() {
+        // 1. Check if URL hash has a shared state snapshot (for GitHub Pages link sharing)
+        this.tryLoadFromUrlHash();
+
+        // 2. Start live EOD countdown clock
+        this.startClock();
+
+        // 3. Initialize Firebase Cloud if __firebase_config is present in environment
+        await this.initFirebaseIfAvailable();
+
+        // 4. Render initial view
+        this.render();
+      }
+
+      tryLoadFromUrlHash() {
+        try {
+          const hash = window.location.hash;
+          if (hash && hash.startsWith('#pact=')) {
+            const encoded = hash.replace('#pact=', '');
+            const jsonStr = decodeURIComponent(escape(atob(encoded)));
+            const parsed = JSON.parse(jsonStr);
+            if (parsed && parsed.users && parsed.pacts) {
+              this.state = parsed;
+              this.showToast('Loaded shared Pact state from link!', 'lime');
+            }
+          }
+        } catch (err) {
+          console.warn('Could not parse URL hash snapshot:', err);
+        }
+      }
+
+      encodeStateToken() {
+        const jsonStr = JSON.stringify(this.state);
+        return btoa(unescape(encodeURIComponent(jsonStr)));
+      }
+
+      syncUrlHashQuietly() {
+        try {
+          const token = this.encodeStateToken();
+          window.history.replaceState(null, '', `#pact=${token}`);
+        } catch (e) {
+          // Ignore if history replace is restricted in iframe
+        }
+      }
+
+      async initFirebaseIfAvailable() {
+        try {
+          if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+            const firebaseConfig = JSON.parse(__firebase_config);
+            const app = initializeApp(firebaseConfig);
+            this.db = getFirestore(app);
+            this.auth = getAuth(app);
+
+            // RULE 3: Auth Before Queries
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+              await signInWithCustomToken(this.auth, __initial_auth_token);
+            } else {
+              await signInAnonymously(this.auth);
+            }
+
+            onAuthStateChanged(this.auth, (user) => {
+              this.firebaseUser = user;
+              if (user) {
+                this.isCloudConnected = true;
+                this.updateSyncBadge(true);
+                this.subscribeToFirestoreState();
+              }
+            });
+          } else {
+            this.updateSyncBadge(false);
+          }
+        } catch (err) {
+          console.warn('Running in standalone portable mode:', err);
+          this.updateSyncBadge(false);
+        }
+      }
+
+      updateSyncBadge(isCloud) {
+        const dot = document.getElementById('syncDot');
+        const text = document.getElementById('syncText');
+        const engineLabel = document.getElementById('modalStorageEngineLabel');
+        if (isCloud) {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-emeraldHit';
+          text.textContent = 'CLOUD LIVE';
+          if (engineLabel) engineLabel.textContent = 'Realtime Cloud Firestore + URL Sync';
+        } else {
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-vaultGold';
+          text.textContent = 'PORTABLE SYNC';
+          if (engineLabel) engineLabel.textContent = 'GitHub Portable Engine + URL Hash Sync';
+        }
+      }
+
+      subscribeToFirestoreState() {
+        if (!this.firebaseUser || !this.db) return;
+
+        // RULE 1: Strict Path `/artifacts/{appId}/public/data/{collectionName}`
+        const stateDocRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'pact_global_state', 'main_ledger');
+
+        onSnapshot(
+          stateDocRef,
+          (snapshot) => {
+            if (snapshot.exists()) {
+              const data = snapshot.data();
+              if (data && data.payload) {
+                try {
+                  this.state = JSON.parse(data.payload);
+                  this.render();
+                } catch (e) {
+                  console.error('Failed to parse cloud state:', e);
+                }
+              }
+            } else {
+              // Seed initial state to Firestore so both accounts exist immediately
+              this.persistState();
+            }
+          },
+          (error) => {
+            console.error('Firestore listener error:', error);
+          }
+        );
+      }
+
+      async persistState() {
+        this.syncUrlHashQuietly();
+        this.render();
+
+        if (this.firebaseUser && this.db) {
+          try {
+            const stateDocRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'pact_global_state', 'main_ledger');
+            await setDoc(stateDocRef, {
+              payload: JSON.stringify(this.state),
+              updatedAt: Date.now()
+            });
+          } catch (err) {
+            console.error('Error saving state to cloud:', err);
+          }
+        }
+      }
+
+      // ============================================================================
+      // EOD COUNTDOWN CLOCK
+      // ============================================================================
+      startClock() {
+        const updateTimer = () => {
+          const now = new Date();
+          const eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+          const diffMs = Math.max(0, eod - now);
+
+          const hrs = String(Math.floor(diffMs / (1000 * 60 * 60))).padStart(2, '0');
+          const mins = String(Math.floor((diffMs / (1000 * 60)) % 60)).padStart(2, '0');
+          const secs = String(Math.floor((diffMs / 1000) % 60)).padStart(2, '0');
+
+          const clockEl = document.getElementById('eodCountdownDisplay');
+          if (clockEl) {
+            clockEl.textContent = `${hrs}:${mins}:${secs}`;
+          }
+
+          const dateLabelEl = document.getElementById('todayDateFormatted');
+          if (dateLabelEl) {
+            const f = formatDisplayDate(getTodayKey());
+            dateLabelEl.textContent = `TODAY IS ${f.full}`;
+          }
+        };
+        updateTimer();
+        setInterval(updateTimer, 1000);
+      }
+
+      // ============================================================================
+      // AUTHENTICATION & ACCOUNT CREATION
+      // ============================================================================
+      switchAuthTab(mode) {
+        this.authMode = mode;
+        const tabLogin = document.getElementById('tabLogin');
+        const tabSignup = document.getElementById('tabSignup');
+        const signupNameField = document.getElementById('signupNameField');
+        const signupPartnerField = document.getElementById('signupPartnerField');
+        const submitBtn = document.getElementById('authSubmitBtn');
+        const errBox = document.getElementById('authErrorBox');
+        errBox.classList.add('hidden');
+
+        if (mode === 'login') {
+          tabLogin.className = 'py-2 rounded-lg text-xs font-mono font-semibold uppercase tracking-wider bg-slateElevated text-alabaster border border-hairline transition-all';
+          tabSignup.className = 'py-2 rounded-lg text-xs font-mono font-semibold uppercase tracking-wider text-techGray hover:text-alabaster transition-all';
+          signupNameField.classList.add('hidden');
+          signupPartnerField.classList.add('hidden');
+          submitBtn.textContent = 'Enter The Pact →';
+        } else {
+          tabSignup.className = 'py-2 rounded-lg text-xs font-mono font-semibold uppercase tracking-wider bg-slateElevated text-alabaster border border-hairline transition-all';
+          tabLogin.className = 'py-2 rounded-lg text-xs font-mono font-semibold uppercase tracking-wider text-techGray hover:text-alabaster transition-all';
+          signupNameField.classList.remove('hidden');
+          signupPartnerField.classList.remove('hidden');
+          submitBtn.textContent = 'Create Account & Start Pact →';
+        }
+      }
+
+      handleAuthSubmit(e) {
+        e.preventDefault();
+        const usernameRaw = document.getElementById('authUsername').value.trim().toLowerCase().replace(/^@/, '');
+        const password = document.getElementById('authPassword').value.trim();
+        const displayName = document.getElementById('authDisplayName').value.trim();
+        const partnerUsernameRaw = document.getElementById('authPartnerUsername').value.trim().toLowerCase().replace(/^@/, '');
+        const errBox = document.getElementById('authErrorBox');
+
+        if (!usernameRaw) return;
+
+        if (this.authMode === 'login') {
+          const existing = this.state.users[usernameRaw];
+          if (!existing) {
+            errBox.textContent = `Account @${usernameRaw} not found. Switch to "Create Account" tab to sign up!`;
+            errBox.classList.remove('hidden');
+            return;
+          }
+          if (existing.password && existing.password !== password) {
+            errBox.textContent = 'Invalid password/PIN. (For demo accounts @kabir or @meera, password is 123)';
+            errBox.classList.remove('hidden');
+            return;
+          }
+          this.currentUser = usernameRaw;
+          errBox.classList.add('hidden');
+          this.showToast(`Welcome back, ${existing.displayName}!`, 'lime');
+          this.render();
+        } else {
+          // Sign Up flow
+          if (this.state.users[usernameRaw]) {
+            errBox.textContent = `Username @${usernameRaw} is already taken. Try logging in instead.`;
+            errBox.classList.remove('hidden');
+            return;
+          }
+          const finalDisplayName = displayName || usernameRaw.charAt(0).toUpperCase() + usernameRaw.slice(1);
+          this.state.users[usernameRaw] = {
+            username: usernameRaw,
+            displayName: finalDisplayName,
+            password: password || '123',
+            partnerUsername: null
+          };
+
+          if (partnerUsernameRaw && partnerUsernameRaw !== usernameRaw) {
+            this.pairUsersInternal(usernameRaw, partnerUsernameRaw, '');
+          }
+
+          this.currentUser = usernameRaw;
+          errBox.classList.add('hidden');
+          this.showToast(`Account @${usernameRaw} created!`, 'lime');
+          this.persistState();
+        }
+      }
+
+      quickLogin(username) {
+        if (!this.state.users[username]) return;
+        this.currentUser = username;
+        this.showToast(`Logged in as ${this.state.users[username].displayName} (@${username})`, 'lime');
+        this.render();
+      }
+
+      logout() {
+        this.currentUser = null;
+        this.render();
+      }
+
+      swapPerspective() {
+        if (!this.currentUser) return;
+        const userObj = this.state.users[this.currentUser];
+        if (userObj && userObj.partnerUsername && this.state.users[userObj.partnerUsername]) {
+          this.currentUser = userObj.partnerUsername;
+          const newActive = this.state.users[this.currentUser];
+          this.showToast(`Switched perspective to ${newActive.displayName} (@${newActive.username})`, 'lime');
+          this.render();
+        }
+      }
+
+      // ============================================================================
+      // PARTNER / FRIEND PAIRING LOGIC
+      // ============================================================================
+      pairUsersInternal(u1, u2, optionalP2DisplayName) {
+        const cleanU1 = u1.toLowerCase().trim().replace(/^@/, '');
+        const cleanU2 = u2.toLowerCase().trim().replace(/^@/, '');
+        if (!cleanU1 || !cleanU2 || cleanU1 === cleanU2) return false;
+
+        // If partner doesn't exist yet, create their account slot automatically so either person can log in
+        if (!this.state.users[cleanU2]) {
+          const capName = optionalP2DisplayName && optionalP2DisplayName.trim()
+            ? optionalP2DisplayName.trim()
+            : cleanU2.charAt(0).toUpperCase() + cleanU2.slice(1);
+
+          this.state.users[cleanU2] = {
+            username: cleanU2,
+            displayName: capName,
+            password: '123',
+            partnerUsername: cleanU1
+          };
+        } else {
+          this.state.users[cleanU2].partnerUsername = cleanU1;
+          if (optionalP2DisplayName && optionalP2DisplayName.trim()) {
+            this.state.users[cleanU2].displayName = optionalP2DisplayName.trim();
+          }
+        }
+
+        this.state.users[cleanU1].partnerUsername = cleanU2;
+
+        // Ensure a shared Pact exists for this pair
+        const pactId = makePactId(cleanU1, cleanU2);
+        if (!this.state.pacts[pactId]) {
+          const todayKey = getTodayKey();
+          const startKey = addDays(todayKey, -4); // Default 5 days of history so Vault is immediately active
+          this.state.pacts[pactId] = {
+            id: pactId,
+            members: [cleanU1, cleanU2],
+            goalTitle: 'Walk 3,000 Steps a Day',
+            target: 3000,
+            unit: 'steps',
+            penalty: 100,
+            startDate: startKey,
+            rewardNote: 'Date Night / Treat Pool funded by the Vault',
+            logs: {}
+          };
+        }
+        return true;
+      }
+
+      handlePairFriend(e) {
+        e.preventDefault();
+        if (!this.currentUser) return;
+        const partnerUser = document.getElementById('pairUsernameInput').value.trim().toLowerCase().replace(/^@/, '');
+        const partnerName = document.getElementById('pairDisplayNameInput').value.trim();
+        if (this.pairUsersInternal(this.currentUser, partnerUser, partnerName)) {
+          this.showToast(`Paired with @${partnerUser}! Your shared Vault is live.`, 'lime');
+          this.persistState();
+        }
+      }
+
+      handlePairFriendFromModal(e) {
+        e.preventDefault();
+        if (!this.currentUser) return;
+        const partnerUser = document.getElementById('modalPairUsername').value.trim().toLowerCase().replace(/^@/, '');
+        const partnerName = document.getElementById('modalPairDisplayName').value.trim();
+        if (this.pairUsersInternal(this.currentUser, partnerUser, partnerName)) {
+          this.closeModal('friendModal');
+          this.showToast(`Connected with @${partnerUser}!`, 'lime');
+          this.persistState();
+        }
+      }
+
+      quickPairWithExisting(username) {
+        if (!this.currentUser) return;
+        if (this.pairUsersInternal(this.currentUser, username, '')) {
+          this.showToast(`Paired with @${username}!`, 'lime');
+          this.persistState();
+        }
+      }
+
+      // ============================================================================
+      // GOAL CUSTOMIZATION & TARGET INCREASES
+      // ============================================================================
+      getActivePact() {
+        if (!this.currentUser) return null;
+        const me = this.state.users[this.currentUser];
+        if (!me || !me.partnerUsername) return null;
+        const pactId = makePactId(me.username, me.partnerUsername);
+        return this.state.pacts[pactId] || null;
+      }
+
+      openGoalModal() {
+        const pact = this.getActivePact();
+        if (!pact) {
+          this.showToast('Pair with a partner first to configure your shared goal.', 'gold');
+          return;
+        }
+        document.getElementById('modalGoalTitle').value = pact.goalTitle;
+        document.getElementById('modalGoalTarget').value = pact.target;
+        document.getElementById('modalGoalUnit').value = pact.unit;
+        document.getElementById('modalGoalPenalty').value = pact.penalty || 100;
+        document.getElementById('modalGoalStartDate').value = pact.startDate;
+        document.getElementById('modalGoalReward').value = pact.rewardNote || '';
+        this.openModal('goalModal');
+      }
+
+      applyGoalPreset(title, target, unit) {
+        document.getElementById('modalGoalTitle').value = title;
+        document.getElementById('modalGoalTarget').value = target;
+        document.getElementById('modalGoalUnit').value = unit;
+      }
+
+      handleSaveGoal(e) {
+        e.preventDefault();
+        const pact = this.getActivePact();
+        if (!pact) return;
+
+        const newTitle = document.getElementById('modalGoalTitle').value.trim();
+        const newTarget = Number(document.getElementById('modalGoalTarget').value) || 3000;
+        const newUnit = document.getElementById('modalGoalUnit').value;
+        const newPenalty = Number(document.getElementById('modalGoalPenalty').value) || 100;
+        const newStart = document.getElementById('modalGoalStartDate').value || getTodayKey();
+        const newReward = document.getElementById('modalGoalReward').value.trim();
+
+        pact.goalTitle = newTitle;
+        pact.target = newTarget;
+        pact.unit = newUnit;
+        pact.penalty = newPenalty;
+        pact.startDate = newStart <= getTodayKey() ? newStart : getTodayKey();
+        pact.rewardNote = newReward;
+
+        this.closeModal('goalModal');
+        this.showToast(`Goal updated: ${newTarget.toLocaleString()} ${newUnit}/day (₹${newPenalty} penalty)`, 'lime');
+        this.persistState();
+      }
+
+      bumpGoalTarget(delta) {
+        const pact = this.getActivePact();
+        if (!pact) return;
+        pact.target = Number(pact.target) + delta;
+        // Also update title automatically if it mentions the step count
+        if (pact.unit === 'steps' && pact.goalTitle.toLowerCase().includes('walk')) {
+          pact.goalTitle = `Walk ${pact.target.toLocaleString()} Steps a Day`;
+        }
+        this.showToast(`Target increased to ${pact.target.toLocaleString()} ${pact.unit}/day!`, 'lime');
+        this.persistState();
+      }
+
+      // ============================================================================
+      // DAILY CHECK-IN & RETROACTIVE LOGGING
+      // ============================================================================
+      ensureDayLogEntry(pact, dateKey) {
+        if (!pact.logs) pact.logs = {};
+        if (!pact.logs[dateKey]) {
+          pact.logs[dateKey] = {};
+        }
+        pact.members.forEach(m => {
+          if (!pact.logs[dateKey][m]) {
+            pact.logs[dateKey][m] = { value: 0, excused: false, forcedMiss: false };
+          }
+        });
+        return pact.logs[dateKey];
+      }
+
+      handleTodayCheckinSubmit(e) {
+        e.preventDefault();
+        const pact = this.getActivePact();
+        if (!pact || !this.currentUser) return;
+        const val = Number(document.getElementById('todayLogInput').value);
+        if (isNaN(val) || val < 0) return;
+
+        const todayKey = getTodayKey();
+        const entry = this.ensureDayLogEntry(pact, todayKey);
+        entry[this.currentUser].value = val;
+        entry[this.currentUser].forcedMiss = false;
+
+        const hit = val >= pact.target;
+        this.showToast(
+          hit
+            ? `Target crushed! ${val.toLocaleString()} ${pact.unit} logged for today.`
+            : `Logged ${val.toLocaleString()} ${pact.unit}. ${(pact.target - val).toLocaleString()} more before EOD!`,
+          hit ? 'lime' : 'gold'
+        );
+        this.persistState();
+      }
+
+      quickAddToday(delta) {
+        const pact = this.getActivePact();
+        if (!pact || !this.currentUser) return;
+        const todayKey = getTodayKey();
+        const entry = this.ensureDayLogEntry(pact, todayKey);
+        const nextVal = (Number(entry[this.currentUser].value) || 0) + delta;
+        entry[this.currentUser].value = nextVal;
+        entry[this.currentUser].forcedMiss = false;
+        document.getElementById('todayLogInput').value = nextVal;
+        this.showToast(`+${delta.toLocaleString()} ${pact.unit} added (${nextVal.toLocaleString()} total today)`, 'lime');
+        this.persistState();
+      }
+
+      quickHitTargetToday() {
+        const pact = this.getActivePact();
+        if (!pact || !this.currentUser) return;
+        const todayKey = getTodayKey();
+        const entry = this.ensureDayLogEntry(pact, todayKey);
+        entry[this.currentUser].value = Math.max(Number(entry[this.currentUser].value) || 0, pact.target);
+        entry[this.currentUser].forcedMiss = false;
+        document.getElementById('todayLogInput').value = entry[this.currentUser].value;
+        this.showToast(`Today's target of ${pact.target.toLocaleString()} ${pact.unit} completed! Safe from the Vault.`, 'lime');
+        this.persistState();
+      }
+
+      forfeitToday() {
+        const pact = this.getActivePact();
+        if (!pact || !this.currentUser) return;
+        const todayKey = getTodayKey();
+        const entry = this.ensureDayLogEntry(pact, todayKey);
+        entry[this.currentUser].forcedMiss = true;
+        if (entry[this.currentUser].value >= pact.target) {
+          entry[this.currentUser].value = 0;
+        }
+        this.showToast(`Marked today as MISSED. +₹${pact.penalty} added to your Vault tab!`, 'crimson');
+        this.persistState();
+      }
+
+      openLogForPartnerToday() {
+        this.openDayEditModal(getTodayKey());
+      }
+
+      openDayEditModal(dateKey) {
+        const pact = this.getActivePact();
+        if (!pact || !this.currentUser) return;
+        const me = this.state.users[this.currentUser];
+        const partner = this.state.users[me.partnerUsername];
+        const entry = this.ensureDayLogEntry(pact, dateKey);
+
+        const f = formatDisplayDate(dateKey);
+        document.getElementById('dayModalDateBadge').textContent = `${f.full} (${dateKey})`;
+        document.getElementById('dayModalDateKey').value = dateKey;
+
+        document.getElementById('dayModalP1Label').textContent = `${me.displayName} (You) — ${pact.unit}`;
+        document.getElementById('dayModalP1Value').value = entry[me.username]?.value || 0;
+        document.getElementById('dayModalP1Excused').checked = Boolean(entry[me.username]?.excused);
+
+        document.getElementById('dayModalP2Label').textContent = `${partner.displayName} (@${partner.username}) — ${pact.unit}`;
+        document.getElementById('dayModalP2Value').value = entry[partner.username]?.value || 0;
+        document.getElementById('dayModalP2Excused').checked = Boolean(entry[partner.username]?.excused);
+
+        this.openModal('dayEditModal');
+      }
+
+      fillDayModalTarget(which) {
+        const pact = this.getActivePact();
+        if (!pact) return;
+        if (which === 'p1') {
+          document.getElementById('dayModalP1Value').value = pact.target;
+          document.getElementById('dayModalP1Excused').checked = false;
+        } else {
+          document.getElementById('dayModalP2Value').value = pact.target;
+          document.getElementById('dayModalP2Excused').checked = false;
+        }
+      }
+
+      handleSaveDayEdit(e) {
+        e.preventDefault();
+        const pact = this.getActivePact();
+        if (!pact || !this.currentUser) return;
+        const me = this.state.users[this.currentUser];
+        const partner = this.state.users[me.partnerUsername];
+        const dateKey = document.getElementById('dayModalDateKey').value;
+        const entry = this.ensureDayLogEntry(pact, dateKey);
+
+        const p1Val = Number(document.getElementById('dayModalP1Value').value) || 0;
+        const p1Exc = document.getElementById('dayModalP1Excused').checked;
+        const p2Val = Number(document.getElementById('dayModalP2Value').value) || 0;
+        const p2Exc = document.getElementById('dayModalP2Excused').checked;
+
+        entry[me.username] = { value: p1Val, excused: p1Exc, forcedMiss: false };
+        entry[partner.username] = { value: p2Val, excused: p2Exc, forcedMiss: false };
+
+        this.closeModal('dayEditModal');
+        this.showToast(`Updated record for ${dateKey}`, 'lime');
+        this.persistState();
+      }
+
+      setLedgerFilter(filter) {
+        this.ledgerFilter = filter;
+        const buttons = {
+          all: document.getElementById('filterAllBtn'),
+          missed: document.getElementById('filterMissedBtn'),
+          hit: document.getElementById('filterHitBtn')
+        };
+        Object.keys(buttons).forEach(k => {
+          if (k === filter) {
+            buttons[k].className = 'px-3 py-1.5 rounded-lg font-mono text-xs font-semibold bg-slateElevated text-alabaster';
+          } else {
+            buttons[k].className = 'px-3 py-1.5 rounded-lg font-mono text-xs text-techGray hover:text-alabaster';
+          }
+        });
+        this.render();
+      }
+
+      // ============================================================================
+      // EVALUATION ENGINE (Calculates Hits, EOD Misses, Streaks, & ₹100 Vault Totals)
+      // ============================================================================
+      evaluateDayForUser(pact, dateKey, username, todayKey) {
+        const dayEntry = pact.logs?.[dateKey]?.[username] || { value: 0, excused: false, forcedMiss: false };
+        const val = Number(dayEntry.value) || 0;
+        const isPastDay = dateKey < todayKey;
+        const isToday = dateKey === todayKey;
+
+        if (dayEntry.excused) {
+          return {
+            status: 'EXCUSED',
+            value: val,
+            penalty: 0
+          };
+        }
+
+        if (val >= pact.target && !dayEntry.forcedMiss) {
+          return {
+            status: 'HIT',
+            value: val,
+            penalty: 0
+          };
+        }
+
+        if (isPastDay || dayEntry.forcedMiss) {
+          return {
+            status: 'MISSED',
+            value: val,
+            penalty: Number(pact.penalty) || 100
+          };
+        }
+
+        // Otherwise it's today and before EOD
+        return {
+          status: 'PENDING',
+          value: val,
+          penalty: 0
+        };
+      }
+
+      computeFullPactMetrics(pact, u1, u2) {
+        const todayKey = getTodayKey();
+        const startKey = pact.startDate <= todayKey ? pact.startDate : todayKey;
+        const allDaysAsc = getDaysListBetween(startKey, todayKey);
+
+        const stats = {
+          [u1]: { hits: 0, misses: 0, vaultLost: 0, currentStreak: 0, totalVolume: 0 },
+          [u2]: { hits: 0, misses: 0, vaultLost: 0, currentStreak: 0, totalVolume: 0 },
+          totalVault: 0,
+          totalCombinedMisses: 0,
+          dayRowsDesc: []
+        };
+
+        allDaysAsc.forEach(dateKey => {
+          const eval1 = this.evaluateDayForUser(pact, dateKey, u1, todayKey);
+          const eval2 = this.evaluateDayForUser(pact, dateKey, u2, todayKey);
+
+          stats[u1].totalVolume += eval1.value;
+          stats[u2].totalVolume += eval2.value;
+
+          if (eval1.status === 'HIT') {
+            stats[u1].hits++;
+            stats[u1].currentStreak++;
+          } else if (eval1.status === 'MISSED') {
+            stats[u1].misses++;
+            stats[u1].vaultLost += eval1.penalty;
+            stats[u1].currentStreak = 0;
+          }
+
+          if (eval2.status === 'HIT') {
+            stats[u2].hits++;
+            stats[u2].currentStreak++;
+          } else if (eval2.status === 'MISSED') {
+            stats[u2].misses++;
+            stats[u2].vaultLost += eval2.penalty;
+            stats[u2].currentStreak = 0;
+          }
+
+          const dayVaultAdded = eval1.penalty + eval2.penalty;
+          stats.totalVault += dayVaultAdded;
+          stats.totalCombinedMisses += (eval1.status === 'MISSED' ? 1 : 0) + (eval2.status === 'MISSED' ? 1 : 0);
+
+          stats.dayRowsDesc.unshift({
+            dateKey,
+            isToday: dateKey === todayKey,
+            eval1,
+            eval2,
+            dayVaultAdded
+          });
+        });
+
+        return {
+          allDaysAsc,
+          stats
+        };
+      }
+
+      // ============================================================================
+      // UI RENDERING
+      // ============================================================================
+      render() {
+        const authView = document.getElementById('authView');
+        const dashboardView = document.getElementById('dashboardView');
+        const headerUserArea = document.getElementById('headerUserArea');
+        const btnSwapPerspective = document.getElementById('btnSwapPerspective');
+
+        if (!this.currentUser || !this.state.users[this.currentUser]) {
+          authView.classList.remove('hidden');
+          dashboardView.classList.add('hidden');
+          headerUserArea.classList.add('hidden');
+          headerUserArea.classList.remove('flex');
+          btnSwapPerspective.classList.add('hidden');
+          btnSwapPerspective.classList.remove('flex');
+          return;
+        }
+
+        // User is logged in
+        const me = this.state.users[this.currentUser];
+        authView.classList.add('hidden');
+        dashboardView.classList.remove('hidden');
+        headerUserArea.classList.remove('hidden');
+        headerUserArea.classList.add('flex');
+
+        document.getElementById('headerDisplayName').textContent = me.displayName;
+        document.getElementById('headerUsername').textContent = `@${me.username}`;
+        document.getElementById('friendModalMyUsername').textContent = `@${me.username}`;
+
+        // Check if paired with a partner
+        const unpairedBanner = document.getElementById('unpairedBanner');
+        const hasPartner = Boolean(me.partnerUsername && this.state.users[me.partnerUsername]);
+
+        if (!hasPartner) {
+          unpairedBanner.classList.remove('hidden');
+          btnSwapPerspective.classList.add('hidden');
+          btnSwapPerspective.classList.remove('flex');
+
+          // Render available users to pair with in 1 click
+          const availContainer = document.getElementById('availableUsersList');
+          const otherUsers = Object.values(this.state.users).filter(u => u.username !== me.username);
+          if (otherUsers.length === 0) {
+            availContainer.innerHTML = `<span class="text-xs font-mono text-techGray">Type any username above to create & link your partner!</span>`;
+          } else {
+            availContainer.innerHTML = otherUsers.map(u => `
+              <button onclick="window.app.quickPairWithExisting('${u.username}')" class="px-2.5 py-1 rounded-lg bg-obsidian hover:bg-slateElevated border border-hairline font-mono text-xs text-acidLime">
+                Pair w/ ${u.displayName} (@${u.username})
+              </button>
+            `).join('');
+          }
+          return;
+        }
+
+        unpairedBanner.classList.add('hidden');
+        const partner = this.state.users[me.partnerUsername];
+
+        // Show Perspective Switcher in header
+        btnSwapPerspective.classList.remove('hidden');
+        btnSwapPerspective.classList.add('flex');
+        document.getElementById('swapPartnerName').textContent = partner.displayName;
+
+        const pact = this.getActivePact();
+        if (!pact) return;
+
+        const { allDaysAsc, stats } = this.computeFullPactMetrics(pact, me.username, partner.username);
+        const myStats = stats[me.username];
+        const partnerStats = stats[partner.username];
+        const todayKey = getTodayKey();
+        const startFmt = formatDisplayDate(pact.startDate);
+        const todayFmt = formatDisplayDate(todayKey);
+
+        // 1. Render Top Pact Header
+        document.getElementById('pactPeriodBadge').textContent = `${startFmt.shortDate} → ${todayFmt.shortDate}`;
+        document.getElementById('goalTitleDisplay').textContent = pact.goalTitle;
+        document.getElementById('goalTargetDisplay').textContent = `${Number(pact.target).toLocaleString()} ${pact.unit}`;
+        document.getElementById('goalPenaltyDisplay').textContent = `₹${pact.penalty} / day`;
+        document.getElementById('goalDaysElapsedDisplay').textContent = `${allDaysAsc.length} ${allDaysAsc.length === 1 ? 'Day' : 'Days'}`;
+        document.getElementById('eodRuleBadge').textContent = `Auto +₹${pact.penalty} to Vault`;
+
+        // 2. Render Today's Check-In Card
+        const todayRow = stats.dayRowsDesc.find(r => r.dateKey === todayKey);
+        const myTodayEval = todayRow ? todayRow.eval1 : { status: 'PENDING', value: 0 };
+        const partnerTodayEval = todayRow ? todayRow.eval2 : { status: 'PENDING', value: 0 };
+
+        document.getElementById('checkinUserLabel').textContent = `${me.displayName}'s`;
+        document.getElementById('todayCurrentValue').textContent = myTodayEval.value.toLocaleString();
+        document.getElementById('todayTargetValue').textContent = ` / ${Number(pact.target).toLocaleString()} ${pact.unit}`;
+        document.getElementById('todayInputUnit').textContent = pact.unit;
+        document.getElementById('quickHitTargetBtnNum').textContent = Number(pact.target).toLocaleString();
+        document.getElementById('logForPartnerBtnName').textContent = partner.displayName;
+
+        const todayInput = document.getElementById('todayLogInput');
+        if (document.activeElement !== todayInput) {
+          todayInput.value = myTodayEval.value > 0 ? myTodayEval.value : '';
+        }
+
+        const pct = Math.min(100, Math.round((myTodayEval.value / pact.target) * 100));
+        document.getElementById('todayPercentLabel').textContent = `${pct}%`;
+        const progBar = document.getElementById('todayProgressBar');
+        progBar.style.width = `${pct}%`;
+
+        const statusPill = document.getElementById('todayUserStatusPill');
+        if (myTodayEval.status === 'HIT') {
+          statusPill.textContent = '✓ TARGET HIT TODAY';
+          statusPill.className = 'px-3 py-1 rounded-full font-mono text-xs font-bold uppercase tracking-wider bg-emeraldHit/15 border border-emeraldHit/40 text-emeraldHit';
+          progBar.className = 'h-full bg-emeraldHit transition-all duration-300 rounded-full';
+        } else if (myTodayEval.status === 'MISSED') {
+          statusPill.textContent = `✕ MISSED (+₹${pact.penalty} VAULT)`;
+          statusPill.className = 'px-3 py-1 rounded-full font-mono text-xs font-bold uppercase tracking-wider bg-crimsonMiss/15 border border-crimsonMiss/40 text-crimsonMiss';
+          progBar.className = 'h-full bg-crimsonMiss transition-all duration-300 rounded-full';
+        } else {
+          statusPill.textContent = '⏳ IN PROGRESS (BEFORE EOD)';
+          statusPill.className = 'px-3 py-1 rounded-full font-mono text-xs font-bold uppercase tracking-wider bg-vaultGold/15 border border-vaultGold/40 text-vaultGold';
+          progBar.className = 'h-full bg-acidLime transition-all duration-300 rounded-full';
+        }
+
+        // Partner mini status inside Today's card
+        document.getElementById('partnerNameMini').textContent = partner.displayName;
+        const partnerMiniEl = document.getElementById('partnerTodayMiniStatus');
+        if (partnerTodayEval.status === 'HIT') {
+          partnerMiniEl.innerHTML = `<span class="text-emeraldHit">${partnerTodayEval.value.toLocaleString()} ${pact.unit} — HIT ✓</span>`;
+        } else if (partnerTodayEval.status === 'MISSED') {
+          partnerMiniEl.innerHTML = `<span class="text-crimsonMiss">${partnerTodayEval.value.toLocaleString()} ${pact.unit} — MISSED (-₹${pact.penalty})</span>`;
+        } else {
+          partnerMiniEl.innerHTML = `<span class="text-vaultGold">${partnerTodayEval.value.toLocaleString()} / ${pact.target.toLocaleString()} ${pact.unit} (Pending EOD)</span>`;
+        }
+
+        // 3. Render Shared Penalty Vault Card
+        document.getElementById('totalVaultBalance').textContent = `₹${stats.totalVault.toLocaleString('en-IN')}`;
+        document.getElementById('totalVaultMissedDays').textContent = `${stats.totalCombinedMisses} combined missed ${stats.totalCombinedMisses === 1 ? 'day' : 'days'}`;
+        document.getElementById('vaultRewardText').textContent = pact.rewardNote || 'Pact Reward: Date Night / Treat Pool';
+        document.getElementById('vaultRulePenaltyText').textContent = `₹${pact.penalty}`;
+
+        document.getElementById('myVaultLostAmount').textContent = `₹${myStats.vaultLost.toLocaleString('en-IN')}`;
+        document.getElementById('myMissedDaysCount').textContent = `${myStats.misses} ${myStats.misses === 1 ? 'miss' : 'misses'}`;
+        document.getElementById('myVaultNameSub').textContent = `${me.displayName} (@${me.username})`;
+
+        document.getElementById('partnerVaultLostAmount').textContent = `₹${partnerStats.vaultLost.toLocaleString('en-IN')}`;
+        document.getElementById('partnerMissedDaysCount').textContent = `${partnerStats.misses} ${partnerStats.misses === 1 ? 'miss' : 'misses'}`;
+        document.getElementById('partnerVaultNameSub').textContent = `${partner.displayName} (@${partner.username})`;
+
+        // Split bar calculation
+        let mySharePct = 50;
+        let partnerSharePct = 50;
+        if (stats.totalVault > 0) {
+          mySharePct = Math.round((myStats.vaultLost / stats.totalVault) * 100);
+          partnerSharePct = 100 - mySharePct;
+        }
+        document.getElementById('vaultSplitLeftLabel').textContent = `${me.displayName} Lost: ₹${myStats.vaultLost} (${mySharePct}%)`;
+        document.getElementById('vaultSplitRightLabel').textContent = `${partner.displayName} Lost: ₹${partnerStats.vaultLost} (${partnerSharePct}%)`;
+        document.getElementById('vaultSplitMyBar').style.width = `${mySharePct}%`;
+        document.getElementById('vaultSplitPartnerBar').style.width = `${partnerSharePct}%`;
+
+        const leaderBadge = document.getElementById('vaultLeaderBadge');
+        const netDiffText = document.getElementById('netVaultDiffText');
+        if (myStats.vaultLost < partnerStats.vaultLost) {
+          const diff = partnerStats.vaultLost - myStats.vaultLost;
+          leaderBadge.textContent = `🏆 ${me.displayName.toUpperCase()} LEADING`;
+          leaderBadge.className = 'px-2.5 py-1 rounded-lg bg-acidLime/15 border border-acidLime/40 font-mono text-[11px] font-semibold text-acidLime';
+          netDiffText.textContent = `${partner.displayName} owes ₹${diff} more to the Vault than you!`;
+        } else if (myStats.vaultLost > partnerStats.vaultLost) {
+          const diff = myStats.vaultLost - partnerStats.vaultLost;
+          leaderBadge.textContent = `🏆 ${partner.displayName.toUpperCase()} LEADING`;
+          leaderBadge.className = 'px-2.5 py-1 rounded-lg bg-vaultGold/15 border border-vaultGold/40 font-mono text-[11px] font-semibold text-vaultGold';
+          netDiffText.textContent = `You have put ₹${diff} more into the Vault than ${partner.displayName}.`;
+        } else {
+          leaderBadge.textContent = '⚖️ TIED DISCIPLINE';
+          leaderBadge.className = 'px-2.5 py-1 rounded-lg bg-slateElevated border border-hairline font-mono text-[11px] font-semibold text-alabaster';
+          netDiffText.textContent = 'Both players have contributed equally to the Vault.';
+        }
+
+        // 4. Render Player 1 & Player 2 Comparison Cards & Consistency Heatmaps
+        const evaluatedCountP1 = Math.max(1, myStats.hits + myStats.misses);
+        const evaluatedCountP2 = Math.max(1, partnerStats.hits + partnerStats.misses);
+        const p1Rate = Math.round((myStats.hits / evaluatedCountP1) * 100);
+        const p2Rate = Math.round((partnerStats.hits / evaluatedCountP2) * 100);
+
+        document.getElementById('p1Avatar').textContent = me.displayName.slice(0, 2).toUpperCase();
+        document.getElementById('p1CardName').textContent = me.displayName;
+        document.getElementById('p1CardUsername').textContent = `@${me.username}`;
+        document.getElementById('p1WinRate').textContent = `${p1Rate}%`;
+        document.getElementById('p1DaysHit').textContent = `${myStats.hits} / ${allDaysAsc.length}`;
+        document.getElementById('p1Streak').textContent = `${myStats.currentStreak}d 🔥`;
+        document.getElementById('p1TotalVolume').textContent = `${myStats.totalVolume.toLocaleString()}`;
+
+        document.getElementById('p2Avatar').textContent = partner.displayName.slice(0, 2).toUpperCase();
+        document.getElementById('p2CardName').textContent = partner.displayName;
+        document.getElementById('p2CardUsername').textContent = `@${partner.username}`;
+        document.getElementById('p2WinRate').textContent = `${p2Rate}%`;
+        document.getElementById('p2DaysHit').textContent = `${partnerStats.hits} / ${allDaysAsc.length}`;
+        document.getElementById('p2Streak').textContent = `${partnerStats.currentStreak}d 🔥`;
+        document.getElementById('p2TotalVolume').textContent = `${partnerStats.totalVolume.toLocaleString()}`;
+
+        // Render Heatmaps (Ascending chronological blocks)
+        const renderHeatmapBox = (dateKey, evalObj) => {
+          const dNum = dateKey.split('-')[2];
+          let colorCls = 'bg-obsidian border-hairline text-techGray';
+          if (evalObj.status === 'HIT') {
+            colorCls = 'bg-emeraldHit/20 border-emeraldHit/50 text-emeraldHit font-bold';
+          } else if (evalObj.status === 'MISSED') {
+            colorCls = 'bg-crimsonMiss/20 border-crimsonMiss/50 text-crimsonMiss font-bold';
+          } else if (evalObj.status === 'EXCUSED') {
+            colorCls = 'bg-slateElevated border-hairline text-techGray';
+          } else {
+            colorCls = 'bg-vaultGold/15 border-vaultGold/50 text-vaultGold';
+          }
+          return `
+            <button onclick="window.app.openDayEditModal('${dateKey}')" title="${dateKey}: ${evalObj.value.toLocaleString()} ${pact.unit} (${evalObj.status})" class="w-8 h-8 rounded-lg border font-mono text-[11px] flex items-center justify-center transition-transform hover:scale-105 ${colorCls}">
+              ${dNum}
+            </button>
+          `;
+        };
+
+        const rowsByKey = {};
+        stats.dayRowsDesc.forEach(r => { rowsByKey[r.dateKey] = r; });
+
+        document.getElementById('p1HeatmapGrid').innerHTML = allDaysAsc.map(dk => renderHeatmapBox(dk, rowsByKey[dk].eval1)).join('');
+        document.getElementById('p2HeatmapGrid').innerHTML = allDaysAsc.map(dk => renderHeatmapBox(dk, rowsByKey[dk].eval2)).join('');
+
+        // 5. Render Day-by-Day Head-to-Head Ledger Table
+        document.getElementById('thPlayer1').textContent = `${me.displayName} (You)`;
+        document.getElementById('thPlayer2').textContent = `${partner.displayName} (@${partner.username})`;
+        document.getElementById('ledgerSubtitleCount').textContent = `${allDaysAsc.length} days tracked since ${startFmt.shortDate}`;
+
+        const filteredRows = stats.dayRowsDesc.filter(row => {
+          if (this.ledgerFilter === 'missed') {
+            return row.eval1.status === 'MISSED' || row.eval2.status === 'MISSED';
+          }
+          if (this.ledgerFilter === 'hit') {
+            return row.eval1.status === 'HIT' && row.eval2.status === 'HIT';
+          }
+          return true;
+        });
+
+        const tbody = document.getElementById('dailyLedgerBody');
+        if (filteredRows.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" class="py-10 text-center font-mono text-xs text-techGray">
+                No days match the selected filter.
+              </td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML = filteredRows.map(row => {
+            const f = formatDisplayDate(row.dateKey);
+            const renderCell = (ev) => {
+              if (ev.status === 'HIT') {
+                return `
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    <span class="font-mono font-bold text-alabaster">${ev.value.toLocaleString()} ${pact.unit}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emeraldHit/15 text-emeraldHit border border-emeraldHit/30 w-fit">HIT ✓</span>
+                  </div>
+                `;
+              }
+              if (ev.status === 'MISSED') {
+                return `
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    <span class="font-mono font-bold text-crimsonMiss">${ev.value.toLocaleString()} ${pact.unit}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-crimsonMiss/15 text-crimsonMiss border border-crimsonMiss/30 w-fit">MISSED (-₹${ev.penalty})</span>
+                  </div>
+                `;
+              }
+              if (ev.status === 'EXCUSED') {
+                return `
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    <span class="font-mono text-techGray">${ev.value.toLocaleString()} ${pact.unit}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-slateElevated text-techGray border border-hairline w-fit">REST DAY</span>
+                  </div>
+                `;
+              }
+              return `
+                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <span class="font-mono font-semibold text-alabaster">${ev.value.toLocaleString()} ${pact.unit}</span>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-vaultGold/15 text-vaultGold border border-vaultGold/30 w-fit">PENDING EOD</span>
+                </div>
+              `;
+            };
+
+            const vaultImpactBadge = row.dayVaultAdded > 0
+              ? `<span class="inline-flex items-center px-2.5 py-1 rounded-lg font-mono text-xs font-bold bg-vaultGold/15 text-vaultGold border border-vaultGold/40">+₹${row.dayVaultAdded} to Vault</span>`
+              : `<span class="font-mono text-xs text-techGray">₹0 (Clean Day)</span>`;
+
+            return `
+              <tr class="hover:bg-slateElevated/60 transition-colors ${row.isToday ? 'bg-acidLime/[0.03]' : ''}">
+                <td class="py-3.5 px-4 sm:px-6 whitespace-nowrap">
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-xs sm:text-sm text-alabaster">${f.shortDate}</span>
+                    ${row.isToday
+                      ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-acidLime text-obsidian uppercase">TODAY</span>`
+                      : `<span class="font-mono text-[11px] text-techGray">${f.weekday}</span>`
+                    }
+                  </div>
+                </td>
+                <td class="py-3.5 px-4">${renderCell(row.eval1)}</td>
+                <td class="py-3.5 px-4">${renderCell(row.eval2)}</td>
+                <td class="py-3.5 px-4 whitespace-nowrap">${vaultImpactBadge}</td>
+                <td class="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap">
+                  <button onclick="window.app.openDayEditModal('${row.dateKey}')" class="px-2.5 py-1 rounded-lg bg-obsidian hover:bg-slateElevated border border-hairline font-mono text-xs text-techGray hover:text-acidLime">
+                    Edit Day
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      // ============================================================================
+      // MODALS, CLIPBOARD & TOAST HELPERS
+      // ============================================================================
+      openModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (id === 'syncModal') {
+          const token = this.encodeStateToken();
+          const url = `${window.location.origin}${window.location.pathname}#pact=${token}`;
+          document.getElementById('shareableUrlInput').value = url;
+        }
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+      }
+
+      closeModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      }
+
+      copyTextFallback(text, successMsg) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          this.showToast(successMsg, 'lime');
+        } catch (err) {
+          this.showToast('Could not copy automatically. Select & copy manually.', 'gold');
+        }
+        document.body.removeChild(ta);
+      }
+
+      copyMyUsername() {
+        if (!this.currentUser) return;
+        this.copyTextFallback(this.currentUser, `Copied username @${this.currentUser} to clipboard!`);
+      }
+
+      copyShareableLink() {
+        const url = document.getElementById('shareableUrlInput').value;
+        this.copyTextFallback(url, 'Copied Shareable Pact URL! Send this link to your partner.');
+      }
+
+      importSyncCode() {
+        const raw = document.getElementById('importSyncCodeInput').value.trim();
+        if (!raw) return;
+        try {
+          const token = raw.includes('#pact=') ? raw.split('#pact=')[1] : raw;
+          const jsonStr = decodeURIComponent(escape(atob(token)));
+          const parsed = JSON.parse(jsonStr);
+          if (parsed && parsed.users && parsed.pacts) {
+            this.state = parsed;
+            this.closeModal('syncModal');
+            this.showToast('Synced Pact state from partner!', 'lime');
+            this.persistState();
+          }
+        } catch (e) {
+          this.showToast('Invalid sync link or code.', 'crimson');
+        }
+      }
+
+      showToast(message, tone = 'lime') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        let borderCls = 'border-acidLime/50 text-acidLime';
+        if (tone === 'crimson') borderCls = 'border-crimsonMiss/50 text-crimsonMiss';
+        if (tone === 'gold') borderCls = 'border-vaultGold/50 text-vaultGold';
+
+        toast.className = `px-4 py-3 rounded-xl bg-obsidian/95 border ${borderCls} shadow-2xl font-mono text-xs flex items-center gap-2 transition-all duration-300`;
+        toast.innerHTML = `<span>●</span><span class="text-alabaster">${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => toast.remove(), 300);
+        }, 3200);
+      }
+    }
+
+    // Expose singleton instance to window for inline event handlers
+    window.onload = () => {
+      window.app = new PactVaultApp();
+    };
+  </script>
+</body>
+</html>
