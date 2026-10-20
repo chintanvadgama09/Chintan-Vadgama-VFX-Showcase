@@ -3,431 +3,388 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GoalVault — 1v1 Monthly Goal & ₹100 Vault Tracker</title>
-  <!-- Tailwind CSS -->
+  <title>Pacto — 1v1 Daily Goal & ₹100 Vault</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
-
   <style>
     body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: #F8FAFC;
       color: #0F172A;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      -webkit-font-smoothing: antialiased;
     }
-    .tabular-nums {
-      font-variant-numeric: tabular-nums;
-    }
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button {
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
-    input[type=number] {
-      -moz-appearance: textfield;
-    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-[#F8FAFC] text-[#0F172A]">
+<body class="min-h-screen flex flex-col">
 
-  <!-- TOP NAVIGATION HEADER -->
-  <header class="sticky top-0 z-30 bg-white border-b border-[#E2E8F0]">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-      <!-- Brand Logo & Title -->
-      <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-[#2563EB] text-white flex items-center justify-center font-bold text-sm shadow-sm tabular-nums">
-          ₹100
+  <!-- TOP NAVBAR -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white font-extrabold flex items-center justify-center text-lg shadow-sm">
+          ₹
         </div>
         <div>
-          <span class="font-bold text-base sm:text-lg tracking-tight text-[#0F172A]">GoalVault</span>
-          <span class="hidden sm:inline-block ml-2 text-xs font-medium text-[#475569] bg-slate-100 px-2 py-0.5 rounded-md">1v1 Monthly Challenge</span>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-lg tracking-tight text-slate-900">Pacto</span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">₹100 Vault</span>
+          </div>
+          <div id="syncStatusBadge" class="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+            <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span id="syncText">Connecting to Pacto Cloud...</span>
+          </div>
         </div>
       </div>
 
-      <!-- Right Controls -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Live Cloud Server Status Pill -->
-        <button type="button" onclick="app.openModal('syncModal')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition">
-          <span class="relative flex h-2 w-2">
-            <span id="syncPulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span id="syncDot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-          </span>
-          <span id="syncLabel">Connecting Server...</span>
-        </button>
-
-        <!-- Logged-in User Controls -->
-        <div id="navUserSection" class="hidden items-center gap-2 sm:gap-3 pl-2 sm:pl-3 border-l border-[#E2E8F0]">
-          <div class="text-right">
-            <div id="navUserName" class="text-xs sm:text-sm font-semibold text-[#0F172A] leading-tight">User</div>
-            <div id="navUserHandle" class="text-[11px] text-[#475569] leading-tight">@username</div>
-          </div>
-          <button type="button" onclick="app.handleLogout()" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#475569] hover:text-red-600 hover:bg-red-50 border border-[#E2E8F0] transition">
-            Log Out
-          </button>
+      <!-- Right User Controls -->
+      <div id="navUserSection" class="hidden items-center gap-3">
+        <div class="text-right hidden sm:block">
+          <div id="navDisplayName" class="text-sm font-bold text-slate-900 leading-tight"></div>
+          <div id="navUsername" class="text-xs font-medium text-slate-500"></div>
         </div>
+        <button id="logoutBtn" class="px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
+          Log Out
+        </button>
       </div>
     </div>
   </header>
 
+  <!-- DATABASE ERROR BANNER (Only shows if Firestore isn't created or rules block access) -->
+  <div id="dbErrorBanner" class="hidden bg-red-50 border-b border-red-200 px-4 py-3">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-red-800">
+      <div>
+        <strong class="font-bold">Cloud Database Setup Notice:</strong>
+        <span id="dbErrorText">Please make sure Firestore Database is created and Rules are set to <code>allow read, write: if true;</code> in your Firebase console.</span>
+      </div>
+    </div>
+  </div>
+
   <!-- MAIN CONTAINER -->
   <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
-    <!-- ===================================================== -->
-    <!-- VIEW 1: LOG IN & CREATE ACCOUNT                       -->
-    <!-- ===================================================== -->
-    <section id="authSection" class="max-w-md mx-auto my-4 sm:my-8">
-      <div class="text-center mb-6">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-[#2563EB] border border-blue-200 mb-3">
-          <span>☁️ Real-Time Cloud Server Synced</span>
-        </div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
-          1v1 Monthly Goal & ₹100 Vault
-        </h1>
-        <p class="text-sm text-[#475569] mt-2 leading-relaxed">
-          Create your account or log in from any device. Add your partner by <span class="font-semibold text-[#0F172A]">@username</span> to compete live—whoever misses today's goal by EOD adds ₹100 to the shared Vault.
-        </p>
-      </div>
-
-      <div class="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-6 sm:p-7">
-        <!-- Tabs: Log In vs Create Account -->
-        <div class="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-xl mb-6">
-          <button type="button" id="tabBtnLogin" onclick="app.setAuthTab('login')" class="py-2.5 rounded-lg text-sm font-semibold bg-white text-[#0F172A] shadow-sm transition">
+    <!-- ==================== AUTH VIEW (LOGIN / SIGNUP) ==================== -->
+    <section id="authView" class="max-w-md mx-auto mt-4 sm:mt-10">
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <!-- Auth Tabs -->
+        <div class="grid grid-cols-2 border-b border-slate-200 bg-slate-50 p-1.5 gap-1.5">
+          <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2.5 text-sm font-bold rounded-xl bg-white text-slate-900 shadow-sm transition">
             Log In
           </button>
-          <button type="button" id="tabBtnSignup" onclick="app.setAuthTab('signup')" class="py-2.5 rounded-lg text-sm font-semibold text-[#475569] hover:text-[#0F172A] transition">
+          <button id="tabSignupBtn" onclick="switchAuthTab('signup')" class="py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-800 transition">
             Create Account
           </button>
         </div>
 
-        <!-- Auth Form -->
-        <form id="authForm" onsubmit="app.handleAuthSubmit(event)" class="space-y-4">
-          <!-- Full Name (Create Account only) -->
-          <div id="fieldFullName" class="hidden">
-            <label for="inputFullName" class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">
-              Your Display Name
-            </label>
-            <input id="inputFullName" type="text" placeholder="e.g. Rahul" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm text-[#0F172A] placeholder-slate-400 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/15 transition" />
-          </div>
+        <div class="p-6 sm:p-7">
+          <!-- Error/Status Box -->
+          <div id="authAlert" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold border"></div>
 
-          <!-- Username -->
-          <div>
-            <label for="inputUsername" class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">
-              Username
-            </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm font-medium">@</span>
-              <input id="inputUsername" type="text" required placeholder="rahul" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm text-[#0F172A] placeholder-slate-400 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/15 transition lowercase" />
+          <!-- LOGIN FORM -->
+          <form id="loginForm" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Username</label>
+              <div class="relative">
+                <span class="absolute left-3.5 top-2.5 text-slate-400 font-semibold">@</span>
+                <input id="loginUsername" type="text" required placeholder="your_username"
+                  class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+              </div>
             </div>
-          </div>
 
-          <!-- Password -->
-          <div>
-            <label for="inputPassword" class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">
-              Password
-            </label>
-            <input id="inputPassword" type="password" required placeholder="Enter your password" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm text-[#0F172A] placeholder-slate-400 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/15 transition" />
-          </div>
-
-          <!-- Friend Username (Optional during signup) -->
-          <div id="fieldFriendSignup" class="hidden pt-1">
-            <label for="inputSignupFriend" class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">
-              Partner / Friend's Username <span class="font-normal text-slate-400">(Optional — can add later)</span>
-            </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm font-medium">@</span>
-              <input id="inputSignupFriend" type="text" placeholder="ananya" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm text-[#0F172A] placeholder-slate-400 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/15 transition lowercase" />
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
+              <input id="loginPassword" type="password" required placeholder="Enter your password"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
             </div>
-          </div>
 
-          <!-- Error / Feedback Banner -->
-          <div id="authMessage" class="hidden p-3 rounded-xl text-xs font-medium border"></div>
+            <button type="submit" id="loginSubmitBtn"
+              class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm transition">
+              Log In to Pacto
+            </button>
+          </form>
 
-          <!-- Submit Button -->
-          <button id="authSubmitBtn" type="submit" class="w-full py-3 rounded-xl bg-[#2563EB] hover:bg-blue-700 active:scale-[0.99] text-white font-semibold text-sm shadow-sm transition">
-            Log In
-          </button>
-        </form>
+          <!-- SIGNUP FORM -->
+          <form id="signupForm" class="hidden space-y-4">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Your Name</label>
+              <input id="signupDisplayName" type="text" required placeholder="e.g. Chintan"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+            </div>
 
-        <!-- Registered Cloud Accounts Directory (Quick Switch / Verification) -->
-        <div id="cloudAccountsBox" class="mt-6 pt-5 border-t border-[#E2E8F0]">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-[#475569]">Accounts on Cloud Server</span>
-            <span id="cloudAccountCount" class="text-[11px] font-semibold text-[#2563EB]">0 registered</span>
-          </div>
-          <div id="cloudAccountsList" class="flex flex-wrap gap-1.5 text-xs text-[#475569]">
-            <span class="text-slate-400 text-xs">No accounts created yet. Click "Create Account" above!</span>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Choose Username</label>
+              <div class="relative">
+                <span class="absolute left-3.5 top-2.5 text-slate-400 font-semibold">@</span>
+                <input id="signupUsername" type="text" required placeholder="e.g. chintan"
+                  class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Create Password</label>
+              <input id="signupPassword" type="password" required placeholder="Create a password"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+            </div>
+
+            <div class="pt-1 border-t border-slate-100">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                Friend / Partner's Username <span class="text-slate-400 font-normal">(Optional - can add later)</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3.5 top-2.5 text-slate-400 font-semibold">@</span>
+                <input id="signupFriendUsername" type="text" placeholder="partner_username"
+                  class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+              </div>
+            </div>
+
+            <button type="submit" id="signupSubmitBtn"
+              class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm transition">
+              Create Account & Start
+            </button>
+          </form>
+
+          <!-- Registered Cloud Accounts Quick Pick -->
+          <div class="mt-6 pt-5 border-t border-slate-200">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Accounts on Server</span>
+              <span id="userCountBadge" class="text-[11px] font-semibold text-slate-400">0 users</span>
+            </div>
+            <div id="cloudUsersList" class="flex flex-wrap gap-1.5 text-xs text-slate-500">
+              <span class="text-slate-400 italic">No accounts created yet. Create the first one!</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ===================================================== -->
-    <!-- VIEW 2: MAIN DASHBOARD                                -->
-    <!-- ===================================================== -->
-    <section id="dashboardSection" class="hidden space-y-6">
 
-      <!-- TOP STATUS BAR: FRIEND PAIRING & GOAL HEADER -->
-      <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 shadow-sm">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <!-- Left: Goal Title & Details -->
+    <!-- ==================== DASHBOARD VIEW ==================== -->
+    <section id="dashboardView" class="hidden space-y-6">
+
+      <!-- 1. FRIEND / COMPETITOR PAIRING BAR -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-extrabold text-base">
+            1v1
+          </div>
           <div>
-            <div class="flex flex-wrap items-center gap-2 mb-1.5">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-[#2563EB] border border-blue-200">
-                Monthly Goal
-              </span>
-              <span id="challengePartnerBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-[#475569]">
-                Not paired with a friend yet
-              </span>
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Active Competition</div>
+            <div id="matchupHeadline" class="text-base sm:text-lg font-extrabold text-slate-900">
+              Loading matchup...
             </div>
-            <h1 id="displayGoalTitle" class="text-xl sm:text-2xl font-bold text-[#0F172A]">
-              Walk 3,000 Steps a Day
-            </h1>
-            <p class="text-xs sm:text-sm text-[#475569] mt-1 tabular-nums">
-              Daily Target: <strong id="displayGoalTarget" class="text-[#0F172A]">3,000 steps</strong>
-              <span class="mx-1.5 text-slate-300">•</span>
-              Missed EOD Penalty: <strong id="displayGoalPenalty" class="text-[#DC2626]">₹100 / day</strong>
-              <span class="mx-1.5 text-slate-300">•</span>
-              Started: <strong id="displayGoalStart" class="text-[#0F172A]">Today</strong>
-            </p>
-          </div>
-
-          <!-- Right: Action Buttons (Increase Goal, Edit Goal & Add/Change Friend) -->
-          <div class="flex flex-wrap items-center gap-2 shrink-0">
-            <button type="button" onclick="app.bumpGoalTarget(500)" title="Increase daily goal target by +500" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold tabular-nums transition">
-              +500 Target
-            </button>
-            <button type="button" onclick="app.bumpGoalTarget(1000)" title="Increase daily goal target by +1,000" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold tabular-nums transition">
-              +1k Target
-            </button>
-            <button type="button" onclick="app.openFriendModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs sm:text-sm font-semibold transition">
-              <svg class="w-4 h-4 text-[#475569]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              <span id="btnFriendText">Add / Change Friend</span>
-            </button>
-            <button type="button" onclick="app.openGoalModal()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-[#2563EB] border border-blue-200 text-xs sm:text-sm font-semibold shadow-sm transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-              <span>Edit Goal</span>
-            </button>
+            <div id="matchupSubtext" class="text-xs text-slate-500"></div>
           </div>
         </div>
 
-        <!-- Inline Add Friend Banner (Automatically shown if user has no friend paired yet) -->
-        <div id="unpairedPromptCard" class="hidden mt-5 pt-5 border-t border-[#E2E8F0]">
-          <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h3 class="text-sm font-bold text-[#0F172A]">Connect with your Partner or Friend for Live 1v1 Competition</h3>
-              <p class="text-xs text-[#475569] mt-0.5">
-                Enter their <span class="font-semibold">@username</span> below. When they log in on their device with that username, both accounts sync live to this shared challenge and ₹100 Vault!
-              </p>
-            </div>
-            <form onsubmit="app.handleInlinePairSubmit(event)" class="flex flex-col sm:flex-row gap-2 shrink-0">
-              <div class="relative">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-medium">@</span>
-                <input id="inlineFriendUsername" type="text" required placeholder="partner_username" class="w-full sm:w-44 pl-7 pr-3 py-2 rounded-lg bg-white border border-[#E2E8F0] text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB] lowercase" />
-              </div>
-              <input id="inlineFriendName" type="text" placeholder="Their Name (e.g. Priya)" class="w-full sm:w-44 px-3 py-2 rounded-lg bg-white border border-[#E2E8F0] text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB]" />
-              <button type="submit" class="px-4 py-2 rounded-lg bg-[#2563EB] hover:bg-blue-700 text-white text-xs font-semibold whitespace-nowrap transition">
-                Connect Friend
-              </button>
-            </form>
+        <!-- Connect / Change Friend Form -->
+        <form id="friendConnectForm" class="flex items-center gap-2 w-full md:w-auto">
+          <div class="relative flex-1 md:w-52">
+            <span class="absolute left-3 top-2 text-slate-400 font-semibold text-sm">@</span>
+            <input id="friendUsernameInput" type="text" required placeholder="friend's username"
+              class="w-full pl-7 pr-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
-        </div>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold whitespace-nowrap transition">
+            Connect Friend
+          </button>
+        </form>
       </div>
 
-      <!-- ===================================================== -->
-      <!-- HERO SECTION: LOG TODAY'S PROGRESS                    -->
-      <!-- ===================================================== -->
-      <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#E2E8F0]">
+
+      <!-- 2. MONTHLY GOAL & TODAY'S LOGGING (2-COLUMN GRID) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT: MONTHLY GOAL CARD (5 cols) -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-[#2563EB]">Log Today's Progress</span>
-            <h2 id="todayDateHeading" class="text-lg sm:text-xl font-bold text-[#0F172A] mt-0.5">
-              Today
-            </h2>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="text-right">
-              <div class="text-[11px] font-medium text-[#475569]">EOD Cutoff (11:59 PM)</div>
-              <div id="eodCountdown" class="text-sm font-bold text-[#0F172A] tabular-nums">--h --m --s left</div>
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">
+                Monthly Goal
+              </span>
+              <button onclick="openGoalModal()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline">
+                Edit Goal
+              </button>
             </div>
-            <span id="todayStatusBadge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-              Pending
+
+            <h2 id="goalTitleDisplay" class="text-xl font-extrabold text-slate-900 mb-1">
+              Walk 3,000 Steps a Day
+            </h2>
+            <p class="text-xs text-slate-500 mb-4">
+              Daily Target: <strong id="goalTargetDisplay" class="text-slate-800">3,000 steps</strong> • Missed EOD Penalty: <strong class="text-red-600">₹<span id="goalPenaltyDisplay">100</span></strong>
+            </p>
+
+            <!-- Quick Increase Target Buttons -->
+            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/80 mb-4">
+              <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                Quick Increase Daily Target
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="bumpGoalTarget(500)" class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 hover:border-indigo-500 text-xs font-bold text-slate-700 hover:text-indigo-600 transition shadow-2xs">
+                  +500
+                </button>
+                <button onclick="bumpGoalTarget(1000)" class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 hover:border-indigo-500 text-xs font-bold text-slate-700 hover:text-indigo-600 transition shadow-2xs">
+                  +1,000
+                </button>
+                <button onclick="openGoalModal()" class="px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-xs font-bold text-indigo-700 transition">
+                  Custom Target / Date
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- EOD Countdown Footer -->
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="font-medium text-slate-500">Today's EOD Deadline (11:59 PM):</span>
+            <span id="eodCountdown" class="font-extrabold text-slate-900 bg-amber-50 border border-amber-200 text-amber-800 px-2.5 py-1 rounded-lg font-mono">
+              --h --m --s left
             </span>
           </div>
         </div>
 
-        <!-- Progress Display & Logging Controls -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-5 items-center">
-          <!-- Left 5 cols: Today's Numeric Progress & Bar -->
-          <div class="lg:col-span-5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4">
-            <div class="flex items-baseline justify-between mb-2">
-              <div>
-                <span class="text-xs font-medium text-[#475569] block mb-0.5">Your Logged Total Today</span>
-                <span id="todayLoggedNum" class="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tabular-nums">0</span>
-                <span id="todayTargetSub" class="text-sm font-medium text-[#475569] tabular-nums"> / 3,000 steps</span>
-              </div>
-              <span id="todayPercentNum" class="text-sm font-bold text-[#2563EB] tabular-nums">0%</span>
-            </div>
 
-            <!-- Progress Bar -->
-            <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
-              <div id="todayProgressBar" class="h-full bg-[#2563EB] transition-all duration-300 rounded-full" style="width: 0%"></div>
+        <!-- RIGHT: LOG TODAY'S PROGRESS CARD (7 cols) -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">
+                Today's Check-In
+              </span>
+              <h3 id="todayDateLabel" class="text-lg font-extrabold text-slate-900 mt-1">
+                Today
+              </h3>
             </div>
-
-            <div class="mt-3 pt-3 border-t border-[#E2E8F0] flex items-center justify-between text-xs">
-              <span class="text-[#475569]"><span id="competitorMiniLabel">Competitor</span> Today:</span>
-              <span id="competitorMiniValue" class="font-semibold text-[#0F172A] tabular-nums">Not paired yet</span>
+            <div id="todayMyStatusBadge" class="px-3 py-1 rounded-full text-xs font-bold">
+              Checking...
             </div>
           </div>
 
-          <!-- Right 7 cols: Effortless Logging Form & 1-Click Quick Buttons -->
-          <div class="lg:col-span-7 space-y-3">
-            <form onsubmit="app.handleSaveTodayProgress(event)" class="flex flex-col sm:flex-row gap-2.5">
-              <div class="relative flex-1">
-                <input id="inputTodayProgress" type="number" min="0" step="any" required placeholder="Enter today's total (e.g. 3200)" class="w-full pl-4 pr-16 py-3 rounded-xl bg-white border border-[#E2E8F0] text-base font-bold text-[#0F172A] placeholder-slate-400 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/15 tabular-nums transition" />
-                <span id="inputTodayUnitLabel" class="absolute inset-y-0 right-0 pr-4 flex items-center text-xs font-semibold text-[#475569] pointer-events-none">
-                  steps
-                </span>
-              </div>
-              <button type="submit" class="px-6 py-3 rounded-xl bg-[#2563EB] hover:bg-blue-700 active:scale-[0.99] text-white font-semibold text-sm shadow-sm whitespace-nowrap transition">
-                Save Progress
-              </button>
-            </form>
-
-            <!-- Quick Add & 1-Click Mark Done Buttons -->
-            <div class="flex flex-wrap items-center gap-2 pt-1">
-              <span class="text-xs font-medium text-[#475569] mr-1">Quick Log:</span>
-              <button type="button" onclick="app.quickIncrementToday(500)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#0F172A] font-semibold text-xs tabular-nums transition">
-                +500
-              </button>
-              <button type="button" onclick="app.quickIncrementToday(1000)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#0F172A] font-semibold text-xs tabular-nums transition">
-                +1,000
-              </button>
-              <button type="button" onclick="app.quickCompleteToday()" class="px-3.5 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 text-[#16A34A] border border-green-200 font-semibold text-xs tabular-nums transition">
-                ✓ Mark Goal Done (<span id="quickDoneTargetText">3,000</span>)
-              </button>
-              <button type="button" onclick="app.markTodayMissed()" class="ml-auto px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-[#DC2626] border border-red-200 font-semibold text-xs tabular-nums transition">
-                Mark Missed (+₹<span id="quickMissPenaltyText">100</span>)
-              </button>
+          <!-- Log Input & Quick Buttons -->
+          <form id="todayLogForm" class="flex flex-col sm:flex-row gap-2.5 mb-3">
+            <div class="relative flex-1">
+              <input id="todayProgressInput" type="number" min="0" step="any" required placeholder="Enter today's total (e.g. 3000)"
+                class="w-full px-4 py-3 rounded-xl border border-slate-300 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <span id="todayUnitSuffix" class="absolute right-3.5 top-3.5 text-xs font-bold uppercase text-slate-400">steps</span>
             </div>
+            <button type="submit" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm transition whitespace-nowrap">
+              Save Today's Log
+            </button>
+          </form>
+
+          <!-- One-Tap Quick Add Buttons -->
+          <div class="flex flex-wrap items-center gap-2 mb-5">
+            <span class="text-xs font-semibold text-slate-400 mr-1">Quick Log:</span>
+            <button type="button" onclick="quickAddToday(500)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition">
+              +500
+            </button>
+            <button type="button" onclick="quickAddToday(1000)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition">
+              +1,000
+            </button>
+            <button type="button" onclick="quickCompleteToday()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition">
+              ✓ Mark Today's Goal Done
+            </button>
+          </div>
+
+          <!-- Today's Live 1v1 Comparison Bars -->
+          <div class="space-y-3 pt-4 border-t border-slate-100">
+            <!-- My Bar -->
+            <div>
+              <div class="flex justify-between text-xs font-bold mb-1">
+                <span id="todayMeName" class="text-slate-800">You</span>
+                <span id="todayMeNumbers" class="text-slate-600">0 / 3,000 steps</span>
+              </div>
+              <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                <div id="todayMeBar" class="h-full bg-indigo-600 rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <!-- Partner Bar -->
+            <div>
+              <div class="flex justify-between text-xs font-bold mb-1">
+                <span id="todayPartnerName" class="text-slate-800">Competitor</span>
+                <span id="todayPartnerNumbers" class="text-slate-600">0 / 3,000 steps</span>
+              </div>
+              <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                <div id="todayPartnerBar" class="h-full bg-purple-600 rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- 3. THE ₹100 VAULT SUMMARY (3 CARDS) -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-500">
+            The Penalty Vault (₹<span id="vaultHeaderRate">100</span> / Missed Day)
+          </h3>
+          <span id="challengeStartRangeLabel" class="text-xs font-medium text-slate-500"></span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- Total Vault Pool -->
+          <div class="bg-slate-900 text-white rounded-2xl p-5 shadow-sm">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Total Vault Balance</div>
+            <div id="vaultTotalAmount" class="text-3xl font-extrabold tracking-tight text-amber-400">₹0</div>
+            <div id="vaultTotalSubtext" class="text-xs text-slate-300 mt-1.5">Combined penalties from missed days</div>
+          </div>
+
+          <!-- My Lost to Vault -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <div id="vaultMyLabel" class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">You Lost to Vault</div>
+            <div id="vaultMyAmount" class="text-3xl font-extrabold tracking-tight text-red-600">₹0</div>
+            <div id="vaultMySubtext" class="text-xs font-medium text-slate-500 mt-1.5">0 missed days • 0 completed</div>
+          </div>
+
+          <!-- Partner Lost to Vault -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <div id="vaultPartnerLabel" class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Competitor Lost to Vault</div>
+            <div id="vaultPartnerAmount" class="text-3xl font-extrabold tracking-tight text-red-600">₹0</div>
+            <div id="vaultPartnerSubtext" class="text-xs font-medium text-slate-500 mt-1.5">0 missed days • 0 completed</div>
           </div>
         </div>
       </div>
 
-      <!-- ===================================================== -->
-      <!-- THE ₹100 VAULT SUMMARY (3-COLUMN CARDS)               -->
-      <!-- ===================================================== -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <!-- Column 1: Total Vault Balance -->
-        <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold uppercase tracking-wider text-[#475569]">Total Vault Balance</span>
-              <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 text-[#2563EB]">Shared Pool</span>
-            </div>
-            <div id="vaultTotalAmount" class="text-3xl sm:text-4xl font-extrabold text-[#0F172A] mt-2 tabular-nums">
-              ₹0
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-[#E2E8F0] flex items-center justify-between text-xs text-[#475569] tabular-nums">
-            <span>Combined Missed Days:</span>
-            <strong id="vaultTotalMisses" class="text-[#0F172A]">0 days</strong>
-          </div>
-        </div>
 
-        <!-- Column 2: You Lost to Vault -->
-        <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+      <!-- 4. DAY-BY-DAY RECORD TABLE -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-5 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold uppercase tracking-wider text-[#475569]">You Lost to Vault</span>
-              <span id="vaultMyNameTag" class="text-xs font-semibold text-[#0F172A]">You</span>
-            </div>
-            <div id="vaultMyAmount" class="text-3xl sm:text-4xl font-extrabold text-[#DC2626] mt-2 tabular-nums">
-              ₹0
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-[#E2E8F0] flex items-center justify-between text-xs tabular-nums">
-            <span class="text-[#16A34A] font-semibold"><span id="vaultMyCompletedCount">0</span> Completed</span>
-            <span class="text-slate-300">•</span>
-            <span class="text-[#DC2626] font-semibold"><span id="vaultMyMissedCount">0</span> Missed (×₹<span id="vaultMyPenaltyUnit">100</span>)</span>
-          </div>
-        </div>
-
-        <!-- Column 3: Competitor Lost to Vault -->
-        <div class="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between">
-              <span id="vaultFriendHeader" class="text-xs font-bold uppercase tracking-wider text-[#475569]">Competitor Lost to Vault</span>
-              <span id="vaultFriendNameTag" class="text-xs font-semibold text-[#475569]">Partner</span>
-            </div>
-            <div id="vaultFriendAmount" class="text-3xl sm:text-4xl font-extrabold text-[#DC2626] mt-2 tabular-nums">
-              ₹0
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-[#E2E8F0] flex items-center justify-between text-xs tabular-nums">
-            <span class="text-[#16A34A] font-semibold"><span id="vaultFriendCompletedCount">0</span> Completed</span>
-            <span class="text-slate-300">•</span>
-            <span class="text-[#DC2626] font-semibold"><span id="vaultFriendMissedCount">0</span> Missed (×₹<span id="vaultFriendPenaltyUnit">100</span>)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===================================================== -->
-      <!-- DAY-BY-DAY RECORD TABLE (ME VS COMPETITOR)            -->
-      <!-- ===================================================== -->
-      <div class="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
-        <!-- Table Header & Date Range Selector -->
-        <div class="p-5 sm:p-6 border-b border-[#E2E8F0] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-lg font-bold text-[#0F172A]">
-              Day-by-Day Record (You vs. Competitor)
-            </h2>
-            <p class="text-xs text-[#475569] mt-0.5">
-              Every past day below target automatically adds ₹100 to the Vault. Click "Log / Edit" on any day to update.
-            </p>
+            <h3 class="text-base font-extrabold text-slate-900">Day-by-Day Record</h3>
+            <p class="text-xs text-slate-500">Every past day below target automatically adds ₹<span id="tablePenaltyRate">100</span> to that person's Vault total.</p>
           </div>
 
-          <!-- Quick Start Date / Month Range Toggle -->
-          <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-xl self-start sm:self-auto">
-            <button type="button" id="rangeBtnStart" onclick="app.setDateRangeMode('start')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[#0F172A] shadow-sm transition">
+          <!-- Filter Buttons -->
+          <div class="inline-flex bg-slate-100 p-1 rounded-xl self-start sm:self-auto">
+            <button id="filterActiveBtn" onclick="setTableFilter('active')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-2xs transition">
               Since Start Date
             </button>
-            <button type="button" id="rangeBtn7Days" onclick="app.setDateRangeMode('last7')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#475569] hover:text-[#0F172A] transition">
+            <button id="filter7Btn" onclick="setTableFilter('7days')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition">
               Last 7 Days
             </button>
-            <button type="button" id="rangeBtnMonth" onclick="app.setDateRangeMode('month')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#475569] hover:text-[#0F172A] transition">
+            <button id="filterMonthBtn" onclick="setTableFilter('month')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition">
               Full Month
             </button>
           </div>
         </div>
 
-        <!-- Table -->
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] font-bold uppercase tracking-wider text-[#475569]">
+              <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                 <th class="py-3.5 px-4 sm:px-6">Date</th>
-                <th class="py-3.5 px-4" id="tableColYou">You</th>
-                <th class="py-3.5 px-4" id="tableColFriend">Competitor</th>
-                <th class="py-3.5 px-4">Added to Vault</th>
-                <th class="py-3.5 px-4 sm:px-6 text-right">Edit</th>
+                <th id="thMyName" class="py-3.5 px-4">You</th>
+                <th id="thPartnerName" class="py-3.5 px-4">Competitor</th>
+                <th class="py-3.5 px-4">Vault Penalty</th>
+                <th class="py-3.5 px-4 sm:px-6 text-right">Action</th>
               </tr>
             </thead>
-            <tbody id="recordTableBody" class="divide-y divide-[#E2E8F0] text-sm tabular-nums">
+            <tbody id="dailyRecordsTbody" class="divide-y divide-slate-200 text-sm">
               <!-- Populated dynamically -->
             </tbody>
           </table>
@@ -435,1513 +392,991 @@
       </div>
 
     </section>
+
   </main>
 
-  <!-- ===================================================== -->
-  <!-- MODAL 1: EDIT MONTHLY GOAL                            -->
-  <!-- ===================================================== -->
-  <div id="goalModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-    <div class="bg-white border border-[#E2E8F0] rounded-2xl max-w-md w-full p-6 shadow-xl">
-      <div class="flex items-center justify-between pb-4 border-b border-[#E2E8F0]">
-        <h3 class="text-lg font-bold text-[#0F172A]">Edit Monthly Goal</h3>
-        <button type="button" onclick="app.closeModal('goalModal')" class="text-slate-400 hover:text-slate-600 p-1 text-lg leading-none">✕</button>
+
+  <!-- ==================== MODAL: EDIT MONTHLY GOAL ==================== -->
+  <div id="goalModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 shadow-xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-extrabold text-slate-900">Edit Monthly Goal</h3>
+        <button onclick="closeGoalModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
 
-      <form onsubmit="app.handleSaveGoal(event)" class="space-y-4 mt-4">
+      <form id="editGoalForm" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">Goal Title</label>
-          <input id="modalGoalTitle" type="text" required placeholder="Walk 3,000 Steps a Day" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm text-[#0F172A] focus:outline-none focus:border-[#2563EB]" />
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Goal Title</label>
+          <input id="modalGoalTitle" type="text" required placeholder="e.g. Walk 3,000 Steps a Day"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500" />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">Daily Target</label>
-            <input id="modalGoalTarget" type="number" min="1" step="any" required class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm font-bold text-[#0F172A] tabular-nums focus:outline-none focus:border-[#2563EB]" />
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Daily Target Number</label>
+            <input id="modalGoalTarget" type="number" min="1" step="any" required placeholder="3000"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">Unit</label>
-            <select id="modalGoalUnit" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm text-[#0F172A] focus:outline-none focus:border-[#2563EB]">
-              <option value="steps">steps</option>
-              <option value="km">km</option>
-              <option value="mins">mins</option>
-              <option value="pages">pages</option>
-              <option value="workouts">workouts</option>
-              <option value="calories">calories</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Quick Target Increase Presets -->
-        <div>
-          <span class="block text-[11px] font-semibold uppercase tracking-wider text-[#475569] mb-1.5">Quick Presets</span>
-          <div class="flex flex-wrap gap-1.5">
-            <button type="button" onclick="app.setGoalPreset('Walk 3,000 Steps a Day', 3000, 'steps')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-[#0F172A]">3,000 steps</button>
-            <button type="button" onclick="app.setGoalPreset('Walk 5,000 Steps a Day', 5000, 'steps')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-[#0F172A]">5,000 steps</button>
-            <button type="button" onclick="app.setGoalPreset('Walk 8,000 Steps a Day', 8000, 'steps')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-[#0F172A]">8,000 steps</button>
-            <button type="button" onclick="app.setGoalPreset('Walk 10,000 Steps a Day', 10000, 'steps')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-medium text-[#0F172A]">10,000 steps</button>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Unit</label>
+            <input id="modalGoalUnit" type="text" required placeholder="steps, km, mins..."
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">Daily Penalty (₹)</label>
-            <input id="modalGoalPenalty" type="number" min="1" step="1" required value="100" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm font-bold text-[#DC2626] tabular-nums focus:outline-none focus:border-[#2563EB]" />
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Penalty Per Missed Day (₹)</label>
+            <input id="modalGoalPenalty" type="number" min="1" required placeholder="100"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">Challenge Start Date</label>
-            <input id="modalGoalStartDate" type="date" required class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm text-[#0F172A] focus:outline-none focus:border-[#2563EB]" />
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Challenge Start Date</label>
+            <input id="modalStartDate" type="date" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
         </div>
 
-        <div class="pt-3 border-t border-[#E2E8F0] flex items-center justify-end gap-2">
-          <button type="button" onclick="app.closeModal('goalModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-[#475569]">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white text-xs font-semibold">Save Goal</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ===================================================== -->
-  <!-- MODAL 2: ADD / CHANGE FRIEND BY USERNAME              -->
-  <!-- ===================================================== -->
-  <div id="friendModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-    <div class="bg-white border border-[#E2E8F0] rounded-2xl max-w-md w-full p-6 shadow-xl">
-      <div class="flex items-center justify-between pb-4 border-b border-[#E2E8F0]">
-        <h3 class="text-lg font-bold text-[#0F172A]">Connect with Your Friend / Partner</h3>
-        <button type="button" onclick="app.closeModal('friendModal')" class="text-slate-400 hover:text-slate-600 p-1 text-lg leading-none">✕</button>
-      </div>
-
-      <div class="mt-4 space-y-4">
-        <div class="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-between">
-          <div>
-            <div class="text-[11px] font-semibold uppercase text-[#475569]">Your Username</div>
-            <div id="modalMyUsername" class="text-sm font-bold text-[#0F172A] mt-0.5">@username</div>
-          </div>
-          <button type="button" onclick="app.copyMyUsername()" class="px-3 py-1.5 rounded-lg bg-white border border-[#E2E8F0] text-xs font-semibold text-[#0F172A] hover:bg-slate-50">
-            Copy
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeGoalModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white shadow-sm">
+            Save Goal Changes
           </button>
         </div>
-
-        <form onsubmit="app.handleModalPairSubmit(event)" class="space-y-3">
-          <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">
-              Friend's Username
-            </label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm font-medium">@</span>
-              <input id="modalFriendUsername" type="text" required placeholder="priya" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm text-[#0F172A] focus:outline-none focus:border-[#2563EB] lowercase" />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">
-              Friend's Name <span class="font-normal text-slate-400">(Used if they haven't created their account yet)</span>
-            </label>
-            <input id="modalFriendDisplayName" type="text" placeholder="e.g. Priya" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm text-[#0F172A] focus:outline-none focus:border-[#2563EB]" />
-          </div>
-
-          <div class="pt-3 border-t border-[#E2E8F0] flex items-center justify-end gap-2">
-            <button type="button" onclick="app.closeModal('friendModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-[#475569]">Cancel</button>
-            <button type="submit" class="px-5 py-2 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white text-xs font-semibold">Connect Friend</button>
-          </div>
-        </form>
-      </div>
+      </form>
     </div>
   </div>
 
-  <!-- ===================================================== -->
-  <!-- MODAL 3: LOG / EDIT SPECIFIC DAY                      -->
-  <!-- ===================================================== -->
-  <div id="dayModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-    <div class="bg-white border border-[#E2E8F0] rounded-2xl max-w-md w-full p-6 shadow-xl">
-      <div class="flex items-center justify-between pb-4 border-b border-[#E2E8F0]">
+
+  <!-- ==================== MODAL: EDIT SPECIFIC DAY RECORD ==================== -->
+  <div id="editDayModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 max-w-sm w-full p-6 shadow-xl">
+      <div class="flex items-center justify-between mb-4">
         <div>
-          <span id="dayModalDateSub" class="text-xs font-semibold text-[#2563EB]">Date</span>
-          <h3 class="text-lg font-bold text-[#0F172A]">Log or Edit Daily Record</h3>
+          <h3 class="text-base font-extrabold text-slate-900">Update Day Progress</h3>
+          <p id="editDayDateSubtitle" class="text-xs text-slate-500"></p>
         </div>
-        <button type="button" onclick="app.closeModal('dayModal')" class="text-slate-400 hover:text-slate-600 p-1 text-lg leading-none">✕</button>
+        <button onclick="closeEditDayModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
 
-      <form onsubmit="app.handleSaveDayModal(event)" class="space-y-4 mt-4">
-        <input type="hidden" id="dayModalDateKey" />
-
-        <!-- Your Entry -->
-        <div class="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-          <div class="flex items-center justify-between mb-2">
-            <label id="dayModalYouLabel" class="text-xs font-bold uppercase text-[#0F172A]">Your Progress</label>
-            <div class="flex gap-2">
-              <button type="button" onclick="app.fillDayModalTarget('you')" class="text-xs font-semibold text-[#16A34A] hover:underline">Set Goal Done</button>
-              <span class="text-slate-300">|</span>
-              <button type="button" onclick="app.fillDayModalMissed('you')" class="text-xs font-semibold text-[#DC2626] hover:underline">Mark Missed</button>
-            </div>
-          </div>
-          <input id="dayModalYouInput" type="number" min="0" step="any" required class="w-full px-3.5 py-2 rounded-lg bg-white border border-[#E2E8F0] text-sm font-bold text-[#0F172A] tabular-nums focus:outline-none focus:border-[#2563EB]" />
-          <label class="inline-flex items-center gap-2 mt-2 text-xs text-[#475569] cursor-pointer">
-            <input id="dayModalYouForceMiss" type="checkbox" class="rounded border-slate-300 text-[#DC2626]" />
-            <span>Mark as Missed (+₹100 to Vault)</span>
-          </label>
+      <form id="editDayForm" class="space-y-4">
+        <input type="hidden" id="editDayIsoInput" />
+        <div>
+          <label id="editDayMyLabel" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Your Logged Progress</label>
+          <input id="editDayMyValue" type="number" min="0" step="any" required
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" />
         </div>
 
-        <!-- Competitor Entry -->
-        <div id="dayModalFriendBox" class="p-4 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0]">
-          <div class="flex items-center justify-between mb-2">
-            <label id="dayModalFriendLabel" class="text-xs font-bold uppercase text-[#0F172A]">Competitor's Progress</label>
-            <div class="flex gap-2">
-              <button type="button" onclick="app.fillDayModalTarget('friend')" class="text-xs font-semibold text-[#16A34A] hover:underline">Set Goal Done</button>
-              <span class="text-slate-300">|</span>
-              <button type="button" onclick="app.fillDayModalMissed('friend')" class="text-xs font-semibold text-[#DC2626] hover:underline">Mark Missed</button>
-            </div>
-          </div>
-          <input id="dayModalFriendInput" type="number" min="0" step="any" required class="w-full px-3.5 py-2 rounded-lg bg-white border border-[#E2E8F0] text-sm font-bold text-[#0F172A] tabular-nums focus:outline-none focus:border-[#2563EB]" />
-          <label class="inline-flex items-center gap-2 mt-2 text-xs text-[#475569] cursor-pointer">
-            <input id="dayModalFriendForceMiss" type="checkbox" class="rounded border-slate-300 text-[#DC2626]" />
-            <span>Mark as Missed (+₹100 to Vault)</span>
-          </label>
+        <div id="editDayPartnerContainer">
+          <label id="editDayPartnerLabel" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Partner's Logged Progress</label>
+          <input id="editDayPartnerValue" type="number" min="0" step="any"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" />
         </div>
 
-        <div class="pt-3 border-t border-[#E2E8F0] flex items-center justify-end gap-2">
-          <button type="button" onclick="app.closeModal('dayModal')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-[#475569]">Cancel</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white text-xs font-semibold">Save Day</button>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeEditDayModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white">
+            Save Day
+          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ===================================================== -->
-  <!-- MODAL 4: CLOUD SYNC SETTINGS (FOR GITHUB PAGES)       -->
-  <!-- ===================================================== -->
-  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-    <div class="bg-white border border-[#E2E8F0] rounded-2xl max-w-lg w-full p-6 shadow-xl">
-      <div class="flex items-center justify-between pb-4 border-b border-[#E2E8F0]">
-        <div>
-          <h3 class="text-lg font-bold text-[#0F172A]">Cloud Sync & Share Settings</h3>
-          <p class="text-xs text-[#475569]">Sync your challenge across devices or share a live link on GitHub Pages</p>
-        </div>
-        <button type="button" onclick="app.closeModal('syncModal')" class="text-slate-400 hover:text-slate-600 p-1 text-lg leading-none">✕</button>
-      </div>
 
-      <div class="space-y-4 mt-4 text-xs">
-        <div class="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-between">
-          <span class="font-semibold text-[#475569]">Current Sync Status:</span>
-          <span id="syncModalStatusText" class="font-bold text-emerald-600">Active & Saved</span>
-        </div>
-
-        <div>
-          <label class="block font-semibold uppercase tracking-wider text-[#475569] mb-1.5">
-            Shareable Challenge Link (Send to Partner)
-          </label>
-          <p class="text-[#475569] mb-2">
-            Copy this link to open your exact accounts, goals, and daily Vault records on another phone or browser.
-          </p>
-          <div class="flex gap-2">
-            <input id="shareLinkInput" type="text" readonly class="flex-1 px-3 py-2 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-xs text-[#0F172A]" />
-            <button type="button" onclick="app.copyShareLink()" class="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white font-semibold">
-              Copy Link
-            </button>
-          </div>
-        </div>
-
-        <div class="pt-3 border-t border-[#E2E8F0]">
-          <label class="block font-semibold uppercase tracking-wider text-[#475569] mb-1.5">
-            Import Challenge Link or Sync Code from Partner
-          </label>
-          <div class="flex gap-2">
-            <input id="importCodeInput" type="text" placeholder="Paste partner's link or sync code here..." class="flex-1 px-3 py-2 rounded-xl bg-white border border-[#E2E8F0] text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB]" />
-            <button type="button" onclick="app.handleImportCode()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] font-semibold">
-              Load Data
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST NOTIFICATION -->
-  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-  <!-- ===================================================== -->
-  <!-- CORE APPLICATION LOGIC                                -->
-  <!-- ===================================================== -->
-  <!-- MODAL 4: CLOUD SERVER & GITHUB PAGES CONFIG           -->
-  <!-- ===================================================== -->
-  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-    <div class="bg-white border border-[#E2E8F0] rounded-2xl max-w-lg w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between pb-4 border-b border-[#E2E8F0]">
-        <div>
-          <h3 class="text-lg font-bold text-[#0F172A]">Real-Time Cloud Server & GitHub Hosting</h3>
-          <p class="text-xs text-[#475569]">Automatic live database syncing across phones & laptops</p>
-        </div>
-        <button type="button" onclick="app.closeModal('syncModal')" class="text-slate-400 hover:text-slate-600 p-1 text-lg leading-none">✕</button>
-      </div>
-
-      <div class="space-y-4 mt-4 text-xs">
-        <!-- Live Connection Box -->
-        <div class="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-between">
-          <div>
-            <span class="font-semibold text-[#475569] block">Cloud Database Status:</span>
-            <span id="syncModalSubText" class="text-[11px] text-[#475569]">Real-time Firestore listener (`onSnapshot`)</span>
-          </div>
-          <span id="syncModalStatusText" class="px-2.5 py-1 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            Connected & Live
-          </span>
-        </div>
-
-        <!-- 1-Click Partner Invite Link -->
-        <div class="p-4 rounded-xl bg-blue-50/60 border border-blue-200 space-y-2">
-          <label class="block font-bold uppercase tracking-wider text-[#2563EB]">
-            Invite Link for Partner (Includes Server Connection)
-          </label>
-          <p class="text-[#475569] leading-relaxed">
-            Send this link to your girlfriend/competitor. When they open it and log in with their <span class="font-semibold text-[#0F172A]">@username</span>, both of your devices will stay synced in real time.
-          </p>
-          <div class="flex gap-2 pt-1">
-            <input id="shareLinkInput" type="text" readonly class="flex-1 px-3 py-2 rounded-xl bg-white border border-[#E2E8F0] text-xs text-[#0F172A]" />
-            <button type="button" onclick="app.copyShareLink()" class="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white font-semibold whitespace-nowrap">
-              Copy Invite Link
-            </button>
-          </div>
-        </div>
-
-        <!-- Custom Firebase Server Config for GitHub Pages -->
-        <div class="pt-3 border-t border-[#E2E8F0] space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="block font-bold uppercase tracking-wider text-[#0F172A]">
-              Hosting on GitHub Pages? (Free Forever Cloud DB)
-            </label>
-            <span class="text-[11px] font-semibold text-[#2563EB]">Optional on Preview</span>
-          </div>
-          <p class="text-[#475569] leading-relaxed">
-            In this preview, a live cloud server is already connected automatically. If you upload <code class="bg-slate-100 px-1 py-0.5 rounded">index.html</code> to your own GitHub Pages, you can connect your own free Firebase Firestore database in 60 seconds:
-          </p>
-          <ol class="list-decimal list-inside space-y-1 text-[#475569] bg-[#F8FAFC] p-3 rounded-xl border border-[#E2E8F0]">
-            <li>Go to <span class="font-semibold text-[#0F172A]">console.firebase.google.com</span> → Create a free project.</li>
-            <li>Enable <span class="font-semibold text-[#0F172A]">Authentication → Anonymous</span> and <span class="font-semibold text-[#0F172A]">Firestore Database</span> (Start in test mode).</li>
-            <li>Copy your Web App <code class="bg-white px-1 rounded border">firebaseConfig</code> JSON and paste it below (or into <code class="bg-white px-1 rounded border">GITHUB_FIREBASE_CONFIG</code> inside the HTML file).</li>
-          </ol>
-          <textarea id="customFirebaseInput" rows="4" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}' class="w-full p-3 rounded-xl bg-white border border-[#E2E8F0] font-mono text-[11px] text-[#0F172A] focus:outline-none focus:border-[#2563EB]"></textarea>
-          <div class="flex justify-end gap-2">
-            <button type="button" onclick="app.applyCustomFirebaseConfig()" class="px-4 py-2 rounded-xl bg-[#0F172A] hover:bg-slate-800 text-white font-semibold">
-              Connect Custom Firebase Server
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST NOTIFICATION -->
-  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-  <!-- ===================================================== -->
-  <!-- CORE APPLICATION + REAL-TIME FIRESTORE CLOUD ENGINE   -->
-  <!-- ===================================================== -->
+  <!-- ==================== FIREBASE & APP LOGIC ==================== -->
   <script type="module">
-    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      getDoc,
+      updateDoc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // ============================================================================
-    // OPTIONAL FOR GITHUB PAGES HOSTING:
-    // If you upload this file to GitHub Pages, you can paste your free Firebase
-    // config object right here (or paste it via the "Cloud Server" button in UI).
-    // ============================================================================
-    const GITHUB_FIREBASE_CONFIG = null; 
-    // Example:
-    // const GITHUB_FIREBASE_CONFIG = {
-    //   apiKey: "AIzaSy...",
-    //   authDomain: "your-project.firebaseapp.com",
-    //   projectId: "your-project",
-    //   storageBucket: "your-project.appspot.com",
-    //   messagingSenderId: "123456",
-    //   appId: "1:123456:web:abcdef"
-    // };
+    // =========================================================================
+    // YOUR HARDCODED FIREBASE CONFIG (pacto-e939f)
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUKEBoyxtF5k9t2llCg2WiDZxacCkqPuY",
+      authDomain: "pacto-e939f.firebaseapp.com",
+      projectId: "pacto-e939f",
+      storageBucket: "pacto-e939f.firebasestorage.app",
+      messagingSenderId: "813311625335",
+      appId: "1:813311625335:web:50398252a4f39d157d5e72",
+      measurementId: "G-J60NV7KGEC"
+    };
 
-    // Date helper functions
-    function formatDateKey(dateObj) {
-      const y = dateObj.getFullYear();
-      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const d = String(dateObj.getDate()).padStart(2, '0');
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // State
+    let allUsersMap = {};          // username -> userDoc
+    let currentUser = null;        // logged-in user object
+    let currentPact = null;        // active shared challenge document
+    let unsubscribePact = null;    // real-time listener for current pact
+    let tableFilter = 'active';    // 'active' | '7days' | 'month'
+
+    const SESSION_KEY = 'pacto_logged_in_user_v1';
+
+    // =========================================================================
+    // DATE HELPERS (Local Timezone YYYY-MM-DD)
+    // =========================================================================
+    function getTodayISO() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
       return `${y}-${m}-${d}`;
     }
 
-    function getTodayKey() {
-      return formatDateKey(new Date());
+    function formatReadableDate(isoStr) {
+      const [y, m, d] = isoStr.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      return dateObj.toLocaleDateString('en-IN', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short'
+      });
     }
 
-    function getFirstOfMonthKey() {
-      const now = new Date();
-      return formatDateKey(new Date(now.getFullYear(), now.getMonth(), 1));
+    function normalizeUsername(str) {
+      return (str || '').trim().toLowerCase().replace(/^@+/, '').replace(/[^a-z0-9_]/g, '');
     }
 
-    function addDaysToKey(dateKey, delta) {
-      const [y, m, d] = dateKey.split('-').map(Number);
-      const dt = new Date(y, m - 1, d);
-      dt.setDate(dt.getDate() + delta);
-      return formatDateKey(dt);
+    function getPairPactId(userA, userB) {
+      const u1 = normalizeUsername(userA);
+      const u2 = normalizeUsername(userB);
+      if (!u2) return `solo__${u1}`;
+      return [u1, u2].sort().join('__');
     }
 
-    function formatHumanDate(dateKey, todayKey) {
-      const [y, m, d] = dateKey.split('-').map(Number);
-      const dt = new Date(y, m - 1, d);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      const prefix = dateKey === todayKey ? 'Today' : days[dt.getDay()];
-      return `${prefix}, ${d} ${months[dt.getMonth()]}`;
+    function createDefaultPactObject(pactId, members) {
+      return {
+        pactId,
+        members,
+        goalTitle: "Walk 3,000 Steps a Day",
+        goalTarget: 3000,
+        goalUnit: "steps",
+        penaltyAmount: 100,
+        startDate: getTodayISO(),
+        logs: {},
+        updatedAt: Date.now()
+      };
     }
 
-    function formatFullDateHeading(dateKey) {
-      const [y, m, d] = dateKey.split('-').map(Number);
-      const dt = new Date(y, m - 1, d);
-      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      return `${days[dt.getDay()]}, ${d} ${months[dt.getMonth()]} ${y}`;
-    }
-
-    function enumerateDatesBetween(startKey, endKey) {
-      const result = [];
-      let curr = startKey <= endKey ? startKey : endKey;
-      let safety = 0;
-      while (curr <= endKey && safety < 120) {
-        result.push(curr);
-        curr = addDaysToKey(curr, 1);
-        safety++;
+    // =========================================================================
+    // INITIALIZE CLOUD CONNECTION & USERS LISTENER
+    // =========================================================================
+    async function initCloud() {
+      // Attempt anonymous auth quietly (in case rules check request.auth != null)
+      try {
+        await signInAnonymously(auth);
+      } catch (err) {
+        console.warn("Anonymous auth note (optional if rules are open):", err.message);
       }
-      return result;
+
+      // Listen to all users in real time
+      const usersCol = collection(db, 'pacto_users');
+      onSnapshot(
+        usersCol,
+        (snapshot) => {
+          setSyncStatus(true, "Live Sync • pacto-e939f");
+          document.getElementById('dbErrorBanner').classList.add('hidden');
+
+          const nextMap = {};
+          snapshot.forEach((docSnap) => {
+            nextMap[docSnap.id] = docSnap.data();
+          });
+          allUsersMap = nextMap;
+
+          renderCloudUsersDirectory();
+
+          // Restore session or refresh current user if logged in
+          const savedUsername = localStorage.getItem(SESSION_KEY);
+          if (savedUsername && allUsersMap[savedUsername]) {
+            const freshUser = allUsersMap[savedUsername];
+            const prevPactId = currentUser?.pactId;
+            currentUser = freshUser;
+
+            showDashboardView();
+
+            const targetPactId = freshUser.pactId || getPairPactId(freshUser.username, freshUser.friendUsername);
+            if (prevPactId !== targetPactId || !currentPact) {
+              subscribeToPact(targetPactId);
+            } else {
+              renderDashboard();
+            }
+          }
+        },
+        (error) => {
+          console.error("Firestore Listener Error:", error);
+          setSyncStatus(false, "Database Permission / Setup Needed");
+          const banner = document.getElementById('dbErrorBanner');
+          const errText = document.getElementById('dbErrorText');
+          banner.classList.remove('hidden');
+          errText.innerHTML = `Firestore error (<code>${error.code}</code>). Make sure you clicked <strong>Create database</strong> under Firestore Database and published Rules: <code>allow read, write: if true;</code>`;
+        }
+      );
     }
 
-    function getChallengeRoomId(userA, userB) {
-      if (!userB) return `solo__${userA.toLowerCase()}`;
-      return [userA.toLowerCase(), userB.toLowerCase()].sort().join('__');
+    function setSyncStatus(isConnected, message) {
+      const dot = document.getElementById('syncDot');
+      const text = document.getElementById('syncText');
+      if (isConnected) {
+        dot.className = "w-2 h-2 rounded-full bg-emerald-500";
+        text.textContent = message;
+      } else {
+        dot.className = "w-2 h-2 rounded-full bg-red-500";
+        text.textContent = message;
+      }
     }
 
-    // Core Application with Real-Time Firestore Cloud Collections
-    const app = {
-      state: {
-        users: {},      // { [username]: { username, fullName, password, friendUsername, isReservedSlot, updatedAt } }
-        challenges: {}  // { [roomId]: { id, goalTitle, target, unit, penalty, startDate, logsJson, logs, updatedAt } }
-      },
-      currentUser: null,
-      authTab: 'login',
-      dateRangeMode: 'start',
-      db: null,
-      auth: null,
-      appId: typeof __app_id !== 'undefined' ? __app_id : 'goalvault-100-v2',
-      isCloudConnected: false,
-      activeCustomFbConfig: null,
-      unsubUsers: null,
-      unsubPacts: null,
-      lastLocalWriteTime: 0,
+    // =========================================================================
+    // SUBSCRIBE TO ACTIVE 1v1 PACT DOCUMENT IN REAL TIME
+    // =========================================================================
+    function subscribeToPact(pactId) {
+      if (unsubscribePact) {
+        unsubscribePact();
+        unsubscribePact = null;
+      }
 
-      async init() {
-        // 1. Parse URL parameters if a custom Firebase config or state was shared
-        this.parseUrlParams();
-        // 2. Start live EOD countdown timer
-        this.startCountdownTimer();
-        // 3. Render initial UI immediately
-        this.render();
-        // 4. Connect to Real-Time Cloud Server (Firestore)
-        await this.initCloudServer();
-      },
-
-      parseUrlParams() {
-        try {
-          const hash = window.location.hash.replace(/^#/, '');
-          if (!hash) return;
-          const params = new URLSearchParams(hash);
-          if (params.get('fb')) {
-            const cfgJson = decodeURIComponent(escape(atob(params.get('fb'))));
-            this.activeCustomFbConfig = JSON.parse(cfgJson);
-            const inputEl = document.getElementById('customFirebaseInput');
-            if (inputEl) inputEl.value = JSON.stringify(this.activeCustomFbConfig, null, 2);
-          }
-          if (params.get('user')) {
-            const u = params.get('user').toLowerCase().trim();
-            const uInput = document.getElementById('inputUsername');
-            if (uInput) uInput.value = u;
-          }
-        } catch (err) {
-          console.warn('Could not parse URL parameters:', err);
+      const pactRef = doc(db, 'pacto_challenges', pactId);
+      unsubscribePact = onSnapshot(pactRef, async (docSnap) => {
+        if (docSnap.exists()) {
+          currentPact = docSnap.data();
+          renderDashboard();
+        } else if (currentUser) {
+          // Create default pact document in cloud
+          const members = currentUser.friendUsername
+            ? [currentUser.username, currentUser.friendUsername].sort()
+            : [currentUser.username];
+          const newPact = createDefaultPactObject(pactId, members);
+          await setDoc(pactRef, newPact);
         }
-      },
-
-      updateServerBadge(status, text) {
-        const dot = document.getElementById('syncDot');
-        const pulse = document.getElementById('syncPulse');
-        const label = document.getElementById('syncLabel');
-        const modalStatus = document.getElementById('syncModalStatusText');
-
-        if (status === 'live') {
-          this.isCloudConnected = true;
-          if (dot) dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-emerald-500';
-          if (pulse) pulse.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
-          if (label) label.textContent = text || 'Cloud Server Live';
-          if (modalStatus) {
-            modalStatus.textContent = 'Connected & Auto-Syncing';
-            modalStatus.className = 'px-2.5 py-1 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
-          }
-        } else if (status === 'syncing') {
-          if (label) label.textContent = 'Syncing to Cloud...';
-        } else {
-          this.isCloudConnected = false;
-          if (dot) dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-amber-500';
-          if (pulse) pulse.className = 'hidden';
-          if (label) label.textContent = text || 'Setup Cloud Server';
-          if (modalStatus) {
-            modalStatus.textContent = 'Waiting for Firebase Config';
-            modalStatus.className = 'px-2.5 py-1 rounded-full font-bold bg-amber-50 text-amber-700 border border-amber-200';
-          }
-        }
-      },
-
-      async initCloudServer(overrideConfig = null) {
-        try {
-          let firebaseConfig = overrideConfig || this.activeCustomFbConfig || GITHUB_FIREBASE_CONFIG;
-          if (!firebaseConfig && typeof __firebase_config !== 'undefined' && __firebase_config) {
-            firebaseConfig = JSON.parse(__firebase_config);
-          }
-
-          if (!firebaseConfig || !firebaseConfig.apiKey) {
-            this.updateServerBadge('offline', 'Configure Cloud DB');
-            return;
-          }
-
-          this.updateServerBadge('syncing');
-
-          const appName = overrideConfig ? `goalvault-${Date.now()}` : undefined;
-          const fbApp = appName
-            ? initializeApp(firebaseConfig, appName)
-            : (getApps().length ? getApps()[0] : initializeApp(firebaseConfig));
-
-          this.db = getFirestore(fbApp);
-          this.auth = getAuth(fbApp);
-
-          // RULE 3 - Auth Before Queries
-          if (!overrideConfig && !this.activeCustomFbConfig && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(this.auth, __initial_auth_token);
-          } else {
-            await signInAnonymously(this.auth);
-          }
-
-          onAuthStateChanged(this.auth, (user) => {
-            if (!user) return;
-            this.subscribeToCloudCollections();
-          });
-        } catch (err) {
-          console.error('Firebase connection error:', err);
-          this.updateServerBadge('offline', 'Server Config Needed');
-        }
-      },
-
-      subscribeToCloudCollections() {
-        if (!this.auth || !this.auth.currentUser || !this.db) return;
-
-        if (this.unsubUsers) this.unsubUsers();
-        if (this.unsubPacts) this.unsubPacts();
-
-        // RULE 1 - Strict Paths: /artifacts/{appId}/public/data/users and /artifacts/{appId}/public/data/pacts
-        const usersColRef = collection(this.db, 'artifacts', this.appId, 'public', 'data', 'users');
-        const pactsColRef = collection(this.db, 'artifacts', this.appId, 'public', 'data', 'pacts');
-
-        // Real-time listener for all user accounts
-        this.unsubUsers = onSnapshot(
-          usersColRef,
-          (snapshot) => {
-            snapshot.forEach((docSnap) => {
-              const data = docSnap.data();
-              if (data && data.username) {
-                this.state.users[data.username.toLowerCase()] = {
-                  username: data.username.toLowerCase(),
-                  fullName: data.fullName || data.username,
-                  password: data.password || '',
-                  friendUsername: data.friendUsername || null,
-                  isReservedSlot: Boolean(data.isReservedSlot),
-                  updatedAt: data.updatedAt || 0
-                };
-              }
-            });
-            this.updateServerBadge('live', 'Cloud Server Live');
-            this.render();
-          },
-          (err) => {
-            console.error('Users real-time listener error:', err);
-          }
-        );
-
-        // Real-time listener for all shared 1v1 pacts/challenges
-        this.unsubPacts = onSnapshot(
-          pactsColRef,
-          (snapshot) => {
-            let remoteChangeDetected = false;
-            snapshot.forEach((docSnap) => {
-              const data = docSnap.data();
-              if (data && data.id) {
-                let parsedLogs = {};
-                if (typeof data.logsJson === 'string') {
-                  try {
-                    parsedLogs = JSON.parse(data.logsJson);
-                  } catch (e) {
-                    parsedLogs = {};
-                  }
-                } else if (data.logs && typeof data.logs === 'object') {
-                  parsedLogs = data.logs;
-                }
-
-                const prev = this.state.challenges[data.id];
-                if (prev && data.updatedAt && data.updatedAt !== prev.updatedAt && (Date.now() - this.lastLocalWriteTime > 1200)) {
-                  remoteChangeDetected = true;
-                }
-
-                this.state.challenges[data.id] = {
-                  id: data.id,
-                  goalTitle: data.goalTitle || 'Walk 3,000 Steps a Day',
-                  target: Number(data.target) || 3000,
-                  unit: data.unit || 'steps',
-                  penalty: Number(data.penalty) || 100,
-                  startDate: data.startDate || getTodayKey(),
-                  logs: parsedLogs,
-                  updatedAt: data.updatedAt || 0,
-                  updatedBy: data.updatedBy || ''
-                };
-              }
-            });
-
-            this.updateServerBadge('live', 'Cloud Server Live');
-            this.render();
-
-            if (remoteChangeDetected && this.currentUser) {
-              this.showToast('Live update synced from cloud server!');
-            }
-          },
-          (err) => {
-            console.error('Pacts real-time listener error:', err);
-          }
-        );
-      },
-
-      // Save an individual user document to Firestore immediately
-      async saveUserToCloud(username) {
-        const cleanUser = username.toLowerCase();
-        const userObj = this.state.users[cleanUser];
-        if (!userObj) return;
-        userObj.updatedAt = Date.now();
-        this.lastLocalWriteTime = Date.now();
-        this.render();
-
-        if (!this.auth || !this.auth.currentUser || !this.db) return;
-        try {
-          this.updateServerBadge('syncing');
-          const userDocRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'users', cleanUser);
-          await setDoc(userDocRef, {
-            username: userObj.username,
-            fullName: userObj.fullName,
-            password: userObj.password || '',
-            friendUsername: userObj.friendUsername || null,
-            isReservedSlot: Boolean(userObj.isReservedSlot),
-            updatedAt: userObj.updatedAt
-          });
-          this.updateServerBadge('live', 'Cloud Server Live');
-        } catch (err) {
-          console.error('Error saving user to cloud:', err);
-        }
-      },
-
-      // Save a shared 1v1 challenge/pact document to Firestore immediately
-      async saveChallengeToCloud(roomId) {
-        const ch = this.state.challenges[roomId];
-        if (!ch) return;
-        ch.updatedAt = Date.now();
-        ch.updatedBy = this.currentUser || '';
-        this.lastLocalWriteTime = Date.now();
-        this.render();
-
-        if (!this.auth || !this.auth.currentUser || !this.db) return;
-        try {
-          this.updateServerBadge('syncing');
-          const pactDocRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'pacts', roomId);
-          await setDoc(pactDocRef, {
-            id: ch.id,
-            goalTitle: ch.goalTitle,
-            target: Number(ch.target) || 3000,
-            unit: ch.unit || 'steps',
-            penalty: Number(ch.penalty) || 100,
-            startDate: ch.startDate || getTodayKey(),
-            logsJson: JSON.stringify(ch.logs || {}),
-            updatedAt: ch.updatedAt,
-            updatedBy: ch.updatedBy
-          });
-          this.updateServerBadge('live', 'Cloud Server Live');
-        } catch (err) {
-          console.error('Error saving challenge to cloud:', err);
-        }
-      },
-
-      startCountdownTimer() {
-        const tick = () => {
-          const now = new Date();
-          const eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-          const diff = Math.max(0, eod - now);
-          const h = Math.floor(diff / 3600000);
-          const m = Math.floor((diff % 3600000) / 60000);
-          const s = Math.floor((diff % 60000) / 1000);
-          const el = document.getElementById('eodCountdown');
-          if (el) {
-            el.textContent = `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s left`;
-          }
-        };
-        tick();
-        setInterval(tick, 1000);
-      },
-
-      // =====================================================
-      // AUTHENTICATION (CREATE ACCOUNT & LOG IN)
-      // =====================================================
-      setAuthTab(tab) {
-        this.authTab = tab;
-        const btnLogin = document.getElementById('tabBtnLogin');
-        const btnSignup = document.getElementById('tabBtnSignup');
-        const fieldFullName = document.getElementById('fieldFullName');
-        const fieldFriendSignup = document.getElementById('fieldFriendSignup');
-        const submitBtn = document.getElementById('authSubmitBtn');
-        const msgBox = document.getElementById('authMessage');
-        msgBox.classList.add('hidden');
-
-        if (tab === 'login') {
-          btnLogin.className = 'py-2.5 rounded-lg text-sm font-semibold bg-white text-[#0F172A] shadow-sm transition';
-          btnSignup.className = 'py-2.5 rounded-lg text-sm font-semibold text-[#475569] hover:text-[#0F172A] transition';
-          fieldFullName.classList.add('hidden');
-          fieldFriendSignup.classList.add('hidden');
-          submitBtn.textContent = 'Log In';
-        } else {
-          btnSignup.className = 'py-2.5 rounded-lg text-sm font-semibold bg-white text-[#0F172A] shadow-sm transition';
-          btnLogin.className = 'py-2.5 rounded-lg text-sm font-semibold text-[#475569] hover:text-[#0F172A] transition';
-          fieldFullName.classList.remove('hidden');
-          fieldFriendSignup.classList.remove('hidden');
-          submitBtn.textContent = 'Create Account & Sync to Server';
-        }
-      },
-
-      prefillLoginUsername(username) {
-        this.setAuthTab('login');
-        document.getElementById('inputUsername').value = username;
-        document.getElementById('inputPassword').focus();
-      },
-
-      showAuthMessage(text, isError = true) {
-        const msgBox = document.getElementById('authMessage');
-        msgBox.textContent = text;
-        msgBox.className = isError
-          ? 'p-3 rounded-xl text-xs font-medium border bg-red-50 text-[#DC2626] border-red-200'
-          : 'p-3 rounded-xl text-xs font-medium border bg-green-50 text-[#16A34A] border-green-200';
-        msgBox.classList.remove('hidden');
-      },
-
-      async handleAuthSubmit(e) {
-        e.preventDefault();
-        const username = document.getElementById('inputUsername').value.trim().toLowerCase().replace(/^@/, '');
-        const password = document.getElementById('inputPassword').value.trim();
-        const fullName = document.getElementById('inputFullName').value.trim();
-        const friendUsername = document.getElementById('inputSignupFriend').value.trim().toLowerCase().replace(/^@/, '');
-
-        if (!username) {
-          this.showAuthMessage('Please enter a valid username.');
-          return;
-        }
-
-        // Fetch latest user doc from Firestore if connected so even brand new tabs are 100% up to date
-        if (this.auth && this.auth.currentUser && this.db) {
-          try {
-            const snap = await getDoc(doc(this.db, 'artifacts', this.appId, 'public', 'data', 'users', username));
-            if (snap.exists()) {
-              this.state.users[username] = snap.data();
-            }
-          } catch (err) {}
-        }
-
-        if (this.authTab === 'login') {
-          const user = this.state.users[username];
-          if (!user) {
-            this.showAuthMessage(`No account found on server for @${username}. Click "Create Account" above to sign up.`);
-            return;
-          }
-          // If account was a reserved partner invite slot without password set yet, claim it
-          if (user.isReservedSlot && !user.password) {
-            user.password = password;
-            user.isReservedSlot = false;
-            this.currentUser = username;
-            const ch = this.ensureChallengeForUser(username);
-            await this.saveUserToCloud(username);
-            if (ch) await this.saveChallengeToCloud(ch.id);
-            this.showToast(`Welcome, ${user.fullName}! Synced with your partner's challenge.`);
-            return;
-          }
-          if (user.password !== password) {
-            this.showAuthMessage('Incorrect password. Please try again.');
-            return;
-          }
-          this.currentUser = username;
-          this.ensureChallengeForUser(username);
-          this.showToast(`Logged in as ${user.fullName} (@${username})`);
-          this.render();
-        } else {
-          // Create Account flow
-          const existing = this.state.users[username];
-          if (existing && !existing.isReservedSlot) {
-            this.showAuthMessage(`Username @${username} already exists on the server. Switch to "Log In" above.`);
-            return;
-          }
-
-          const displayFull = fullName || (username.charAt(0).toUpperCase() + username.slice(1));
-
-          if (existing && existing.isReservedSlot) {
-            existing.fullName = displayFull;
-            existing.password = password;
-            existing.isReservedSlot = false;
-          } else {
-            this.state.users[username] = {
-              username,
-              fullName: displayFull,
-              password,
-              friendUsername: null,
-              isReservedSlot: false,
-              updatedAt: Date.now()
-            };
-          }
-
-          this.currentUser = username;
-
-          if (friendUsername && friendUsername !== username) {
-            await this.linkFriends(username, friendUsername, '');
-          } else {
-            const ch = this.ensureChallengeForUser(username);
-            await this.saveUserToCloud(username);
-            if (ch) await this.saveChallengeToCloud(ch.id);
-          }
-
-          this.showToast(`Account @${username} created and saved to Cloud Server!`);
-          this.render();
-        }
-      },
-
-      handleLogout() {
-        this.currentUser = null;
-        document.getElementById('inputPassword').value = '';
-        this.render();
-      },
-
-      // =====================================================
-      // FRIEND PAIRING & SHARED 1V1 CHALLENGE MANAGEMENT
-      // =====================================================
-      ensureChallengeForUser(username) {
-        const user = this.state.users[username];
-        if (!user) return null;
-        const roomId = getChallengeRoomId(username, user.friendUsername);
-
-        if (!this.state.challenges[roomId]) {
-          // Check if either user had logs in a solo room before pairing, and merge them cleanly
-          const soloIdMe = getChallengeRoomId(username, null);
-          const soloIdFriend = user.friendUsername ? getChallengeRoomId(user.friendUsername, null) : null;
-          const soloMe = this.state.challenges[soloIdMe];
-          const soloFriend = soloIdFriend ? this.state.challenges[soloIdFriend] : null;
-          const baseChallenge = soloMe || soloFriend;
-
-          const mergedLogs = {};
-          if (soloFriend && soloFriend.logs) {
-            Object.keys(soloFriend.logs).forEach(dKey => {
-              mergedLogs[dKey] = { ...(soloFriend.logs[dKey] || {}) };
-            });
-          }
-          if (soloMe && soloMe.logs) {
-            Object.keys(soloMe.logs).forEach(dKey => {
-              mergedLogs[dKey] = { ...(mergedLogs[dKey] || {}), ...(soloMe.logs[dKey] || {}) };
-            });
-          }
-
-          this.state.challenges[roomId] = {
-            id: roomId,
-            goalTitle: baseChallenge ? baseChallenge.goalTitle : 'Walk 3,000 Steps a Day',
-            target: baseChallenge ? baseChallenge.target : 3000,
-            unit: baseChallenge ? baseChallenge.unit : 'steps',
-            penalty: baseChallenge ? baseChallenge.penalty : 100,
-            startDate: baseChallenge ? baseChallenge.startDate : getTodayKey(),
-            logs: mergedLogs,
-            updatedAt: Date.now()
-          };
-        }
-        return this.state.challenges[roomId];
-      },
-
-      async linkFriends(myUsername, friendUsernameRaw, friendDisplayNameRaw) {
-        const u1 = myUsername.toLowerCase().trim().replace(/^@/, '');
-        const u2 = friendUsernameRaw.toLowerCase().trim().replace(/^@/, '');
-        if (!u1 || !u2 || u1 === u2) {
-          this.showToast('Please enter a different username for your partner.', true);
-          return false;
-        }
-
-        // If friend hasn't created their account yet, create a reserved invite slot on the cloud server
-        if (!this.state.users[u2]) {
-          const fallbackName = friendDisplayNameRaw && friendDisplayNameRaw.trim()
-            ? friendDisplayNameRaw.trim()
-            : (u2.charAt(0).toUpperCase() + u2.slice(1));
-
-          this.state.users[u2] = {
-            username: u2,
-            fullName: fallbackName,
-            password: '',
-            friendUsername: u1,
-            isReservedSlot: true,
-            updatedAt: Date.now()
-          };
-        } else {
-          this.state.users[u2].friendUsername = u1;
-          if (friendDisplayNameRaw && friendDisplayNameRaw.trim() && this.state.users[u2].isReservedSlot) {
-            this.state.users[u2].fullName = friendDisplayNameRaw.trim();
-          }
-        }
-
-        this.state.users[u1].friendUsername = u2;
-        const ch = this.ensureChallengeForUser(u1);
-
-        await this.saveUserToCloud(u1);
-        await this.saveUserToCloud(u2);
-        if (ch) await this.saveChallengeToCloud(ch.id);
-        return true;
-      },
-
-      async handleInlinePairSubmit(e) {
-        e.preventDefault();
-        if (!this.currentUser) return;
-        const friendUser = document.getElementById('inlineFriendUsername').value;
-        const friendName = document.getElementById('inlineFriendName').value;
-        if (await this.linkFriends(this.currentUser, friendUser, friendName)) {
-          document.getElementById('inlineFriendUsername').value = '';
-          document.getElementById('inlineFriendName').value = '';
-          this.showToast(`Paired with @${friendUser.trim().toLowerCase().replace(/^@/, '')} on Cloud Server!`);
-        }
-      },
-
-      openFriendModal() {
-        if (!this.currentUser) return;
-        const me = this.state.users[this.currentUser];
-        document.getElementById('modalMyUsername').textContent = `@${me.username}`;
-        const friend = me.friendUsername ? this.state.users[me.friendUsername] : null;
-        document.getElementById('modalFriendUsername').value = friend ? friend.username : '';
-        document.getElementById('modalFriendDisplayName').value = friend ? friend.fullName : '';
-        this.openModal('friendModal');
-      },
-
-      async handleModalPairSubmit(e) {
-        e.preventDefault();
-        if (!this.currentUser) return;
-        const friendUser = document.getElementById('modalFriendUsername').value;
-        const friendName = document.getElementById('modalFriendDisplayName').value;
-        if (await this.linkFriends(this.currentUser, friendUser, friendName)) {
-          this.closeModal('friendModal');
-          this.showToast(`Paired with @${friendUser.trim().toLowerCase().replace(/^@/, '')} on Cloud Server!`);
-        }
-      },
-
-      // =====================================================
-      // GOAL CUSTOMIZATION & PROGRESSIVE INCREASE
-      // =====================================================
-      getActiveChallenge() {
-        if (!this.currentUser) return null;
-        return this.ensureChallengeForUser(this.currentUser);
-      },
-
-      async bumpGoalTarget(delta) {
-        const ch = this.getActiveChallenge();
-        if (!ch) return;
-        ch.target = Math.max(1, (Number(ch.target) || 3000) + delta);
-        if (ch.unit === 'steps' && ch.goalTitle.toLowerCase().includes('steps')) {
-          ch.goalTitle = `Walk ${ch.target.toLocaleString()} Steps a Day`;
-        }
-        await this.saveChallengeToCloud(ch.id);
-        this.showToast(`Increased daily goal target to ${ch.target.toLocaleString()} ${ch.unit}!`);
-      },
-
-      openGoalModal() {
-        const ch = this.getActiveChallenge();
-        if (!ch) return;
-        document.getElementById('modalGoalTitle').value = ch.goalTitle;
-        document.getElementById('modalGoalTarget').value = ch.target;
-        document.getElementById('modalGoalUnit').value = ch.unit;
-        document.getElementById('modalGoalPenalty').value = ch.penalty;
-        document.getElementById('modalGoalStartDate').value = ch.startDate;
-        this.openModal('goalModal');
-      },
-
-      setGoalPreset(title, target, unit) {
-        document.getElementById('modalGoalTitle').value = title;
-        document.getElementById('modalGoalTarget').value = target;
-        document.getElementById('modalGoalUnit').value = unit;
-      },
-
-      async handleSaveGoal(e) {
-        e.preventDefault();
-        const ch = this.getActiveChallenge();
-        if (!ch) return;
-        const title = document.getElementById('modalGoalTitle').value.trim() || 'Walk 3,000 Steps a Day';
-        const target = Math.max(1, Number(document.getElementById('modalGoalTarget').value) || 3000);
-        const unit = document.getElementById('modalGoalUnit').value || 'steps';
-        const penalty = Math.max(1, Number(document.getElementById('modalGoalPenalty').value) || 100);
-        const startDate = document.getElementById('modalGoalStartDate').value || getTodayKey();
-
-        ch.goalTitle = title;
-        ch.target = target;
-        ch.unit = unit;
-        ch.penalty = penalty;
-        ch.startDate = startDate <= getTodayKey() ? startDate : getTodayKey();
-
-        this.closeModal('goalModal');
-        await this.saveChallengeToCloud(ch.id);
-        this.showToast(`Goal synced: ${target.toLocaleString()} ${unit}/day`);
-      },
-
-      async setDateRangeMode(mode) {
-        this.dateRangeMode = mode;
-        const ch = this.getActiveChallenge();
-        if (ch) {
-          const todayKey = getTodayKey();
-          if (mode === 'last7') {
-            const sevenAgo = addDaysToKey(todayKey, -6);
-            if (ch.startDate > sevenAgo) ch.startDate = sevenAgo;
-          } else if (mode === 'month') {
-            const firstOfMonth = getFirstOfMonthKey();
-            if (ch.startDate > firstOfMonth) ch.startDate = firstOfMonth;
-          }
-          await this.saveChallengeToCloud(ch.id);
-        }
-      },
-
-      // =====================================================
-      // EFFORTLESS DAILY LOGGING & DAY EDITING
-      // =====================================================
-      ensureUserDayRecord(challenge, dateKey, username) {
-        if (!challenge.logs) challenge.logs = {};
-        if (!challenge.logs[dateKey]) challenge.logs[dateKey] = {};
-        if (!challenge.logs[dateKey][username]) {
-          challenge.logs[dateKey][username] = { value: 0, forcedMiss: false };
-        }
-        return challenge.logs[dateKey][username];
-      },
-
-      async handleSaveTodayProgress(e) {
-        e.preventDefault();
-        const ch = this.getActiveChallenge();
-        if (!ch || !this.currentUser) return;
-        const rawVal = document.getElementById('inputTodayProgress').value;
-        const val = Math.max(0, Number(rawVal) || 0);
-        const todayKey = getTodayKey();
-
-        const rec = this.ensureUserDayRecord(ch, todayKey, this.currentUser);
-        rec.value = val;
-        rec.forcedMiss = false;
-
-        await this.saveChallengeToCloud(ch.id);
-
-        if (val >= ch.target) {
-          this.showToast(`Goal Completed! Synced ${val.toLocaleString()} ${ch.unit} to Cloud Server.`);
-        } else {
-          this.showToast(`Saved ${val.toLocaleString()} ${ch.unit}. ${(ch.target - val).toLocaleString()} more to reach today's goal!`);
-        }
-      },
-
-      async quickIncrementToday(amount) {
-        const ch = this.getActiveChallenge();
-        if (!ch || !this.currentUser) return;
-        const todayKey = getTodayKey();
-        const rec = this.ensureUserDayRecord(ch, todayKey, this.currentUser);
-        rec.value = (Number(rec.value) || 0) + amount;
-        rec.forcedMiss = false;
-        document.getElementById('inputTodayProgress').value = rec.value;
-        await this.saveChallengeToCloud(ch.id);
-        this.showToast(`Synced +${amount.toLocaleString()} ${ch.unit} (Total: ${rec.value.toLocaleString()} ${ch.unit})`);
-      },
-
-      async quickCompleteToday() {
-        const ch = this.getActiveChallenge();
-        if (!ch || !this.currentUser) return;
-        const todayKey = getTodayKey();
-        const rec = this.ensureUserDayRecord(ch, todayKey, this.currentUser);
-        rec.value = Math.max(Number(rec.value) || 0, ch.target);
-        rec.forcedMiss = false;
-        document.getElementById('inputTodayProgress').value = rec.value;
-        await this.saveChallengeToCloud(ch.id);
-        this.showToast(`Today's goal (${ch.target.toLocaleString()} ${ch.unit}) marked Completed & Synced!`);
-      },
-
-      async markTodayMissed() {
-        const ch = this.getActiveChallenge();
-        if (!ch || !this.currentUser) return;
-        const todayKey = getTodayKey();
-        const rec = this.ensureUserDayRecord(ch, todayKey, this.currentUser);
-        rec.forcedMiss = true;
-        if (rec.value >= ch.target) rec.value = 0;
-        document.getElementById('inputTodayProgress').value = rec.value;
-        await this.saveChallengeToCloud(ch.id);
-        this.showToast(`Marked today as Missed (+₹${ch.penalty} added to Vault).`, true);
-      },
-
-      openDayModal(dateKey) {
-        const ch = this.getActiveChallenge();
-        if (!ch || !this.currentUser) return;
-        const me = this.state.users[this.currentUser];
-        const friend = me.friendUsername ? this.state.users[me.friendUsername] : null;
-
-        document.getElementById('dayModalDateKey').value = dateKey;
-        document.getElementById('dayModalDateSub').textContent = formatFullDateHeading(dateKey);
-
-        const myRec = this.ensureUserDayRecord(ch, dateKey, me.username);
-        document.getElementById('dayModalYouLabel').textContent = `${me.fullName} (You) — ${ch.unit}`;
-        document.getElementById('dayModalYouInput').value = myRec.value || 0;
-        document.getElementById('dayModalYouForceMiss').checked = Boolean(myRec.forcedMiss);
-
-        const friendBox = document.getElementById('dayModalFriendBox');
-        if (friend) {
-          friendBox.classList.remove('hidden');
-          const fRec = this.ensureUserDayRecord(ch, dateKey, friend.username);
-          document.getElementById('dayModalFriendLabel').textContent = `${friend.fullName} (@${friend.username}) — ${ch.unit}`;
-          document.getElementById('dayModalFriendInput').value = fRec.value || 0;
-          document.getElementById('dayModalFriendForceMiss').checked = Boolean(fRec.forcedMiss);
-        } else {
-          friendBox.classList.add('hidden');
-        }
-
-        this.openModal('dayModal');
-      },
-
-      fillDayModalTarget(who) {
-        const ch = this.getActiveChallenge();
-        if (!ch) return;
-        if (who === 'you') {
-          document.getElementById('dayModalYouInput').value = ch.target;
-          document.getElementById('dayModalYouForceMiss').checked = false;
-        } else {
-          document.getElementById('dayModalFriendInput').value = ch.target;
-          document.getElementById('dayModalFriendForceMiss').checked = false;
-        }
-      },
-
-      fillDayModalMissed(who) {
-        if (who === 'you') {
-          document.getElementById('dayModalYouInput').value = 0;
-          document.getElementById('dayModalYouForceMiss').checked = true;
-        } else {
-          document.getElementById('dayModalFriendInput').value = 0;
-          document.getElementById('dayModalFriendForceMiss').checked = true;
-        }
-      },
-
-      async handleSaveDayModal(e) {
-        e.preventDefault();
-        const ch = this.getActiveChallenge();
-        if (!ch || !this.currentUser) return;
-        const me = this.state.users[this.currentUser];
-        const friend = me.friendUsername ? this.state.users[me.friendUsername] : null;
-        const dateKey = document.getElementById('dayModalDateKey').value;
-
-        const myRec = this.ensureUserDayRecord(ch, dateKey, me.username);
-        myRec.value = Math.max(0, Number(document.getElementById('dayModalYouInput').value) || 0);
-        myRec.forcedMiss = document.getElementById('dayModalYouForceMiss').checked;
-
-        if (friend) {
-          const fRec = this.ensureUserDayRecord(ch, dateKey, friend.username);
-          fRec.value = Math.max(0, Number(document.getElementById('dayModalFriendInput').value) || 0);
-          fRec.forcedMiss = document.getElementById('dayModalFriendForceMiss').checked;
-        }
-
-        this.closeModal('dayModal');
-        await this.saveChallengeToCloud(ch.id);
-        this.showToast(`Synced record for ${formatHumanDate(dateKey, getTodayKey())}`);
-      },
-
-      // =====================================================
-      // EVALUATION ENGINE (HITS, MISSES & ₹100 VAULT RULES)
-      // =====================================================
-      evaluateUserDay(challenge, dateKey, username, todayKey) {
-        if (!username) {
-          return { status: 'UNPAIRED', value: 0, penalty: 0 };
-        }
-        const rec = challenge.logs?.[dateKey]?.[username] || { value: 0, forcedMiss: false };
-        const val = Number(rec.value) || 0;
-        const isPast = dateKey < todayKey;
-
-        if (val >= challenge.target && !rec.forcedMiss) {
-          return { status: 'COMPLETED', value: val, penalty: 0 };
-        }
-        if (isPast || rec.forcedMiss) {
-          return { status: 'MISSED', value: val, penalty: Number(challenge.penalty) || 100 };
-        }
-        return { status: 'PENDING', value: val, penalty: 0 };
-      },
-
-      // =====================================================
-      // RENDER UI
-      // =====================================================
-      render() {
-        const authSection = document.getElementById('authSection');
-        const dashboardSection = document.getElementById('dashboardSection');
-        const navUserSection = document.getElementById('navUserSection');
-
-        // Render Cloud Accounts directory on Login screen so users can see registered accounts
-        const allUsernames = Object.keys(this.state.users);
-        const countEl = document.getElementById('cloudAccountCount');
-        const listEl = document.getElementById('cloudAccountsList');
-        if (countEl && listEl) {
-          countEl.textContent = `${allUsernames.length} on server`;
-          if (allUsernames.length === 0) {
-            listEl.innerHTML = `<span class="text-slate-400 text-xs">No accounts created yet. Click "Create Account" above!</span>`;
-          } else {
-            listEl.innerHTML = allUsernames.map(uname => {
-              const u = this.state.users[uname];
-              const badge = u.isReservedSlot ? ' (Partner Invite)' : '';
-              return `<button type="button" onclick="app.prefillLoginUsername('${u.username}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-[#2563EB] text-[#0F172A] font-medium text-xs border border-[#E2E8F0] transition">@${u.username}${badge}</button>`;
-            }).join('');
-          }
-        }
-
-        if (!this.currentUser || !this.state.users[this.currentUser]) {
-          authSection.classList.remove('hidden');
-          dashboardSection.classList.add('hidden');
-          navUserSection.classList.add('hidden');
-          navUserSection.classList.remove('flex');
-          return;
-        }
-
-        authSection.classList.add('hidden');
-        dashboardSection.classList.remove('hidden');
-        navUserSection.classList.remove('hidden');
-        navUserSection.classList.add('flex');
-
-        const me = this.state.users[this.currentUser];
-        const friend = me.friendUsername ? this.state.users[me.friendUsername] : null;
-        const ch = this.getActiveChallenge();
-        const todayKey = getTodayKey();
-
-        // Top Navbar user info
-        document.getElementById('navUserName').textContent = me.fullName;
-        document.getElementById('navUserHandle').textContent = `@${me.username}`;
-
-        // Top Goal & Partner Status Card
-        const partnerBadge = document.getElementById('challengePartnerBadge');
-        const unpairedCard = document.getElementById('unpairedPromptCard');
-        const btnFriendText = document.getElementById('btnFriendText');
-
-        if (friend) {
-          partnerBadge.textContent = `Live 1v1 vs. ${friend.fullName} (@${friend.username})`;
-          partnerBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[#16A34A] border border-emerald-200';
-          unpairedCard.classList.add('hidden');
-          btnFriendText.textContent = `Partner: @${friend.username}`;
-        } else {
-          partnerBadge.textContent = 'No Partner Connected Yet';
-          partnerBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200';
-          unpairedCard.classList.remove('hidden');
-          btnFriendText.textContent = 'Add Friend';
-        }
-
-        document.getElementById('displayGoalTitle').textContent = ch.goalTitle;
-        document.getElementById('displayGoalTarget').textContent = `${Number(ch.target).toLocaleString()} ${ch.unit}`;
-        document.getElementById('displayGoalPenalty').textContent = `₹${ch.penalty} / day`;
-        document.getElementById('displayGoalStart').textContent = formatHumanDate(ch.startDate, todayKey);
-
-        // Today's Logging Hero Card
-        document.getElementById('todayDateHeading').textContent = formatFullDateHeading(todayKey);
-        const myToday = this.evaluateUserDay(ch, todayKey, me.username, todayKey);
-        const friendToday = friend ? this.evaluateUserDay(ch, todayKey, friend.username, todayKey) : null;
-
-        document.getElementById('todayLoggedNum').textContent = myToday.value.toLocaleString();
-        document.getElementById('todayTargetSub').textContent = ` / ${Number(ch.target).toLocaleString()} ${ch.unit}`;
-        document.getElementById('inputTodayUnitLabel').textContent = ch.unit;
-        document.getElementById('quickDoneTargetText').textContent = Number(ch.target).toLocaleString();
-        document.getElementById('quickMissPenaltyText').textContent = ch.penalty;
-
-        const inputEl = document.getElementById('inputTodayProgress');
-        if (document.activeElement !== inputEl) {
-          inputEl.value = myToday.value > 0 ? myToday.value : '';
-        }
-
-        const pct = Math.min(100, Math.round((myToday.value / ch.target) * 100));
-        document.getElementById('todayPercentNum').textContent = `${pct}%`;
-        const barEl = document.getElementById('todayProgressBar');
-        barEl.style.width = `${pct}%`;
-
-        const badgeEl = document.getElementById('todayStatusBadge');
-        if (myToday.status === 'COMPLETED') {
-          badgeEl.textContent = '✓ Completed Today';
-          badgeEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-[#16A34A] border border-green-200';
-          barEl.className = 'h-full bg-[#16A34A] transition-all duration-300 rounded-full';
-        } else if (myToday.status === 'MISSED') {
-          badgeEl.textContent = `Missed (+₹${ch.penalty} to Vault)`;
-          badgeEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-[#DC2626] border border-red-200';
-          barEl.className = 'h-full bg-[#DC2626] transition-all duration-300 rounded-full';
-        } else {
-          badgeEl.textContent = `Pending — ₹${ch.penalty} penalty if missed by EOD`;
-          badgeEl.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200';
-          barEl.className = 'h-full bg-[#2563EB] transition-all duration-300 rounded-full';
-        }
-
-        const compMiniLabel = document.getElementById('competitorMiniLabel');
-        const compMiniVal = document.getElementById('competitorMiniValue');
-        if (friend && friendToday) {
-          compMiniLabel.textContent = `${friend.fullName}`;
-          if (friendToday.status === 'COMPLETED') {
-            compMiniVal.innerHTML = `<span class="text-[#16A34A]">${friendToday.value.toLocaleString()} ${ch.unit} (Completed ✓)</span>`;
-          } else if (friendToday.status === 'MISSED') {
-            compMiniVal.innerHTML = `<span class="text-[#DC2626]">${friendToday.value.toLocaleString()} ${ch.unit} (Missed +₹${ch.penalty})</span>`;
-          } else {
-            compMiniVal.innerHTML = `<span class="text-[#475569]">${friendToday.value.toLocaleString()} / ${Number(ch.target).toLocaleString()} ${ch.unit} (Pending)</span>`;
-          }
-        } else {
-          compMiniLabel.textContent = 'Competitor';
-          compMiniVal.textContent = 'Add a friend above to compare live';
-        }
-
-        // Compute multi-day totals & Vault summary
-        const allDatesAsc = enumerateDatesBetween(ch.startDate, todayKey);
-        let myCompleted = 0, myMissed = 0, myVaultLoss = 0;
-        let friendCompleted = 0, friendMissed = 0, friendVaultLoss = 0;
-        const rowsDesc = [];
-
-        allDatesAsc.forEach(dKey => {
-          const evMe = this.evaluateUserDay(ch, dKey, me.username, todayKey);
-          const evFriend = friend ? this.evaluateUserDay(ch, dKey, friend.username, todayKey) : null;
-
-          if (evMe.status === 'COMPLETED') myCompleted++;
-          if (evMe.status === 'MISSED') {
-            myMissed++;
-            myVaultLoss += evMe.penalty;
-          }
-
-          if (evFriend) {
-            if (evFriend.status === 'COMPLETED') friendCompleted++;
-            if (evFriend.status === 'MISSED') {
-              friendMissed++;
-              friendVaultLoss += evFriend.penalty;
-            }
-          }
-
-          const dayVault = evMe.penalty + (evFriend ? evFriend.penalty : 0);
-          rowsDesc.unshift({
-            dateKey: dKey,
-            evMe,
-            evFriend,
-            dayVault
-          });
-        });
-
-        const totalVault = myVaultLoss + friendVaultLoss;
-        const totalMissedDays = myMissed + friendMissed;
-
-        // Render 3-Column Vault Summary
-        document.getElementById('vaultTotalAmount').textContent = `₹${totalVault.toLocaleString('en-IN')}`;
-        document.getElementById('vaultTotalMisses').textContent = `${totalMissedDays} ${totalMissedDays === 1 ? 'day' : 'days'}`;
-
-        document.getElementById('vaultMyNameTag').textContent = `${me.fullName} (@${me.username})`;
-        document.getElementById('vaultMyAmount').textContent = `₹${myVaultLoss.toLocaleString('en-IN')}`;
-        document.getElementById('vaultMyCompletedCount').textContent = myCompleted;
-        document.getElementById('vaultMyMissedCount').textContent = myMissed;
-        document.getElementById('vaultMyPenaltyUnit').textContent = ch.penalty;
-
-        if (friend) {
-          document.getElementById('vaultFriendHeader').textContent = `${friend.fullName} Lost to Vault`;
-          document.getElementById('vaultFriendNameTag').textContent = `@${friend.username}`;
-          document.getElementById('vaultFriendAmount').textContent = `₹${friendVaultLoss.toLocaleString('en-IN')}`;
-          document.getElementById('vaultFriendCompletedCount').textContent = friendCompleted;
-          document.getElementById('vaultFriendMissedCount').textContent = friendMissed;
-          document.getElementById('vaultFriendPenaltyUnit').textContent = ch.penalty;
-        } else {
-          document.getElementById('vaultFriendHeader').textContent = 'Competitor Lost to Vault';
-          document.getElementById('vaultFriendNameTag').textContent = 'Not Paired';
-          document.getElementById('vaultFriendAmount').textContent = '₹0';
-          document.getElementById('vaultFriendCompletedCount').textContent = '0';
-          document.getElementById('vaultFriendMissedCount').textContent = '0';
-          document.getElementById('vaultFriendPenaltyUnit').textContent = ch.penalty;
-        }
-
-        // Date Range Mode Buttons
-        const rangeBtns = {
-          start: document.getElementById('rangeBtnStart'),
-          last7: document.getElementById('rangeBtn7Days'),
-          month: document.getElementById('rangeBtnMonth')
-        };
-        Object.keys(rangeBtns).forEach(k => {
-          if (k === this.dateRangeMode) {
-            rangeBtns[k].className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-[#0F172A] shadow-sm transition';
-          } else {
-            rangeBtns[k].className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-[#475569] hover:text-[#0F172A] transition';
-          }
-        });
-
-        // Render Day-by-Day Table
-        document.getElementById('tableColYou').textContent = `You (${me.fullName})`;
-        document.getElementById('tableColFriend').textContent = friend ? `${friend.fullName} (@${friend.username})` : 'Competitor';
-
-        const formatCellHtml = (ev, isFriendUnpaired) => {
-          if (isFriendUnpaired || !ev) {
-            return `<span class="text-xs text-slate-400">Add friend to track</span>`;
-          }
-          if (ev.status === 'COMPLETED') {
-            return `
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="font-bold text-[#0F172A]">${ev.value.toLocaleString()} ${ch.unit}</span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-[#16A34A] border border-green-200">
-                  Completed
-                </span>
-              </div>
-            `;
-          }
-          if (ev.status === 'MISSED') {
-            return `
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="font-bold text-[#DC2626]">${ev.value.toLocaleString()} ${ch.unit}</span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-[#DC2626] border border-red-200">
-                  Missed (+₹${ev.penalty})
-                </span>
-              </div>
-            `;
-          }
-          return `
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="font-semibold text-[#0F172A]">${ev.value.toLocaleString()} ${ch.unit}</span>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                In Progress
-              </span>
-            </div>
-          `;
-        };
-
-        const tbody = document.getElementById('recordTableBody');
-        tbody.innerHTML = rowsDesc.map(row => {
-          const isToday = row.dateKey === todayKey;
-          const dateLabel = formatHumanDate(row.dateKey, todayKey);
-          const vaultCell = row.dayVault > 0
-            ? `<span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-red-50 text-[#DC2626] border border-red-200">+₹${row.dayVault}</span>`
-            : `<span class="text-xs font-medium text-[#475569]">₹0</span>`;
-
-          return `
-            <tr class="hover:bg-slate-50/80 transition ${isToday ? 'bg-blue-50/30' : ''}">
-              <td class="py-3.5 px-4 sm:px-6 whitespace-nowrap">
-                <div class="font-semibold text-[#0F172A]">${dateLabel}</div>
-                <div class="text-[11px] text-[#475569]">${row.dateKey}</div>
-              </td>
-              <td class="py-3.5 px-4">${formatCellHtml(row.evMe, false)}</td>
-              <td class="py-3.5 px-4">${formatCellHtml(row.evFriend, !friend)}</td>
-              <td class="py-3.5 px-4 whitespace-nowrap">${vaultCell}</td>
-              <td class="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap">
-                <button type="button" onclick="app.openDayModal('${row.dateKey}')" class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-[#2563EB] border border-[#E2E8F0] text-xs font-semibold shadow-2xs transition">
-                  Log / Edit
-                </button>
-              </td>
-            </tr>
-          `;
-        }).join('');
-      },
-
-      // =====================================================
-      // MODALS, PARTNER INVITE LINKS & CUSTOM FIREBASE SERVER
-      // =====================================================
-      buildPartnerShareUrl() {
-        const params = new URLSearchParams();
-        if (this.activeCustomFbConfig) {
-          const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(this.activeCustomFbConfig))));
-          params.set('fb', b64);
-        }
-        if (this.currentUser && this.state.users[this.currentUser]?.friendUsername) {
-          params.set('user', this.state.users[this.currentUser].friendUsername);
-        }
-        const hashStr = params.toString();
-        return `${window.location.origin}${window.location.pathname}${hashStr ? '#' + hashStr : ''}`;
-      },
-
-      openModal(id) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        if (id === 'syncModal') {
-          document.getElementById('shareLinkInput').value = this.buildPartnerShareUrl();
-        }
-        el.classList.remove('hidden');
-        el.classList.add('flex');
-      },
-
-      closeModal(id) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.classList.add('hidden');
-        el.classList.remove('flex');
-      },
-
-      async applyCustomFirebaseConfig() {
-        const raw = document.getElementById('customFirebaseInput').value.trim();
-        if (!raw) {
-          this.showToast('Please paste your Firebase config JSON object.', true);
-          return;
-        }
-        try {
-          // Support both strict JSON and JS object snippets
-          const cleaned = raw
-            .replace(/^(const|let|var)\s+\w+\s*=\s*/, '')
-            .replace(/;$/, '');
-          const parsed = JSON.parse(cleaned);
-          if (!parsed.apiKey || !parsed.projectId) {
-            this.showToast('Config must include apiKey and projectId.', true);
-            return;
-          }
-          this.activeCustomFbConfig = parsed;
-          await this.initCloudServer(parsed);
-          document.getElementById('shareLinkInput').value = this.buildPartnerShareUrl();
-          this.showToast('Connected to your custom Firebase Cloud Server!');
-        } catch (err) {
-          this.showToast('Please paste valid JSON (with double-quoted keys).', true);
-        }
-      },
-
-      copyText(text, message) {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        try {
-          document.execCommand('copy');
-          this.showToast(message);
-        } catch (e) {
-          this.showToast('Please select and copy manually.');
-        }
-        document.body.removeChild(ta);
-      },
-
-      copyMyUsername() {
-        if (!this.currentUser) return;
-        this.copyText(this.currentUser, `Copied @${this.currentUser} to clipboard`);
-      },
-
-      copyShareLink() {
-        const val = document.getElementById('shareLinkInput').value;
-        this.copyText(val, 'Partner Invite Link copied to clipboard!');
-      },
-
-      showToast(msg, isAlert = false) {
-        const container = document.getElementById('toastContainer');
-        if (!container) return;
-        const div = document.createElement('div');
-        div.className = `px-4 py-3 rounded-xl shadow-lg border text-xs font-semibold flex items-center gap-2 transition-all duration-300 ${
-          isAlert
-            ? 'bg-red-600 text-white border-red-700'
-            : 'bg-[#0F172A] text-white border-slate-800'
-        }`;
-        div.innerHTML = `<span>${isAlert ? '!' : '✓'}</span><span>${msg}</span>`;
-        container.appendChild(div);
-        setTimeout(() => {
-          div.style.opacity = '0';
-          setTimeout(() => div.remove(), 250);
-        }, 3000);
+      });
+    }
+
+    // =========================================================================
+    // AUTHENTICATION: SIGN UP & LOG IN
+    // =========================================================================
+    window.switchAuthTab = function(tab) {
+      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
+      const tabLoginBtn = document.getElementById('tabLoginBtn');
+      const tabSignupBtn = document.getElementById('tabSignupBtn');
+      hideAuthAlert();
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+        tabLoginBtn.className = "py-2.5 text-sm font-bold rounded-xl bg-white text-slate-900 shadow-sm transition";
+        tabSignupBtn.className = "py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-800 transition";
+      } else {
+        signupForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+        tabSignupBtn.className = "py-2.5 text-sm font-bold rounded-xl bg-white text-slate-900 shadow-sm transition";
+        tabLoginBtn.className = "py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-800 transition";
       }
     };
 
-    window.app = app;
-    window.addEventListener('DOMContentLoaded', () => app.init());
+    function showAuthAlert(msg, isError = true) {
+      const box = document.getElementById('authAlert');
+      box.classList.remove('hidden');
+      if (isError) {
+        box.className = "mb-4 p-3 rounded-xl text-xs font-semibold border bg-red-50 border-red-200 text-red-700";
+      } else {
+        box.className = "mb-4 p-3 rounded-xl text-xs font-semibold border bg-emerald-50 border-emerald-200 text-emerald-700";
+      }
+      box.textContent = msg;
+    }
+
+    function hideAuthAlert() {
+      document.getElementById('authAlert').classList.add('hidden');
+    }
+
+    // Handle Sign Up
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAuthAlert();
+
+      const displayName = document.getElementById('signupDisplayName').value.trim();
+      const username = normalizeUsername(document.getElementById('signupUsername').value);
+      const password = document.getElementById('signupPassword').value;
+      let friendUsername = normalizeUsername(document.getElementById('signupFriendUsername').value);
+
+      if (!username) {
+        return showAuthAlert("Please enter a valid username (letters and numbers).");
+      }
+      if (friendUsername === username) {
+        friendUsername = "";
+      }
+
+      if (allUsersMap[username]) {
+        return showAuthAlert(`@${username} is already taken! Switch to the Log In tab.`);
+      }
+
+      // Check if someone else already listed this username as their friend
+      if (!friendUsername) {
+        const waitingPartner = Object.values(allUsersMap).find(u => u.friendUsername === username);
+        if (waitingPartner) {
+          friendUsername = waitingPartner.username;
+        }
+      }
+
+      const pactId = getPairPactId(username, friendUsername);
+      const newUserDoc = {
+        username,
+        displayName,
+        password,
+        friendUsername: friendUsername || null,
+        pactId,
+        createdAt: Date.now()
+      };
+
+      try {
+        // Save new user
+        await setDoc(doc(db, 'pacto_users', username), newUserDoc);
+
+        // If friend already exists in cloud, link them back automatically
+        if (friendUsername && allUsersMap[friendUsername]) {
+          await updateDoc(doc(db, 'pacto_users', friendUsername), {
+            friendUsername: username,
+            pactId
+          });
+        }
+
+        // Ensure shared challenge doc exists
+        const pactRef = doc(db, 'pacto_challenges', pactId);
+        const pactSnap = await getDoc(pactRef);
+        if (!pactSnap.exists()) {
+          const members = friendUsername ? [username, friendUsername].sort() : [username];
+          await setDoc(pactRef, createDefaultPactObject(pactId, members));
+        }
+
+        localStorage.setItem(SESSION_KEY, username);
+        currentUser = newUserDoc;
+        showDashboardView();
+        subscribeToPact(pactId);
+      } catch (err) {
+        showAuthAlert("Could not create account: " + err.message);
+      }
+    });
+
+    // Handle Log In
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAuthAlert();
+
+      const username = normalizeUsername(document.getElementById('loginUsername').value);
+      const password = document.getElementById('loginPassword').value;
+
+      const userDoc = allUsersMap[username];
+      if (!userDoc) {
+        return showAuthAlert(`Account @${username} not found. Click "Create Account" above!`);
+      }
+      if (userDoc.password !== password) {
+        return showAuthAlert("Incorrect password. Please try again.");
+      }
+
+      localStorage.setItem(SESSION_KEY, username);
+      currentUser = userDoc;
+      showDashboardView();
+      const pactId = userDoc.pactId || getPairPactId(userDoc.username, userDoc.friendUsername);
+      subscribeToPact(pactId);
+    });
+
+    // Handle Log Out
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem(SESSION_KEY);
+      currentUser = null;
+      currentPact = null;
+      if (unsubscribePact) {
+        unsubscribePact();
+        unsubscribePact = null;
+      }
+      document.getElementById('dashboardView').classList.add('hidden');
+      document.getElementById('navUserSection').classList.add('hidden');
+      document.getElementById('authView').classList.remove('hidden');
+    });
+
+    function renderCloudUsersDirectory() {
+      const container = document.getElementById('cloudUsersList');
+      const badge = document.getElementById('userCountBadge');
+      const users = Object.values(allUsersMap);
+      badge.textContent = `${users.length} ${users.length === 1 ? 'account' : 'accounts'}`;
+
+      if (users.length === 0) {
+        container.innerHTML = `<span class="text-slate-400 italic">No accounts created yet. Create the first one!</span>`;
+        return;
+      }
+
+      container.innerHTML = users.map(u => `
+        <button type="button" onclick="prefillLogin('${u.username}')"
+          class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200 font-semibold text-slate-700 transition">
+          ${u.displayName} <span class="text-slate-400">@${u.username}</span>
+        </button>
+      `).join('');
+    }
+
+    window.prefillLogin = function(username) {
+      switchAuthTab('login');
+      document.getElementById('loginUsername').value = username;
+      document.getElementById('loginPassword').focus();
+    };
+
+    function showDashboardView() {
+      document.getElementById('authView').classList.add('hidden');
+      document.getElementById('dashboardView').classList.remove('hidden');
+      const navUser = document.getElementById('navUserSection');
+      navUser.classList.remove('hidden');
+      navUser.classList.add('flex');
+      document.getElementById('navDisplayName').textContent = currentUser.displayName;
+      document.getElementById('navUsername').textContent = `@${currentUser.username}`;
+    }
+
+    // =========================================================================
+    // CONNECT / PAIR WITH FRIEND
+    // =========================================================================
+    document.getElementById('friendConnectForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const friendUsername = normalizeUsername(document.getElementById('friendUsernameInput').value);
+      if (!friendUsername || friendUsername === currentUser.username) {
+        alert("Please enter your partner or friend's @username (not your own).");
+        return;
+      }
+
+      const newPactId = getPairPactId(currentUser.username, friendUsername);
+      const oldLogs = currentPact?.logs || {};
+
+      // Check if target shared pact already exists
+      const pactRef = doc(db, 'pacto_challenges', newPactId);
+      const existingSnap = await getDoc(pactRef);
+
+      if (!existingSnap.exists()) {
+        const basePact = createDefaultPactObject(newPactId, [currentUser.username, friendUsername].sort());
+        if (currentPact) {
+          basePact.goalTitle = currentPact.goalTitle;
+          basePact.goalTarget = currentPact.goalTarget;
+          basePact.goalUnit = currentPact.goalUnit;
+          basePact.penaltyAmount = currentPact.penaltyAmount;
+          basePact.startDate = currentPact.startDate;
+          basePact.logs = oldLogs;
+        }
+        await setDoc(pactRef, basePact);
+      }
+
+      // Update my user profile
+      await updateDoc(doc(db, 'pacto_users', currentUser.username), {
+        friendUsername,
+        pactId: newPactId
+      });
+
+      // If partner already created their account, link them to the exact same pactId
+      if (allUsersMap[friendUsername]) {
+        await updateDoc(doc(db, 'pacto_users', friendUsername), {
+          friendUsername: currentUser.username,
+          pactId: newPactId
+        });
+      }
+
+      document.getElementById('friendUsernameInput').value = '';
+      subscribeToPact(newPactId);
+    });
+
+    // =========================================================================
+    // LOGGING TODAY'S PROGRESS & UPDATING GOALS
+    // =========================================================================
+    async function saveUserProgressForDate(dateISO, username, numericValue) {
+      if (!currentPact || !currentUser) return;
+      const cleanVal = Math.max(0, Number(numericValue) || 0);
+
+      const updatedLogs = { ...(currentPact.logs || {}) };
+      const dayEntry = { ...(updatedLogs[dateISO] || {}) };
+      dayEntry[username] = {
+        value: cleanVal,
+        updatedAt: Date.now()
+      };
+      updatedLogs[dateISO] = dayEntry;
+
+      const pactRef = doc(db, 'pacto_challenges', currentPact.pactId);
+      await updateDoc(pactRef, {
+        logs: updatedLogs,
+        updatedAt: Date.now()
+      });
+    }
+
+    // Form submit for today's progress
+    document.getElementById('todayLogForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const val = Number(document.getElementById('todayProgressInput').value);
+      await saveUserProgressForDate(getTodayISO(), currentUser.username, val);
+    });
+
+    // Quick +500 / +1000 buttons
+    window.quickAddToday = async function(delta) {
+      if (!currentPact || !currentUser) return;
+      const todayISO = getTodayISO();
+      const currentVal = currentPact.logs?.[todayISO]?.[currentUser.username]?.value || 0;
+      const nextVal = currentVal + delta;
+      document.getElementById('todayProgressInput').value = nextVal;
+      await saveUserProgressForDate(todayISO, currentUser.username, nextVal);
+    };
+
+    // Quick Mark Goal Done button
+    window.quickCompleteToday = async function() {
+      if (!currentPact || !currentUser) return;
+      const todayISO = getTodayISO();
+      const currentVal = currentPact.logs?.[todayISO]?.[currentUser.username]?.value || 0;
+      const target = currentPact.goalTarget || 3000;
+      const nextVal = Math.max(currentVal, target);
+      document.getElementById('todayProgressInput').value = nextVal;
+      await saveUserProgressForDate(todayISO, currentUser.username, nextVal);
+    };
+
+    // Quick bump goal target (+500 / +1000)
+    window.bumpGoalTarget = async function(delta) {
+      if (!currentPact) return;
+      const nextTarget = (Number(currentPact.goalTarget) || 3000) + delta;
+      const unit = currentPact.goalUnit || 'steps';
+      let nextTitle = currentPact.goalTitle;
+      if (unit.toLowerCase() === 'steps') {
+        nextTitle = `Walk ${nextTarget.toLocaleString()} Steps a Day`;
+      }
+      const pactRef = doc(db, 'pacto_challenges', currentPact.pactId);
+      await updateDoc(pactRef, {
+        goalTarget: nextTarget,
+        goalTitle: nextTitle,
+        updatedAt: Date.now()
+      });
+    };
+
+    // =========================================================================
+    // GOAL EDIT MODAL
+    // =========================================================================
+    window.openGoalModal = function() {
+      if (!currentPact) return;
+      document.getElementById('modalGoalTitle').value = currentPact.goalTitle || "Walk 3,000 Steps a Day";
+      document.getElementById('modalGoalTarget').value = currentPact.goalTarget || 3000;
+      document.getElementById('modalGoalUnit').value = currentPact.goalUnit || "steps";
+      document.getElementById('modalGoalPenalty').value = currentPact.penaltyAmount || 100;
+      document.getElementById('modalStartDate').value = currentPact.startDate || getTodayISO();
+
+      const modal = document.getElementById('goalModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    window.closeGoalModal = function() {
+      const modal = document.getElementById('goalModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    document.getElementById('editGoalForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentPact) return;
+
+      const goalTitle = document.getElementById('modalGoalTitle').value.trim();
+      const goalTarget = Math.max(1, Number(document.getElementById('modalGoalTarget').value) || 3000);
+      const goalUnit = document.getElementById('modalGoalUnit').value.trim() || 'steps';
+      const penaltyAmount = Math.max(1, Number(document.getElementById('modalGoalPenalty').value) || 100);
+      const startDate = document.getElementById('modalStartDate').value || getTodayISO();
+
+      const pactRef = doc(db, 'pacto_challenges', currentPact.pactId);
+      await updateDoc(pactRef, {
+        goalTitle,
+        goalTarget,
+        goalUnit,
+        penaltyAmount,
+        startDate,
+        updatedAt: Date.now()
+      });
+
+      closeGoalModal();
+    });
+
+    // =========================================================================
+    // EDIT SPECIFIC DAY MODAL
+    // =========================================================================
+    window.openEditDayModal = function(dateISO) {
+      if (!currentPact || !currentUser) return;
+      const myUsername = currentUser.username;
+      const partnerUsername = currentUser.friendUsername;
+
+      document.getElementById('editDayIsoInput').value = dateISO;
+      document.getElementById('editDayDateSubtitle').textContent = `${formatReadableDate(dateISO)} (${dateISO})`;
+
+      const myVal = currentPact.logs?.[dateISO]?.[myUsername]?.value ?? 0;
+      document.getElementById('editDayMyLabel').textContent = `${currentUser.displayName} (@${myUsername})`;
+      document.getElementById('editDayMyValue').value = myVal;
+
+      const partnerContainer = document.getElementById('editDayPartnerContainer');
+      if (partnerUsername) {
+        partnerContainer.classList.remove('hidden');
+        const partnerDisplay = allUsersMap[partnerUsername]?.displayName || `@${partnerUsername}`;
+        const partnerVal = currentPact.logs?.[dateISO]?.[partnerUsername]?.value ?? 0;
+        document.getElementById('editDayPartnerLabel').textContent = `${partnerDisplay} (@${partnerUsername})`;
+        document.getElementById('editDayPartnerValue').value = partnerVal;
+      } else {
+        partnerContainer.classList.add('hidden');
+      }
+
+      const modal = document.getElementById('editDayModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    window.closeEditDayModal = function() {
+      const modal = document.getElementById('editDayModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    document.getElementById('editDayForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentPact || !currentUser) return;
+
+      const dateISO = document.getElementById('editDayIsoInput').value;
+      const myVal = Math.max(0, Number(document.getElementById('editDayMyValue').value) || 0);
+      const partnerUsername = currentUser.friendUsername;
+
+      const updatedLogs = { ...(currentPact.logs || {}) };
+      const dayEntry = { ...(updatedLogs[dateISO] || {}) };
+
+      dayEntry[currentUser.username] = {
+        value: myVal,
+        updatedAt: Date.now()
+      };
+
+      if (partnerUsername) {
+        const pVal = Math.max(0, Number(document.getElementById('editDayPartnerValue').value) || 0);
+        dayEntry[partnerUsername] = {
+          value: pVal,
+          updatedAt: Date.now()
+        };
+      }
+
+      updatedLogs[dateISO] = dayEntry;
+
+      const pactRef = doc(db, 'pacto_challenges', currentPact.pactId);
+      await updateDoc(pactRef, {
+        logs: updatedLogs,
+        updatedAt: Date.now()
+      });
+
+      closeEditDayModal();
+    });
+
+    // =========================================================================
+    // TABLE FILTER CONTROLS
+    // =========================================================================
+    window.setTableFilter = function(mode) {
+      tableFilter = mode;
+      const activeClass = "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-2xs transition";
+      const inactiveClass = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+
+      document.getElementById('filterActiveBtn').className = mode === 'active' ? activeClass : inactiveClass;
+      document.getElementById('filter7Btn').className = mode === '7days' ? activeClass : inactiveClass;
+      document.getElementById('filterMonthBtn').className = mode === 'month' ? activeClass : inactiveClass;
+
+      renderDashboard();
+    };
+
+    // =========================================================================
+    // RENDER FULL DASHBOARD, VAULT PENALTIES & DAILY RECORD TABLE
+    // =========================================================================
+    function renderDashboard() {
+      if (!currentUser || !currentPact) return;
+
+      const myUsername = currentUser.username;
+      const myName = currentUser.displayName || `@${myUsername}`;
+      const partnerUsername = currentUser.friendUsername;
+      const partnerUserDoc = partnerUsername ? allUsersMap[partnerUsername] : null;
+      const partnerName = partnerUserDoc
+        ? partnerUserDoc.displayName
+        : (partnerUsername ? `@${partnerUsername}` : "No Partner Connected");
+
+      const target = Number(currentPact.goalTarget) || 3000;
+      const unit = currentPact.goalUnit || "steps";
+      const penaltyRate = Number(currentPact.penaltyAmount) || 100;
+      const startDate = currentPact.startDate || getTodayISO();
+      const todayISO = getTodayISO();
+
+      // 1. Matchup Header
+      const headline = document.getElementById('matchupHeadline');
+      const subtext = document.getElementById('matchupSubtext');
+      if (partnerUsername) {
+        headline.innerHTML = `${myName} <span class="text-indigo-600 font-normal">vs</span> ${partnerName}`;
+        subtext.textContent = partnerUserDoc
+          ? `Connected with @${partnerUsername} • Real-time sync active`
+          : `Paired with @${partnerUsername} (Waiting for @${partnerUsername} to create their account)`;
+      } else {
+        headline.textContent = `${myName} (Solo Mode — Add your friend on the right!)`;
+        subtext.textContent = `Enter your girlfriend's or competitor's @username to link your 1v1 Vault.`;
+      }
+
+      // 2. Goal Summary
+      document.getElementById('goalTitleDisplay').textContent = currentPact.goalTitle || "Walk 3,000 Steps a Day";
+      document.getElementById('goalTargetDisplay').textContent = `${target.toLocaleString()} ${unit}`;
+      document.getElementById('goalPenaltyDisplay').textContent = penaltyRate;
+      document.getElementById('vaultHeaderRate').textContent = penaltyRate;
+      document.getElementById('tablePenaltyRate').textContent = penaltyRate;
+      document.getElementById('todayUnitSuffix').textContent = unit;
+
+      // 3. Today's Check-In Card
+      document.getElementById('todayDateLabel').textContent = `Today — ${formatReadableDate(todayISO)}`;
+      const myTodayVal = currentPact.logs?.[todayISO]?.[myUsername]?.value ?? 0;
+      const partnerTodayVal = partnerUsername ? (currentPact.logs?.[todayISO]?.[partnerUsername]?.value ?? 0) : 0;
+
+      const inputEl = document.getElementById('todayProgressInput');
+      if (document.activeElement !== inputEl) {
+        inputEl.value = myTodayVal > 0 ? myTodayVal : '';
+      }
+
+      const myTodayDone = myTodayVal >= target;
+      const statusBadge = document.getElementById('todayMyStatusBadge');
+      if (myTodayDone) {
+        statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800";
+        statusBadge.textContent = "✓ You Completed Today's Goal!";
+      } else {
+        statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800";
+        statusBadge.textContent = `${Math.max(0, target - myTodayVal).toLocaleString()} ${unit} remaining before EOD`;
+      }
+
+      // Today 1v1 Bars
+      const myPct = Math.min(100, Math.round((myTodayVal / target) * 100));
+      const partnerPct = Math.min(100, Math.round((partnerTodayVal / target) * 100));
+
+      document.getElementById('todayMeName').textContent = `${myName} (You)`;
+      document.getElementById('todayMeNumbers').textContent = `${myTodayVal.toLocaleString()} / ${target.toLocaleString()} ${unit} (${myPct}%)`;
+      document.getElementById('todayMeBar').style.width = `${myPct}%`;
+      document.getElementById('todayMeBar').className = `h-full rounded-full transition-all duration-300 ${myTodayDone ? 'bg-emerald-600' : 'bg-indigo-600'}`;
+
+      document.getElementById('todayPartnerName').textContent = partnerUsername ? partnerName : "Competitor (Not linked)";
+      document.getElementById('todayPartnerNumbers').textContent = partnerUsername
+        ? `${partnerTodayVal.toLocaleString()} / ${target.toLocaleString()} ${unit} (${partnerPct}%)`
+        : `—`;
+      document.getElementById('todayPartnerBar').style.width = partnerUsername ? `${partnerPct}%` : '0%';
+      document.getElementById('todayPartnerBar').className = `h-full rounded-full transition-all duration-300 ${partnerTodayVal >= target ? 'bg-emerald-600' : 'bg-purple-600'}`;
+
+      // 4. Calculate Vault Penalties from Challenge Start Date up to Today
+      const activeDates = getDateRangeArray(startDate, todayISO);
+      let myMissedDays = 0;
+      let myCompletedDays = 0;
+      let partnerMissedDays = 0;
+      let partnerCompletedDays = 0;
+
+      activeDates.forEach(dISO => {
+        const isPastDay = dISO < todayISO;
+        const mVal = currentPact.logs?.[dISO]?.[myUsername]?.value ?? 0;
+        const pVal = partnerUsername ? (currentPact.logs?.[dISO]?.[partnerUsername]?.value ?? 0) : 0;
+
+        if (mVal >= target) {
+          myCompletedDays++;
+        } else if (isPastDay) {
+          myMissedDays++;
+        }
+
+        if (partnerUsername) {
+          if (pVal >= target) {
+            partnerCompletedDays++;
+          } else if (isPastDay) {
+            partnerMissedDays++;
+          }
+        }
+      });
+
+      const myPenaltyTotal = myMissedDays * penaltyRate;
+      const partnerPenaltyTotal = partnerMissedDays * penaltyRate;
+      const totalVaultPool = myPenaltyTotal + partnerPenaltyTotal;
+
+      document.getElementById('challengeStartRangeLabel').textContent = `Tracking since ${formatReadableDate(startDate)}`;
+      document.getElementById('vaultTotalAmount').textContent = `₹${totalVaultPool.toLocaleString('en-IN')}`;
+      document.getElementById('vaultTotalSubtext').textContent = `${myMissedDays + partnerMissedDays} total missed days × ₹${penaltyRate}`;
+
+      document.getElementById('vaultMyLabel').textContent = `${myName} (You) Lost to Vault`;
+      document.getElementById('vaultMyAmount').textContent = `₹${myPenaltyTotal.toLocaleString('en-IN')}`;
+      document.getElementById('vaultMySubtext').textContent = `${myMissedDays} missed • ${myCompletedDays} completed`;
+
+      document.getElementById('vaultPartnerLabel').textContent = `${partnerName} Lost to Vault`;
+      document.getElementById('vaultPartnerAmount').textContent = `₹${partnerPenaltyTotal.toLocaleString('en-IN')}`;
+      document.getElementById('vaultPartnerSubtext').textContent = partnerUsername
+        ? `${partnerMissedDays} missed • ${partnerCompletedDays} completed`
+        : `Connect a friend to track their penalties`;
+
+      // 5. Render Day-by-Day Table
+      document.getElementById('thMyName').textContent = `${myName} (You)`;
+      document.getElementById('thPartnerName').textContent = partnerName;
+
+      let displayDates = [];
+      if (tableFilter === 'active') {
+        displayDates = [...activeDates].reverse(); // newest first
+      } else if (tableFilter === '7days') {
+        displayDates = getLastNDays(7);
+      } else {
+        displayDates = getCurrentMonthDaysUpToToday();
+      }
+
+      const tbody = document.getElementById('dailyRecordsTbody');
+      tbody.innerHTML = displayDates.map(dISO => {
+        const isToday = dISO === todayISO;
+        const isBeforeStart = dISO < startDate;
+        const isPastChallengeDay = dISO >= startDate && dISO < todayISO;
+
+        const mVal = currentPact.logs?.[dISO]?.[myUsername]?.value ?? 0;
+        const pVal = partnerUsername ? (currentPact.logs?.[dISO]?.[partnerUsername]?.value ?? 0) : 0;
+
+        const mDone = mVal >= target;
+        const pDone = partnerUsername && pVal >= target;
+
+        // Status badges for Me
+        let myBadgeHtml = '';
+        if (mDone) {
+          myBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">✓ ${mVal.toLocaleString()} ${unit}</span>`;
+        } else if (isToday) {
+          myBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-800">${mVal.toLocaleString()} / ${target.toLocaleString()} (In Progress)</span>`;
+        } else if (isPastChallengeDay) {
+          myBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-100 text-red-700">✗ ${mVal.toLocaleString()} (Missed)</span>`;
+        } else {
+          myBadgeHtml = `<span class="text-xs text-slate-400">${mVal.toLocaleString()} ${unit}</span>`;
+        }
+
+        // Status badges for Partner
+        let partnerBadgeHtml = '<span class="text-xs text-slate-400">—</span>';
+        if (partnerUsername) {
+          if (pDone) {
+            partnerBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">✓ ${pVal.toLocaleString()} ${unit}</span>`;
+          } else if (isToday) {
+            partnerBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-800">${pVal.toLocaleString()} / ${target.toLocaleString()} (In Progress)</span>`;
+          } else if (isPastChallengeDay) {
+            partnerBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-100 text-red-700">✗ ${pVal.toLocaleString()} (Missed)</span>`;
+          } else {
+            partnerBadgeHtml = `<span class="text-xs text-slate-400">${pVal.toLocaleString()} ${unit}</span>`;
+          }
+        }
+
+        // Vault Penalty Breakdown for this Row
+        let penaltyPills = [];
+        if (isPastChallengeDay) {
+          if (!mDone) {
+            penaltyPills.push(`<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-50 text-red-700 border border-red-200">${myName}: +₹${penaltyRate}</span>`);
+          }
+          if (partnerUsername && !pDone) {
+            penaltyPills.push(`<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-50 text-red-700 border border-red-200">${partnerName}: +₹${penaltyRate}</span>`);
+          }
+        }
+
+        let penaltyCellHtml = '';
+        if (isBeforeStart) {
+          penaltyCellHtml = `<span class="text-xs text-slate-400">Before start date</span>`;
+        } else if (isToday) {
+          penaltyCellHtml = `<span class="text-xs font-semibold text-slate-500">EOD Active</span>`;
+        } else if (penaltyPills.length === 0) {
+          penaltyCellHtml = `<span class="text-xs font-bold text-emerald-700">₹0 (Both Safe)</span>`;
+        } else {
+          penaltyCellHtml = `<div class="flex flex-wrap gap-1">${penaltyPills.join('')}</div>`;
+        }
+
+        return `
+          <tr class="${isToday ? 'bg-indigo-50/40' : 'hover:bg-slate-50'}">
+            <td class="py-3.5 px-4 sm:px-6 whitespace-nowrap">
+              <div class="font-bold text-slate-900 flex items-center gap-2">
+                ${formatReadableDate(dISO)}
+                ${isToday ? '<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-600 text-white">Today</span>' : ''}
+              </div>
+              <div class="text-[11px] text-slate-400">${dISO}</div>
+            </td>
+            <td class="py-3.5 px-4 whitespace-nowrap">${myBadgeHtml}</td>
+            <td class="py-3.5 px-4 whitespace-nowrap">${partnerBadgeHtml}</td>
+            <td class="py-3.5 px-4">${penaltyCellHtml}</td>
+            <td class="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap">
+              <button onclick="openEditDayModal('${dISO}')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition">
+                Edit Log
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // DATE ARRAY GENERATORS
+    // =========================================================================
+    function getDateRangeArray(startISO, endISO) {
+      const arr = [];
+      const [sy, sm, sd] = startISO.split('-').map(Number);
+      const [ey, em, ed] = endISO.split('-').map(Number);
+      let cur = new Date(sy, sm - 1, sd);
+      const end = new Date(ey, em - 1, ed);
+
+      if (cur > end) {
+        return [endISO];
+      }
+
+      let safety = 0;
+      while (cur <= end && safety < 120) {
+        const y = cur.getFullYear();
+        const m = String(cur.getMonth() + 1).padStart(2, '0');
+        const d = String(cur.getDate()).padStart(2, '0');
+        arr.push(`${y}-${m}-${d}`);
+        cur.setDate(cur.getDate() + 1);
+        safety++;
+      }
+      return arr;
+    }
+
+    function getLastNDays(n) {
+      const arr = [];
+      const today = new Date();
+      for (let i = 0; i < n; i++) {
+        const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        arr.push(`${y}-${m}-${day}`);
+      }
+      return arr;
+    }
+
+    function getCurrentMonthDaysUpToToday() {
+      const now = new Date();
+      const startISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+      return getDateRangeArray(startISO, getTodayISO()).reverse();
+    }
+
+    // =========================================================================
+    // LIVE EOD COUNTDOWN TIMER
+    // =========================================================================
+    function updateEodClock() {
+      const now = new Date();
+      const eod = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+      const diffMs = Math.max(0, eod - now);
+      const hrs = Math.floor(diffMs / 3600000);
+      const mins = Math.floor((diffMs % 3600000) / 60000);
+      const secs = Math.floor((diffMs % 60000) / 1000);
+
+      const el = document.getElementById('eodCountdown');
+      if (el) {
+        el.textContent = `${String(hrs).padStart(2, '0')}h ${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s left`;
+      }
+    }
+    setInterval(updateEodClock, 1000);
+    updateEodClock();
+
+    // Boot application
+    initCloud();
   </script>
 </body>
 </html>
