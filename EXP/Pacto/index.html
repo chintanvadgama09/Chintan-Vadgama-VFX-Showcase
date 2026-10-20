@@ -61,10 +61,13 @@
 
       <!-- Right Controls -->
       <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Cloud Sync Settings Button (For GitHub Pages / Multi-device) -->
-        <button type="button" onclick="app.openModal('syncModal')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#475569] hover:text-[#0F172A] hover:bg-slate-100 border border-[#E2E8F0] transition">
-          <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span id="syncLabel">Cloud Sync</span>
+        <!-- Live Cloud Server Status Pill -->
+        <button type="button" onclick="app.openModal('syncModal')" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition">
+          <span class="relative flex h-2 w-2">
+            <span id="syncPulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span id="syncDot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span id="syncLabel">Connecting Server...</span>
         </button>
 
         <!-- Logged-in User Controls -->
@@ -89,11 +92,14 @@
     <!-- ===================================================== -->
     <section id="authSection" class="max-w-md mx-auto my-4 sm:my-8">
       <div class="text-center mb-6">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-[#2563EB] border border-blue-200 mb-3">
+          <span>☁️ Real-Time Cloud Server Synced</span>
+        </div>
         <h1 class="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
           1v1 Monthly Goal & ₹100 Vault
         </h1>
         <p class="text-sm text-[#475569] mt-2 leading-relaxed">
-          Create your account, add your partner or friend by username, and track your daily goal together. Miss today's target by EOD and add ₹100 to the shared vault.
+          Create your account or log in from any device. Add your partner by <span class="font-semibold text-[#0F172A]">@username</span> to compete live—whoever misses today's goal by EOD adds ₹100 to the shared Vault.
         </p>
       </div>
 
@@ -113,7 +119,7 @@
           <!-- Full Name (Create Account only) -->
           <div id="fieldFullName" class="hidden">
             <label for="inputFullName" class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">
-              Your Name
+              Your Display Name
             </label>
             <input id="inputFullName" type="text" placeholder="e.g. Rahul" class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#E2E8F0] text-sm text-[#0F172A] placeholder-slate-400 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-500/15 transition" />
           </div>
@@ -140,7 +146,7 @@
           <!-- Friend Username (Optional during signup) -->
           <div id="fieldFriendSignup" class="hidden pt-1">
             <label for="inputSignupFriend" class="block text-xs font-semibold uppercase tracking-wider text-[#475569] mb-1.5">
-              Competitor / Partner's Username <span class="font-normal text-slate-400">(Optional — can add later)</span>
+              Partner / Friend's Username <span class="font-normal text-slate-400">(Optional — can add later)</span>
             </label>
             <div class="relative">
               <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm font-medium">@</span>
@@ -156,6 +162,17 @@
             Log In
           </button>
         </form>
+
+        <!-- Registered Cloud Accounts Directory (Quick Switch / Verification) -->
+        <div id="cloudAccountsBox" class="mt-6 pt-5 border-t border-[#E2E8F0]">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-[#475569]">Accounts on Cloud Server</span>
+            <span id="cloudAccountCount" class="text-[11px] font-semibold text-[#2563EB]">0 registered</span>
+          </div>
+          <div id="cloudAccountsList" class="flex flex-wrap gap-1.5 text-xs text-[#475569]">
+            <span class="text-slate-400 text-xs">No accounts created yet. Click "Create Account" above!</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -189,8 +206,14 @@
             </p>
           </div>
 
-          <!-- Right: Action Buttons (Edit Goal & Add/Change Friend) -->
-          <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+          <!-- Right: Action Buttons (Increase Goal, Edit Goal & Add/Change Friend) -->
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <button type="button" onclick="app.bumpGoalTarget(500)" title="Increase daily goal target by +500" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold tabular-nums transition">
+              +500 Target
+            </button>
+            <button type="button" onclick="app.bumpGoalTarget(1000)" title="Increase daily goal target by +1,000" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold tabular-nums transition">
+              +1k Target
+            </button>
             <button type="button" onclick="app.openFriendModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs sm:text-sm font-semibold transition">
               <svg class="w-4 h-4 text-[#475569]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
               <span id="btnFriendText">Add / Change Friend</span>
@@ -206,9 +229,9 @@
         <div id="unpairedPromptCard" class="hidden mt-5 pt-5 border-t border-[#E2E8F0]">
           <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h3 class="text-sm font-bold text-[#0F172A]">Connect with your Partner or Friend for 1v1 Competition</h3>
+              <h3 class="text-sm font-bold text-[#0F172A]">Connect with your Partner or Friend for Live 1v1 Competition</h3>
               <p class="text-xs text-[#475569] mt-0.5">
-                Enter their username below. When they log in with that username, both of your accounts will share this goal and ₹100 Vault automatically.
+                Enter their <span class="font-semibold">@username</span> below. When they log in on their device with that username, both accounts sync live to this shared challenge and ₹100 Vault!
               </p>
             </div>
             <form onsubmit="app.handleInlinePairSubmit(event)" class="flex flex-col sm:flex-row gap-2 shrink-0">
@@ -639,7 +662,100 @@
   <!-- ===================================================== -->
   <!-- CORE APPLICATION LOGIC                                -->
   <!-- ===================================================== -->
-  <script>
+  <!-- MODAL 4: CLOUD SERVER & GITHUB PAGES CONFIG           -->
+  <!-- ===================================================== -->
+  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="bg-white border border-[#E2E8F0] rounded-2xl max-w-lg w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-[#E2E8F0]">
+        <div>
+          <h3 class="text-lg font-bold text-[#0F172A]">Real-Time Cloud Server & GitHub Hosting</h3>
+          <p class="text-xs text-[#475569]">Automatic live database syncing across phones & laptops</p>
+        </div>
+        <button type="button" onclick="app.closeModal('syncModal')" class="text-slate-400 hover:text-slate-600 p-1 text-lg leading-none">✕</button>
+      </div>
+
+      <div class="space-y-4 mt-4 text-xs">
+        <!-- Live Connection Box -->
+        <div class="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-between">
+          <div>
+            <span class="font-semibold text-[#475569] block">Cloud Database Status:</span>
+            <span id="syncModalSubText" class="text-[11px] text-[#475569]">Real-time Firestore listener (`onSnapshot`)</span>
+          </div>
+          <span id="syncModalStatusText" class="px-2.5 py-1 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Connected & Live
+          </span>
+        </div>
+
+        <!-- 1-Click Partner Invite Link -->
+        <div class="p-4 rounded-xl bg-blue-50/60 border border-blue-200 space-y-2">
+          <label class="block font-bold uppercase tracking-wider text-[#2563EB]">
+            Invite Link for Partner (Includes Server Connection)
+          </label>
+          <p class="text-[#475569] leading-relaxed">
+            Send this link to your girlfriend/competitor. When they open it and log in with their <span class="font-semibold text-[#0F172A]">@username</span>, both of your devices will stay synced in real time.
+          </p>
+          <div class="flex gap-2 pt-1">
+            <input id="shareLinkInput" type="text" readonly class="flex-1 px-3 py-2 rounded-xl bg-white border border-[#E2E8F0] text-xs text-[#0F172A]" />
+            <button type="button" onclick="app.copyShareLink()" class="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white font-semibold whitespace-nowrap">
+              Copy Invite Link
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Firebase Server Config for GitHub Pages -->
+        <div class="pt-3 border-t border-[#E2E8F0] space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block font-bold uppercase tracking-wider text-[#0F172A]">
+              Hosting on GitHub Pages? (Free Forever Cloud DB)
+            </label>
+            <span class="text-[11px] font-semibold text-[#2563EB]">Optional on Preview</span>
+          </div>
+          <p class="text-[#475569] leading-relaxed">
+            In this preview, a live cloud server is already connected automatically. If you upload <code class="bg-slate-100 px-1 py-0.5 rounded">index.html</code> to your own GitHub Pages, you can connect your own free Firebase Firestore database in 60 seconds:
+          </p>
+          <ol class="list-decimal list-inside space-y-1 text-[#475569] bg-[#F8FAFC] p-3 rounded-xl border border-[#E2E8F0]">
+            <li>Go to <span class="font-semibold text-[#0F172A]">console.firebase.google.com</span> → Create a free project.</li>
+            <li>Enable <span class="font-semibold text-[#0F172A]">Authentication → Anonymous</span> and <span class="font-semibold text-[#0F172A]">Firestore Database</span> (Start in test mode).</li>
+            <li>Copy your Web App <code class="bg-white px-1 rounded border">firebaseConfig</code> JSON and paste it below (or into <code class="bg-white px-1 rounded border">GITHUB_FIREBASE_CONFIG</code> inside the HTML file).</li>
+          </ol>
+          <textarea id="customFirebaseInput" rows="4" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}' class="w-full p-3 rounded-xl bg-white border border-[#E2E8F0] font-mono text-[11px] text-[#0F172A] focus:outline-none focus:border-[#2563EB]"></textarea>
+          <div class="flex justify-end gap-2">
+            <button type="button" onclick="app.applyCustomFirebaseConfig()" class="px-4 py-2 rounded-xl bg-[#0F172A] hover:bg-slate-800 text-white font-semibold">
+              Connect Custom Firebase Server
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- ===================================================== -->
+  <!-- CORE APPLICATION + REAL-TIME FIRESTORE CLOUD ENGINE   -->
+  <!-- ===================================================== -->
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // ============================================================================
+    // OPTIONAL FOR GITHUB PAGES HOSTING:
+    // If you upload this file to GitHub Pages, you can paste your free Firebase
+    // config object right here (or paste it via the "Cloud Server" button in UI).
+    // ============================================================================
+    const GITHUB_FIREBASE_CONFIG = null; 
+    // Example:
+    // const GITHUB_FIREBASE_CONFIG = {
+    //   apiKey: "AIzaSy...",
+    //   authDomain: "your-project.firebaseapp.com",
+    //   projectId: "your-project",
+    //   storageBucket: "your-project.appspot.com",
+    //   messagingSenderId: "123456",
+    //   appId: "1:123456:web:abcdef"
+    // };
+
     // Date helper functions
     function formatDateKey(dateObj) {
       const y = dateObj.getFullYear();
@@ -698,59 +814,264 @@
       return [userA.toLowerCase(), userB.toLowerCase()].sort().join('__');
     }
 
-    // Core Application Controller (Synchronous UI + Background Cloud Sync)
+    // Core Application with Real-Time Firestore Cloud Collections
     const app = {
       state: {
-        users: {},      // { [username]: { username, fullName, password, friendUsername } }
-        challenges: {}  // { [roomId]: { id, goalTitle, target, unit, penalty, startDate, logs: { [dateKey]: { [username]: { value, forcedMiss } } } } }
+        users: {},      // { [username]: { username, fullName, password, friendUsername, isReservedSlot, updatedAt } }
+        challenges: {}  // { [roomId]: { id, goalTitle, target, unit, penalty, startDate, logsJson, logs, updatedAt } }
       },
       currentUser: null,
       authTab: 'login',
-      dateRangeMode: 'start', // 'start' | 'last7' | 'month'
-      cloudPushCallback: null,
+      dateRangeMode: 'start',
+      db: null,
+      auth: null,
+      appId: typeof __app_id !== 'undefined' ? __app_id : 'goalvault-100-v2',
+      isCloudConnected: false,
+      activeCustomFbConfig: null,
+      unsubUsers: null,
+      unsubPacts: null,
+      lastLocalWriteTime: 0,
 
-      init() {
-        // Load state from URL hash if shared link was opened
-        this.loadFromUrlHash();
-        // Start live EOD countdown timer
+      async init() {
+        // 1. Parse URL parameters if a custom Firebase config or state was shared
+        this.parseUrlParams();
+        // 2. Start live EOD countdown timer
         this.startCountdownTimer();
-        // Render initial UI immediately
+        // 3. Render initial UI immediately
         this.render();
+        // 4. Connect to Real-Time Cloud Server (Firestore)
+        await this.initCloudServer();
       },
 
-      loadFromUrlHash() {
+      parseUrlParams() {
         try {
-          if (window.location.hash && window.location.hash.startsWith('#vault=')) {
-            const raw = window.location.hash.replace('#vault=', '');
-            const json = decodeURIComponent(escape(atob(raw)));
-            const parsed = JSON.parse(json);
-            if (parsed && parsed.users && parsed.challenges) {
-              this.state = parsed;
-            }
+          const hash = window.location.hash.replace(/^#/, '');
+          if (!hash) return;
+          const params = new URLSearchParams(hash);
+          if (params.get('fb')) {
+            const cfgJson = decodeURIComponent(escape(atob(params.get('fb'))));
+            this.activeCustomFbConfig = JSON.parse(cfgJson);
+            const inputEl = document.getElementById('customFirebaseInput');
+            if (inputEl) inputEl.value = JSON.stringify(this.activeCustomFbConfig, null, 2);
+          }
+          if (params.get('user')) {
+            const u = params.get('user').toLowerCase().trim();
+            const uInput = document.getElementById('inputUsername');
+            if (uInput) uInput.value = u;
           }
         } catch (err) {
-          console.warn('Could not read URL state:', err);
+          console.warn('Could not parse URL parameters:', err);
         }
       },
 
-      encodeState() {
-        const json = JSON.stringify(this.state);
-        return btoa(unescape(encodeURIComponent(json)));
+      updateServerBadge(status, text) {
+        const dot = document.getElementById('syncDot');
+        const pulse = document.getElementById('syncPulse');
+        const label = document.getElementById('syncLabel');
+        const modalStatus = document.getElementById('syncModalStatusText');
+
+        if (status === 'live') {
+          this.isCloudConnected = true;
+          if (dot) dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-emerald-500';
+          if (pulse) pulse.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
+          if (label) label.textContent = text || 'Cloud Server Live';
+          if (modalStatus) {
+            modalStatus.textContent = 'Connected & Auto-Syncing';
+            modalStatus.className = 'px-2.5 py-1 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+          }
+        } else if (status === 'syncing') {
+          if (label) label.textContent = 'Syncing to Cloud...';
+        } else {
+          this.isCloudConnected = false;
+          if (dot) dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-amber-500';
+          if (pulse) pulse.className = 'hidden';
+          if (label) label.textContent = text || 'Setup Cloud Server';
+          if (modalStatus) {
+            modalStatus.textContent = 'Waiting for Firebase Config';
+            modalStatus.className = 'px-2.5 py-1 rounded-full font-bold bg-amber-50 text-amber-700 border border-amber-200';
+          }
+        }
       },
 
-      saveAndSync() {
-        // 1. Update URL hash quietly so page refreshes or link sharing preserve state
+      async initCloudServer(overrideConfig = null) {
         try {
-          const encoded = this.encodeState();
-          window.history.replaceState(null, '', `#vault=${encoded}`);
-        } catch (e) {}
+          let firebaseConfig = overrideConfig || this.activeCustomFbConfig || GITHUB_FIREBASE_CONFIG;
+          if (!firebaseConfig && typeof __firebase_config !== 'undefined' && __firebase_config) {
+            firebaseConfig = JSON.parse(__firebase_config);
+          }
 
-        // 2. Render updated UI immediately (0ms latency)
+          if (!firebaseConfig || !firebaseConfig.apiKey) {
+            this.updateServerBadge('offline', 'Configure Cloud DB');
+            return;
+          }
+
+          this.updateServerBadge('syncing');
+
+          const appName = overrideConfig ? `goalvault-${Date.now()}` : undefined;
+          const fbApp = appName
+            ? initializeApp(firebaseConfig, appName)
+            : (getApps().length ? getApps()[0] : initializeApp(firebaseConfig));
+
+          this.db = getFirestore(fbApp);
+          this.auth = getAuth(fbApp);
+
+          // RULE 3 - Auth Before Queries
+          if (!overrideConfig && !this.activeCustomFbConfig && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(this.auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(this.auth);
+          }
+
+          onAuthStateChanged(this.auth, (user) => {
+            if (!user) return;
+            this.subscribeToCloudCollections();
+          });
+        } catch (err) {
+          console.error('Firebase connection error:', err);
+          this.updateServerBadge('offline', 'Server Config Needed');
+        }
+      },
+
+      subscribeToCloudCollections() {
+        if (!this.auth || !this.auth.currentUser || !this.db) return;
+
+        if (this.unsubUsers) this.unsubUsers();
+        if (this.unsubPacts) this.unsubPacts();
+
+        // RULE 1 - Strict Paths: /artifacts/{appId}/public/data/users and /artifacts/{appId}/public/data/pacts
+        const usersColRef = collection(this.db, 'artifacts', this.appId, 'public', 'data', 'users');
+        const pactsColRef = collection(this.db, 'artifacts', this.appId, 'public', 'data', 'pacts');
+
+        // Real-time listener for all user accounts
+        this.unsubUsers = onSnapshot(
+          usersColRef,
+          (snapshot) => {
+            snapshot.forEach((docSnap) => {
+              const data = docSnap.data();
+              if (data && data.username) {
+                this.state.users[data.username.toLowerCase()] = {
+                  username: data.username.toLowerCase(),
+                  fullName: data.fullName || data.username,
+                  password: data.password || '',
+                  friendUsername: data.friendUsername || null,
+                  isReservedSlot: Boolean(data.isReservedSlot),
+                  updatedAt: data.updatedAt || 0
+                };
+              }
+            });
+            this.updateServerBadge('live', 'Cloud Server Live');
+            this.render();
+          },
+          (err) => {
+            console.error('Users real-time listener error:', err);
+          }
+        );
+
+        // Real-time listener for all shared 1v1 pacts/challenges
+        this.unsubPacts = onSnapshot(
+          pactsColRef,
+          (snapshot) => {
+            let remoteChangeDetected = false;
+            snapshot.forEach((docSnap) => {
+              const data = docSnap.data();
+              if (data && data.id) {
+                let parsedLogs = {};
+                if (typeof data.logsJson === 'string') {
+                  try {
+                    parsedLogs = JSON.parse(data.logsJson);
+                  } catch (e) {
+                    parsedLogs = {};
+                  }
+                } else if (data.logs && typeof data.logs === 'object') {
+                  parsedLogs = data.logs;
+                }
+
+                const prev = this.state.challenges[data.id];
+                if (prev && data.updatedAt && data.updatedAt !== prev.updatedAt && (Date.now() - this.lastLocalWriteTime > 1200)) {
+                  remoteChangeDetected = true;
+                }
+
+                this.state.challenges[data.id] = {
+                  id: data.id,
+                  goalTitle: data.goalTitle || 'Walk 3,000 Steps a Day',
+                  target: Number(data.target) || 3000,
+                  unit: data.unit || 'steps',
+                  penalty: Number(data.penalty) || 100,
+                  startDate: data.startDate || getTodayKey(),
+                  logs: parsedLogs,
+                  updatedAt: data.updatedAt || 0,
+                  updatedBy: data.updatedBy || ''
+                };
+              }
+            });
+
+            this.updateServerBadge('live', 'Cloud Server Live');
+            this.render();
+
+            if (remoteChangeDetected && this.currentUser) {
+              this.showToast('Live update synced from cloud server!');
+            }
+          },
+          (err) => {
+            console.error('Pacts real-time listener error:', err);
+          }
+        );
+      },
+
+      // Save an individual user document to Firestore immediately
+      async saveUserToCloud(username) {
+        const cleanUser = username.toLowerCase();
+        const userObj = this.state.users[cleanUser];
+        if (!userObj) return;
+        userObj.updatedAt = Date.now();
+        this.lastLocalWriteTime = Date.now();
         this.render();
 
-        // 3. Push to Firestore cloud if available
-        if (typeof this.cloudPushCallback === 'function') {
-          this.cloudPushCallback(this.state);
+        if (!this.auth || !this.auth.currentUser || !this.db) return;
+        try {
+          this.updateServerBadge('syncing');
+          const userDocRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'users', cleanUser);
+          await setDoc(userDocRef, {
+            username: userObj.username,
+            fullName: userObj.fullName,
+            password: userObj.password || '',
+            friendUsername: userObj.friendUsername || null,
+            isReservedSlot: Boolean(userObj.isReservedSlot),
+            updatedAt: userObj.updatedAt
+          });
+          this.updateServerBadge('live', 'Cloud Server Live');
+        } catch (err) {
+          console.error('Error saving user to cloud:', err);
+        }
+      },
+
+      // Save a shared 1v1 challenge/pact document to Firestore immediately
+      async saveChallengeToCloud(roomId) {
+        const ch = this.state.challenges[roomId];
+        if (!ch) return;
+        ch.updatedAt = Date.now();
+        ch.updatedBy = this.currentUser || '';
+        this.lastLocalWriteTime = Date.now();
+        this.render();
+
+        if (!this.auth || !this.auth.currentUser || !this.db) return;
+        try {
+          this.updateServerBadge('syncing');
+          const pactDocRef = doc(this.db, 'artifacts', this.appId, 'public', 'data', 'pacts', roomId);
+          await setDoc(pactDocRef, {
+            id: ch.id,
+            goalTitle: ch.goalTitle,
+            target: Number(ch.target) || 3000,
+            unit: ch.unit || 'steps',
+            penalty: Number(ch.penalty) || 100,
+            startDate: ch.startDate || getTodayKey(),
+            logsJson: JSON.stringify(ch.logs || {}),
+            updatedAt: ch.updatedAt,
+            updatedBy: ch.updatedBy
+          });
+          this.updateServerBadge('live', 'Cloud Server Live');
+        } catch (err) {
+          console.error('Error saving challenge to cloud:', err);
         }
       },
 
@@ -795,8 +1116,14 @@
           btnLogin.className = 'py-2.5 rounded-lg text-sm font-semibold text-[#475569] hover:text-[#0F172A] transition';
           fieldFullName.classList.remove('hidden');
           fieldFriendSignup.classList.remove('hidden');
-          submitBtn.textContent = 'Create Account';
+          submitBtn.textContent = 'Create Account & Sync to Server';
         }
+      },
+
+      prefillLoginUsername(username) {
+        this.setAuthTab('login');
+        document.getElementById('inputUsername').value = username;
+        document.getElementById('inputPassword').focus();
       },
 
       showAuthMessage(text, isError = true) {
@@ -808,7 +1135,7 @@
         msgBox.classList.remove('hidden');
       },
 
-      handleAuthSubmit(e) {
+      async handleAuthSubmit(e) {
         e.preventDefault();
         const username = document.getElementById('inputUsername').value.trim().toLowerCase().replace(/^@/, '');
         const password = document.getElementById('inputPassword').value.trim();
@@ -820,10 +1147,20 @@
           return;
         }
 
+        // Fetch latest user doc from Firestore if connected so even brand new tabs are 100% up to date
+        if (this.auth && this.auth.currentUser && this.db) {
+          try {
+            const snap = await getDoc(doc(this.db, 'artifacts', this.appId, 'public', 'data', 'users', username));
+            if (snap.exists()) {
+              this.state.users[username] = snap.data();
+            }
+          } catch (err) {}
+        }
+
         if (this.authTab === 'login') {
           const user = this.state.users[username];
           if (!user) {
-            this.showAuthMessage(`No account found for @${username}. Click "Create Account" above to sign up.`);
+            this.showAuthMessage(`No account found on server for @${username}. Click "Create Account" above to sign up.`);
             return;
           }
           // If account was a reserved partner invite slot without password set yet, claim it
@@ -831,9 +1168,10 @@
             user.password = password;
             user.isReservedSlot = false;
             this.currentUser = username;
-            this.ensureChallengeForUser(username);
-            this.showToast(`Welcome, ${user.fullName}! Connected to your shared challenge.`);
-            this.saveAndSync();
+            const ch = this.ensureChallengeForUser(username);
+            await this.saveUserToCloud(username);
+            if (ch) await this.saveChallengeToCloud(ch.id);
+            this.showToast(`Welcome, ${user.fullName}! Synced with your partner's challenge.`);
             return;
           }
           if (user.password !== password) {
@@ -843,19 +1181,18 @@
           this.currentUser = username;
           this.ensureChallengeForUser(username);
           this.showToast(`Logged in as ${user.fullName} (@${username})`);
-          this.saveAndSync();
+          this.render();
         } else {
           // Create Account flow
           const existing = this.state.users[username];
           if (existing && !existing.isReservedSlot) {
-            this.showAuthMessage(`Username @${username} is already registered. Please switch to "Log In".`);
+            this.showAuthMessage(`Username @${username} already exists on the server. Switch to "Log In" above.`);
             return;
           }
 
           const displayFull = fullName || (username.charAt(0).toUpperCase() + username.slice(1));
 
           if (existing && existing.isReservedSlot) {
-            // Claim reserved friend invite slot so they automatically link to the partner who invited them
             existing.fullName = displayFull;
             existing.password = password;
             existing.isReservedSlot = false;
@@ -865,19 +1202,23 @@
               fullName: displayFull,
               password,
               friendUsername: null,
-              isReservedSlot: false
+              isReservedSlot: false,
+              updatedAt: Date.now()
             };
           }
 
+          this.currentUser = username;
+
           if (friendUsername && friendUsername !== username) {
-            this.linkFriends(username, friendUsername, '');
+            await this.linkFriends(username, friendUsername, '');
           } else {
-            this.ensureChallengeForUser(username);
+            const ch = this.ensureChallengeForUser(username);
+            await this.saveUserToCloud(username);
+            if (ch) await this.saveChallengeToCloud(ch.id);
           }
 
-          this.currentUser = username;
-          this.showToast(`Account created for ${displayFull} (@${username})!`);
-          this.saveAndSync();
+          this.showToast(`Account @${username} created and saved to Cloud Server!`);
+          this.render();
         }
       },
 
@@ -896,24 +1237,40 @@
         const roomId = getChallengeRoomId(username, user.friendUsername);
 
         if (!this.state.challenges[roomId]) {
-          // Check if user had logs in a solo room before pairing, migrate them cleanly
-          const soloId = getChallengeRoomId(username, null);
-          const soloChallenge = this.state.challenges[soloId];
+          // Check if either user had logs in a solo room before pairing, and merge them cleanly
+          const soloIdMe = getChallengeRoomId(username, null);
+          const soloIdFriend = user.friendUsername ? getChallengeRoomId(user.friendUsername, null) : null;
+          const soloMe = this.state.challenges[soloIdMe];
+          const soloFriend = soloIdFriend ? this.state.challenges[soloIdFriend] : null;
+          const baseChallenge = soloMe || soloFriend;
+
+          const mergedLogs = {};
+          if (soloFriend && soloFriend.logs) {
+            Object.keys(soloFriend.logs).forEach(dKey => {
+              mergedLogs[dKey] = { ...(soloFriend.logs[dKey] || {}) };
+            });
+          }
+          if (soloMe && soloMe.logs) {
+            Object.keys(soloMe.logs).forEach(dKey => {
+              mergedLogs[dKey] = { ...(mergedLogs[dKey] || {}), ...(soloMe.logs[dKey] || {}) };
+            });
+          }
 
           this.state.challenges[roomId] = {
             id: roomId,
-            goalTitle: soloChallenge ? soloChallenge.goalTitle : 'Walk 3,000 Steps a Day',
-            target: soloChallenge ? soloChallenge.target : 3000,
-            unit: soloChallenge ? soloChallenge.unit : 'steps',
-            penalty: soloChallenge ? soloChallenge.penalty : 100,
-            startDate: soloChallenge ? soloChallenge.startDate : getTodayKey(),
-            logs: soloChallenge ? JSON.parse(JSON.stringify(soloChallenge.logs)) : {}
+            goalTitle: baseChallenge ? baseChallenge.goalTitle : 'Walk 3,000 Steps a Day',
+            target: baseChallenge ? baseChallenge.target : 3000,
+            unit: baseChallenge ? baseChallenge.unit : 'steps',
+            penalty: baseChallenge ? baseChallenge.penalty : 100,
+            startDate: baseChallenge ? baseChallenge.startDate : getTodayKey(),
+            logs: mergedLogs,
+            updatedAt: Date.now()
           };
         }
         return this.state.challenges[roomId];
       },
 
-      linkFriends(myUsername, friendUsernameRaw, friendDisplayNameRaw) {
+      async linkFriends(myUsername, friendUsernameRaw, friendDisplayNameRaw) {
         const u1 = myUsername.toLowerCase().trim().replace(/^@/, '');
         const u2 = friendUsernameRaw.toLowerCase().trim().replace(/^@/, '');
         if (!u1 || !u2 || u1 === u2) {
@@ -921,7 +1278,7 @@
           return false;
         }
 
-        // If friend hasn't created their account yet, create a reserved invite slot for @u2
+        // If friend hasn't created their account yet, create a reserved invite slot on the cloud server
         if (!this.state.users[u2]) {
           const fallbackName = friendDisplayNameRaw && friendDisplayNameRaw.trim()
             ? friendDisplayNameRaw.trim()
@@ -932,7 +1289,8 @@
             fullName: fallbackName,
             password: '',
             friendUsername: u1,
-            isReservedSlot: true
+            isReservedSlot: true,
+            updatedAt: Date.now()
           };
         } else {
           this.state.users[u2].friendUsername = u1;
@@ -942,20 +1300,23 @@
         }
 
         this.state.users[u1].friendUsername = u2;
-        this.ensureChallengeForUser(u1);
+        const ch = this.ensureChallengeForUser(u1);
+
+        await this.saveUserToCloud(u1);
+        await this.saveUserToCloud(u2);
+        if (ch) await this.saveChallengeToCloud(ch.id);
         return true;
       },
 
-      handleInlinePairSubmit(e) {
+      async handleInlinePairSubmit(e) {
         e.preventDefault();
         if (!this.currentUser) return;
         const friendUser = document.getElementById('inlineFriendUsername').value;
         const friendName = document.getElementById('inlineFriendName').value;
-        if (this.linkFriends(this.currentUser, friendUser, friendName)) {
+        if (await this.linkFriends(this.currentUser, friendUser, friendName)) {
           document.getElementById('inlineFriendUsername').value = '';
           document.getElementById('inlineFriendName').value = '';
-          this.showToast(`Connected with @${friendUser.trim().toLowerCase().replace(/^@/, '')}!`);
-          this.saveAndSync();
+          this.showToast(`Paired with @${friendUser.trim().toLowerCase().replace(/^@/, '')} on Cloud Server!`);
         }
       },
 
@@ -969,24 +1330,34 @@
         this.openModal('friendModal');
       },
 
-      handleModalPairSubmit(e) {
+      async handleModalPairSubmit(e) {
         e.preventDefault();
         if (!this.currentUser) return;
         const friendUser = document.getElementById('modalFriendUsername').value;
         const friendName = document.getElementById('modalFriendDisplayName').value;
-        if (this.linkFriends(this.currentUser, friendUser, friendName)) {
+        if (await this.linkFriends(this.currentUser, friendUser, friendName)) {
           this.closeModal('friendModal');
-          this.showToast(`Connected with @${friendUser.trim().toLowerCase().replace(/^@/, '')}!`);
-          this.saveAndSync();
+          this.showToast(`Paired with @${friendUser.trim().toLowerCase().replace(/^@/, '')} on Cloud Server!`);
         }
       },
 
       // =====================================================
-      // GOAL CUSTOMIZATION
+      // GOAL CUSTOMIZATION & PROGRESSIVE INCREASE
       // =====================================================
       getActiveChallenge() {
         if (!this.currentUser) return null;
         return this.ensureChallengeForUser(this.currentUser);
+      },
+
+      async bumpGoalTarget(delta) {
+        const ch = this.getActiveChallenge();
+        if (!ch) return;
+        ch.target = Math.max(1, (Number(ch.target) || 3000) + delta);
+        if (ch.unit === 'steps' && ch.goalTitle.toLowerCase().includes('steps')) {
+          ch.goalTitle = `Walk ${ch.target.toLocaleString()} Steps a Day`;
+        }
+        await this.saveChallengeToCloud(ch.id);
+        this.showToast(`Increased daily goal target to ${ch.target.toLocaleString()} ${ch.unit}!`);
       },
 
       openGoalModal() {
@@ -1006,7 +1377,7 @@
         document.getElementById('modalGoalUnit').value = unit;
       },
 
-      handleSaveGoal(e) {
+      async handleSaveGoal(e) {
         e.preventDefault();
         const ch = this.getActiveChallenge();
         if (!ch) return;
@@ -1023,11 +1394,11 @@
         ch.startDate = startDate <= getTodayKey() ? startDate : getTodayKey();
 
         this.closeModal('goalModal');
-        this.showToast(`Goal updated: ${target.toLocaleString()} ${unit}/day`);
-        this.saveAndSync();
+        await this.saveChallengeToCloud(ch.id);
+        this.showToast(`Goal synced: ${target.toLocaleString()} ${unit}/day`);
       },
 
-      setDateRangeMode(mode) {
+      async setDateRangeMode(mode) {
         this.dateRangeMode = mode;
         const ch = this.getActiveChallenge();
         if (ch) {
@@ -1039,8 +1410,8 @@
             const firstOfMonth = getFirstOfMonthKey();
             if (ch.startDate > firstOfMonth) ch.startDate = firstOfMonth;
           }
+          await this.saveChallengeToCloud(ch.id);
         }
-        this.saveAndSync();
       },
 
       // =====================================================
@@ -1055,7 +1426,7 @@
         return challenge.logs[dateKey][username];
       },
 
-      handleSaveTodayProgress(e) {
+      async handleSaveTodayProgress(e) {
         e.preventDefault();
         const ch = this.getActiveChallenge();
         if (!ch || !this.currentUser) return;
@@ -1067,15 +1438,16 @@
         rec.value = val;
         rec.forcedMiss = false;
 
+        await this.saveChallengeToCloud(ch.id);
+
         if (val >= ch.target) {
-          this.showToast(`Goal Completed! Logged ${val.toLocaleString()} ${ch.unit} for today.`);
+          this.showToast(`Goal Completed! Synced ${val.toLocaleString()} ${ch.unit} to Cloud Server.`);
         } else {
           this.showToast(`Saved ${val.toLocaleString()} ${ch.unit}. ${(ch.target - val).toLocaleString()} more to reach today's goal!`);
         }
-        this.saveAndSync();
       },
 
-      quickIncrementToday(amount) {
+      async quickIncrementToday(amount) {
         const ch = this.getActiveChallenge();
         if (!ch || !this.currentUser) return;
         const todayKey = getTodayKey();
@@ -1083,11 +1455,11 @@
         rec.value = (Number(rec.value) || 0) + amount;
         rec.forcedMiss = false;
         document.getElementById('inputTodayProgress').value = rec.value;
-        this.showToast(`Added +${amount.toLocaleString()} ${ch.unit} (Total: ${rec.value.toLocaleString()} ${ch.unit})`);
-        this.saveAndSync();
+        await this.saveChallengeToCloud(ch.id);
+        this.showToast(`Synced +${amount.toLocaleString()} ${ch.unit} (Total: ${rec.value.toLocaleString()} ${ch.unit})`);
       },
 
-      quickCompleteToday() {
+      async quickCompleteToday() {
         const ch = this.getActiveChallenge();
         if (!ch || !this.currentUser) return;
         const todayKey = getTodayKey();
@@ -1095,11 +1467,11 @@
         rec.value = Math.max(Number(rec.value) || 0, ch.target);
         rec.forcedMiss = false;
         document.getElementById('inputTodayProgress').value = rec.value;
-        this.showToast(`Today's goal of ${ch.target.toLocaleString()} ${ch.unit} marked Completed!`);
-        this.saveAndSync();
+        await this.saveChallengeToCloud(ch.id);
+        this.showToast(`Today's goal (${ch.target.toLocaleString()} ${ch.unit}) marked Completed & Synced!`);
       },
 
-      markTodayMissed() {
+      async markTodayMissed() {
         const ch = this.getActiveChallenge();
         if (!ch || !this.currentUser) return;
         const todayKey = getTodayKey();
@@ -1107,8 +1479,8 @@
         rec.forcedMiss = true;
         if (rec.value >= ch.target) rec.value = 0;
         document.getElementById('inputTodayProgress').value = rec.value;
+        await this.saveChallengeToCloud(ch.id);
         this.showToast(`Marked today as Missed (+₹${ch.penalty} added to Vault).`, true);
-        this.saveAndSync();
       },
 
       openDayModal(dateKey) {
@@ -1161,7 +1533,7 @@
         }
       },
 
-      handleSaveDayModal(e) {
+      async handleSaveDayModal(e) {
         e.preventDefault();
         const ch = this.getActiveChallenge();
         if (!ch || !this.currentUser) return;
@@ -1180,8 +1552,8 @@
         }
 
         this.closeModal('dayModal');
-        this.showToast(`Updated record for ${formatHumanDate(dateKey, getTodayKey())}`);
-        this.saveAndSync();
+        await this.saveChallengeToCloud(ch.id);
+        this.showToast(`Synced record for ${formatHumanDate(dateKey, getTodayKey())}`);
       },
 
       // =====================================================
@@ -1212,6 +1584,23 @@
         const dashboardSection = document.getElementById('dashboardSection');
         const navUserSection = document.getElementById('navUserSection');
 
+        // Render Cloud Accounts directory on Login screen so users can see registered accounts
+        const allUsernames = Object.keys(this.state.users);
+        const countEl = document.getElementById('cloudAccountCount');
+        const listEl = document.getElementById('cloudAccountsList');
+        if (countEl && listEl) {
+          countEl.textContent = `${allUsernames.length} on server`;
+          if (allUsernames.length === 0) {
+            listEl.innerHTML = `<span class="text-slate-400 text-xs">No accounts created yet. Click "Create Account" above!</span>`;
+          } else {
+            listEl.innerHTML = allUsernames.map(uname => {
+              const u = this.state.users[uname];
+              const badge = u.isReservedSlot ? ' (Partner Invite)' : '';
+              return `<button type="button" onclick="app.prefillLoginUsername('${u.username}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-[#2563EB] text-[#0F172A] font-medium text-xs border border-[#E2E8F0] transition">@${u.username}${badge}</button>`;
+            }).join('');
+          }
+        }
+
         if (!this.currentUser || !this.state.users[this.currentUser]) {
           authSection.classList.remove('hidden');
           dashboardSection.classList.add('hidden');
@@ -1240,7 +1629,7 @@
         const btnFriendText = document.getElementById('btnFriendText');
 
         if (friend) {
-          partnerBadge.textContent = `1v1 vs. ${friend.fullName} (@${friend.username})`;
+          partnerBadge.textContent = `Live 1v1 vs. ${friend.fullName} (@${friend.username})`;
           partnerBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[#16A34A] border border-emerald-200';
           unpairedCard.classList.add('hidden');
           btnFriendText.textContent = `Partner: @${friend.username}`;
@@ -1450,15 +1839,26 @@
       },
 
       // =====================================================
-      // MODALS, SHARE LINKS & TOASTS
+      // MODALS, PARTNER INVITE LINKS & CUSTOM FIREBASE SERVER
       // =====================================================
+      buildPartnerShareUrl() {
+        const params = new URLSearchParams();
+        if (this.activeCustomFbConfig) {
+          const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(this.activeCustomFbConfig))));
+          params.set('fb', b64);
+        }
+        if (this.currentUser && this.state.users[this.currentUser]?.friendUsername) {
+          params.set('user', this.state.users[this.currentUser].friendUsername);
+        }
+        const hashStr = params.toString();
+        return `${window.location.origin}${window.location.pathname}${hashStr ? '#' + hashStr : ''}`;
+      },
+
       openModal(id) {
         const el = document.getElementById(id);
         if (!el) return;
         if (id === 'syncModal') {
-          const encoded = this.encodeState();
-          const url = `${window.location.origin}${window.location.pathname}#vault=${encoded}`;
-          document.getElementById('shareLinkInput').value = url;
+          document.getElementById('shareLinkInput').value = this.buildPartnerShareUrl();
         }
         el.classList.remove('hidden');
         el.classList.add('flex');
@@ -1469,6 +1869,31 @@
         if (!el) return;
         el.classList.add('hidden');
         el.classList.remove('flex');
+      },
+
+      async applyCustomFirebaseConfig() {
+        const raw = document.getElementById('customFirebaseInput').value.trim();
+        if (!raw) {
+          this.showToast('Please paste your Firebase config JSON object.', true);
+          return;
+        }
+        try {
+          // Support both strict JSON and JS object snippets
+          const cleaned = raw
+            .replace(/^(const|let|var)\s+\w+\s*=\s*/, '')
+            .replace(/;$/, '');
+          const parsed = JSON.parse(cleaned);
+          if (!parsed.apiKey || !parsed.projectId) {
+            this.showToast('Config must include apiKey and projectId.', true);
+            return;
+          }
+          this.activeCustomFbConfig = parsed;
+          await this.initCloudServer(parsed);
+          document.getElementById('shareLinkInput').value = this.buildPartnerShareUrl();
+          this.showToast('Connected to your custom Firebase Cloud Server!');
+        } catch (err) {
+          this.showToast('Please paste valid JSON (with double-quoted keys).', true);
+        }
       },
 
       copyText(text, message) {
@@ -1494,25 +1919,7 @@
 
       copyShareLink() {
         const val = document.getElementById('shareLinkInput').value;
-        this.copyText(val, 'Shareable Challenge Link copied to clipboard!');
-      },
-
-      handleImportCode() {
-        const raw = document.getElementById('importCodeInput').value.trim();
-        if (!raw) return;
-        try {
-          const token = raw.includes('#vault=') ? raw.split('#vault=')[1] : raw;
-          const json = decodeURIComponent(escape(atob(token)));
-          const parsed = JSON.parse(json);
-          if (parsed && parsed.users && parsed.challenges) {
-            this.state = parsed;
-            this.closeModal('syncModal');
-            this.showToast('Challenge data loaded successfully!');
-            this.saveAndSync();
-          }
-        } catch (err) {
-          this.showToast('Invalid link or sync code.', true);
-        }
+        this.copyText(val, 'Partner Invite Link copied to clipboard!');
       },
 
       showToast(msg, isAlert = false) {
@@ -1535,76 +1942,6 @@
 
     window.app = app;
     window.addEventListener('DOMContentLoaded', () => app.init());
-  </script>
-
-  <!-- OPTIONAL REALTIME CLOUD SYNC MODULE (FIRESTORE) -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-    async function connectCloudSync() {
-      try {
-        if (typeof __firebase_config === 'undefined' || !__firebase_config) return;
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const fbApp = initializeApp(firebaseConfig);
-        const db = getFirestore(fbApp);
-        const auth = getAuth(fbApp);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'goalvault-100-app';
-
-        // RULE 3: Auth Before Queries
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-
-        onAuthStateChanged(auth, (user) => {
-          if (!user) return;
-          // RULE 1: Strict Path `/artifacts/{appId}/public/data/{collectionName}`
-          const ledgerDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'goalvault_records', 'shared_state');
-
-          // Register push callback on window.app
-          window.app.cloudPushCallback = async (currentState) => {
-            if (!auth.currentUser) return;
-            try {
-              await setDoc(ledgerDocRef, {
-                payload: JSON.stringify(currentState),
-                updatedAt: Date.now()
-              });
-            } catch (e) {
-              console.warn('Cloud sync push error:', e);
-            }
-          };
-
-          // Listen for realtime updates from partner
-          onSnapshot(
-            ledgerDocRef,
-            (snapshot) => {
-              if (snapshot.exists()) {
-                const data = snapshot.data();
-                if (data && data.payload) {
-                  try {
-                    const remoteState = JSON.parse(data.payload);
-                    if (remoteState && remoteState.users && remoteState.challenges) {
-                      window.app.state = remoteState;
-                      window.app.render();
-                    }
-                  } catch (e) {}
-                }
-              }
-            },
-            (err) => {
-              console.warn('Cloud sync listener error:', err);
-            }
-          );
-        });
-      } catch (err) {
-        console.warn('Running with standalone browser state:', err);
-      }
-    }
-
-    connectCloudSync();
   </script>
 </body>
 </html>
