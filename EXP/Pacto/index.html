@@ -1,494 +1,1119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pacto — 1v1 Daily Goal & ₹100 Vault</title>
+  <title>Pacto — 1v1 Daily Goal & 1,000 PTS Arena</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            carbon: {
+              950: '#0B0C0E',
+              900: '#111215',
+              850: '#16171B',
+              800: '#1C1D22',
+              700: '#262830',
+              600: '#343742'
+            },
+            accent: {
+              lime: '#C8F904',
+              yellow: '#FCE354',
+              blue: '#6C8CFF',
+              coral: '#FF7A59',
+              mint: '#4ADE80'
+            }
+          }
+        }
+      }
+    };
+  </script>
   <style>
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #F8FAFC;
-      color: #0F172A;
+    :root {
+      --bg-outer: #F1F3F6;
+      --bg-shell: #FFFFFF;
+      --bg-card: #F7F8FA;
+      --bg-elevated: #ECEEF2;
+      --text-main: #0F1115;
+      --text-muted: #686E7A;
+      --border-subtle: #E2E5EC;
     }
+    html.dark {
+      --bg-outer: #0B0C0E;
+      --bg-shell: #111215;
+      --bg-card: #18191E;
+      --bg-elevated: #21232A;
+      --text-main: #F5F6F8;
+      --text-muted: #8C909E;
+      --border-subtle: #25272F;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-outer);
+      color: var(--text-main);
+      overflow-x: hidden;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .app-shell {
+      background-color: var(--bg-shell);
+      border: 1px solid var(--border-subtle);
+    }
+    .bento-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .bento-surface {
+      background-color: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* High-Contrast Concept Theme Cards */
+    .card-lime {
+      background-color: #C8F904;
+      color: #0B0C0E;
+    }
+    .card-yellow {
+      background-color: #FCE354;
+      color: #0B0C0E;
+    }
+    .card-light {
+      background-color: #EAECEF;
+      color: #0B0C0E;
+    }
+
+    /* Subtle Geometric Pattern Card */
+    .card-pattern {
+      background-color: var(--bg-card);
+      background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    html:not(.dark) .card-pattern {
+      background-image: radial-gradient(rgba(0,0,0,0.06) 1px, transparent 1px);
+    }
+
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Smooth SVG Ring Transitions */
+    .progress-ring-circle {
+      transition: stroke-dashoffset 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(140, 144, 158, 0.25);
+      border-radius: 9999px;
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col justify-center p-0 sm:p-3 md:p-5">
 
-  <!-- TOP NAVBAR -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white font-extrabold flex items-center justify-center text-lg shadow-sm">
-          ₹
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="font-extrabold text-lg tracking-tight text-slate-900">Pacto</span>
-            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">₹100 Vault</span>
+  <!-- ==================== APP SHELL CONTAINER ==================== -->
+  <div class="app-shell w-full max-w-[1280px] mx-auto sm:rounded-[28px] min-h-screen sm:min-h-[840px] flex flex-col lg:flex-row overflow-hidden shadow-2xl">
+
+    <!-- ==================== LEFT SIDEBAR (PC) / BOTTOM NAV (MOBILE) ==================== -->
+    <aside id="appSidebar" class="hidden lg:flex lg:w-60 shrink-0 flex-col justify-between p-5 border-b lg:border-b-0 lg:border-r border-[var(--border-subtle)] select-none">
+      <!-- Top Brand & User Profile -->
+      <div>
+        <div class="flex items-center justify-between mb-7 px-1">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-[#C8F904] text-[#0B0C0E] flex items-center justify-center font-extrabold text-lg shadow-sm">
+              ⚡
+            </div>
+            <div>
+              <span class="font-extrabold text-lg tracking-tight">Pacto</span>
+              <span class="block text-[10px] font-mono uppercase tracking-widest text-[var(--text-muted)]">1,000 PTS Arena</span>
+            </div>
           </div>
-          <div id="syncStatusBadge" class="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
-            <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-            <span id="syncText">Connecting to Pacto Cloud...</span>
+          <span id="syncDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" title="Connecting..."></span>
+        </div>
+
+        <!-- User Mini Card -->
+        <div class="bento-surface rounded-2xl p-3.5 mb-6 text-center">
+          <div id="sidebarAvatar" class="w-12 h-12 rounded-full bg-[#FCE354] text-[#0B0C0E] font-extrabold text-lg flex items-center justify-center mx-auto mb-2 shadow-sm">
+            U
+          </div>
+          <div id="navDisplayName" class="text-sm font-extrabold truncate">Player</div>
+          <div id="navUsername" class="text-[11px] font-mono text-[var(--text-muted)] truncate mb-2">@username</div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/20 text-[10px] font-bold text-[#FCE354]">
+            <span>🏆</span>
+            <span id="sidebarRankText">Rookie I</span>
           </div>
         </div>
+
+        <!-- Primary Navigation -->
+        <div class="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] px-3 mb-2">
+          Dashboards
+        </div>
+        <nav class="space-y-1">
+          <button onclick="switchMainTab('overview')" id="navBtn-overview" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition">
+            <span class="text-sm">⊞</span>
+            <span>Overview</span>
+          </button>
+          <button onclick="switchMainTab('history')" id="navBtn-history" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition">
+            <span class="text-sm">☰</span>
+            <span>Daily Ledger</span>
+          </button>
+          <button onclick="switchMainTab('achievements')" id="navBtn-achievements" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition">
+            <span class="text-sm">🏅</span>
+            <span>Achievements</span>
+            <span id="navBadgeCount" class="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-black/20">0/8</span>
+          </button>
+          <button onclick="switchMainTab('settings')" id="navBtn-settings" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition">
+            <span class="text-sm">🎯</span>
+            <span>Goal & Partner</span>
+          </button>
+        </nav>
       </div>
 
-      <!-- Right User Controls -->
-      <div id="navUserSection" class="hidden items-center gap-3">
-        <div class="text-right hidden sm:block">
-          <div id="navDisplayName" class="text-sm font-bold text-slate-900 leading-tight"></div>
-          <div id="navUsername" class="text-xs font-medium text-slate-500"></div>
-        </div>
-        <button id="logoutBtn" class="px-3.5 py-2 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
+      <!-- Bottom Quick Controls -->
+      <div class="pt-4 border-t border-[var(--border-subtle)] space-y-2.5">
+        <button onclick="openSettingsModal()" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bento-surface text-xs font-bold hover:opacity-90 transition">
+          <span class="flex items-center gap-2">
+            <span>⚙️</span>
+            <span>App Settings</span>
+          </span>
+          <span class="text-[10px] font-mono text-[var(--text-muted)]">Admin / Theme</span>
+        </button>
+
+        <button id="logoutBtn" class="w-full py-2 rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-red-400 hover:bg-red-500/10 transition">
           Log Out
         </button>
       </div>
-    </div>
-  </header>
+    </aside>
 
-  <!-- DATABASE ERROR BANNER (Only shows if Firestore isn't created or rules block access) -->
-  <div id="dbErrorBanner" class="hidden bg-red-50 border-b border-red-200 px-4 py-3">
-    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-red-800">
-      <div>
-        <strong class="font-bold">Cloud Database Setup Notice:</strong>
-        <span id="dbErrorText">Please make sure Firestore Database is created and Rules are set to <code>allow read, write: if true;</code> in your Firebase console.</span>
-      </div>
-    </div>
-  </div>
+    <!-- ==================== MAIN CONTENT AREA ==================== -->
+    <div class="flex-1 flex flex-col min-w-0">
 
-  <!-- MAIN CONTAINER -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
-
-    <!-- ==================== AUTH VIEW (LOGIN / SIGNUP) ==================== -->
-    <section id="authView" class="max-w-md mx-auto mt-4 sm:mt-10">
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <!-- Auth Tabs -->
-        <div class="grid grid-cols-2 border-b border-slate-200 bg-slate-50 p-1.5 gap-1.5">
-          <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2.5 text-sm font-bold rounded-xl bg-white text-slate-900 shadow-sm transition">
-            Log In
-          </button>
-          <button id="tabSignupBtn" onclick="switchAuthTab('signup')" class="py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-800 transition">
-            Create Account
-          </button>
-        </div>
-
-        <div class="p-6 sm:p-7">
-          <!-- Error/Status Box -->
-          <div id="authAlert" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold border"></div>
-
-          <!-- LOGIN FORM -->
-          <form id="loginForm" class="space-y-4">
-            <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Username</label>
-              <div class="relative">
-                <span class="absolute left-3.5 top-2.5 text-slate-400 font-semibold">@</span>
-                <input id="loginUsername" type="text" required placeholder="your_username"
-                  class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
-              <input id="loginPassword" type="password" required placeholder="Enter your password"
-                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-            </div>
-
-            <button type="submit" id="loginSubmitBtn"
-              class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm transition">
-              Log In to Pacto
-            </button>
-          </form>
-
-          <!-- SIGNUP FORM -->
-          <form id="signupForm" class="hidden space-y-4">
-            <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Your Name</label>
-              <input id="signupDisplayName" type="text" required placeholder="e.g. Chintan"
-                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Choose Username</label>
-              <div class="relative">
-                <span class="absolute left-3.5 top-2.5 text-slate-400 font-semibold">@</span>
-                <input id="signupUsername" type="text" required placeholder="e.g. chintan"
-                  class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Create Password</label>
-              <input id="signupPassword" type="password" required placeholder="Create a password"
-                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-            </div>
-
-            <div class="pt-1 border-t border-slate-100">
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                Friend / Partner's Username <span class="text-slate-400 font-normal">(Optional - can add later)</span>
-              </label>
-              <div class="relative">
-                <span class="absolute left-3.5 top-2.5 text-slate-400 font-semibold">@</span>
-                <input id="signupFriendUsername" type="text" placeholder="partner_username"
-                  class="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-              </div>
-            </div>
-
-            <button type="submit" id="signupSubmitBtn"
-              class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm transition">
-              Create Account & Start
-            </button>
-          </form>
-
-          <!-- Registered Cloud Accounts Quick Pick -->
-          <div class="mt-6 pt-5 border-t border-slate-200">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Accounts on Server</span>
-              <span id="userCountBadge" class="text-[11px] font-semibold text-slate-400">0 users</span>
-            </div>
-            <div id="cloudUsersList" class="flex flex-wrap gap-1.5 text-xs text-slate-500">
-              <span class="text-slate-400 italic">No accounts created yet. Create the first one!</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- ==================== DASHBOARD VIEW ==================== -->
-    <section id="dashboardView" class="hidden space-y-6">
-
-      <!-- 1. FRIEND / COMPETITOR PAIRING BAR -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5">
-          <div class="w-11 h-11 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-extrabold text-base">
-            1v1
+      <!-- TOP BAR -->
+      <header class="h-16 px-4 sm:px-7 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          <!-- Mobile Logo -->
+          <div class="lg:hidden w-8 h-8 rounded-xl bg-[#C8F904] text-[#0B0C0E] flex items-center justify-center font-extrabold text-base">
+            ⚡
           </div>
           <div>
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Active Competition</div>
-            <div id="matchupHeadline" class="text-base sm:text-lg font-extrabold text-slate-900">
-              Loading matchup...
-            </div>
-            <div id="matchupSubtext" class="text-xs text-slate-500"></div>
+            <h1 id="topBarTitle" class="text-base sm:text-lg font-extrabold tracking-tight">Overview</h1>
+            <p id="topBarSubtitle" class="text-[11px] text-[var(--text-muted)] hidden sm:block">Today's 1v1 progress & momentum</p>
           </div>
         </div>
 
-        <!-- Connect / Change Friend Form -->
-        <form id="friendConnectForm" class="flex items-center gap-2 w-full md:w-auto">
-          <div class="relative flex-1 md:w-52">
-            <span class="absolute left-3 top-2 text-slate-400 font-semibold text-sm">@</span>
-            <input id="friendUsernameInput" type="text" required placeholder="friend's username"
-              class="w-full pl-7 pr-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        <!-- Right Quick Pills & Settings Trigger -->
+        <div class="flex items-center gap-2 sm:gap-2.5">
+          <div id="topBarRight" class="hidden items-center gap-2 sm:gap-2.5">
+            <!-- Streak Pill -->
+            <div class="bento-surface px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-extrabold tabular-nums" title="Your Active Streak">
+              <span>🔥</span>
+              <span id="headerStreakNum">0</span>
+              <span class="text-[10px] font-semibold text-[var(--text-muted)] hidden sm:inline">streak</span>
+            </div>
+
+            <!-- Points Pill -->
+            <div class="bento-surface px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs font-extrabold tabular-nums" title="Your Net Points">
+              <span class="text-[#C8F904]">⚡</span>
+              <span id="headerPointsNum">0</span>
+              <span class="text-[10px] font-mono text-[var(--text-muted)]">PTS</span>
+            </div>
+
+            <!-- EOD Timer Pill -->
+            <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bento-surface text-[11px] font-mono font-bold text-[var(--text-muted)]" title="Time remaining until 11:59 PM">
+              <span>⏱</span>
+              <span id="eodCountdown">--:--:--</span>
+            </div>
           </div>
-          <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold whitespace-nowrap transition">
-            Connect Friend
+
+          <!-- Settings Popup Button (Always Accessible) -->
+          <button onclick="openSettingsModal()" class="w-9 h-9 rounded-full bento-surface flex items-center justify-center text-sm hover:border-[#C8F904] transition" title="Open Settings & Master Controls">
+            ⚙️
           </button>
-        </form>
-      </div>
+        </div>
+      </header>
 
+      <!-- SCROLLABLE BODY -->
+      <main class="flex-1 p-4 sm:p-7 overflow-y-auto pb-24 lg:pb-8">
 
-      <!-- 2. MONTHLY GOAL & TODAY'S LOGGING (2-COLUMN GRID) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- ==================== AUTH VIEW (LOGIN / SIGNUP) ==================== -->
+        <section id="authView" class="max-w-md mx-auto my-6 sm:my-12">
+          <div class="text-center mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-[#C8F904] text-[#0B0C0E] font-extrabold text-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+              ⚡
+            </div>
+            <h2 class="text-2xl font-extrabold tracking-tight">Welcome to Pacto</h2>
+            <p class="text-xs text-[var(--text-muted)] mt-1">1v1 Daily Habit Arena • <span class="text-[#FCE354] font-bold">±1,000 PTS</span> daily stakes</p>
+          </div>
 
-        <!-- LEFT: MONTHLY GOAL CARD (5 cols) -->
-        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between gap-2 mb-3">
-              <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">
-                Monthly Goal
-              </span>
-              <button onclick="openGoalModal()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline">
-                Edit Goal
+          <div class="bento-card rounded-3xl p-6 sm:p-7 shadow-xl">
+            <!-- Auth Tabs -->
+            <div class="grid grid-cols-2 bento-surface p-1 rounded-2xl mb-6">
+              <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2.5 text-xs font-extrabold rounded-xl bg-[#C8F904] text-[#0B0C0E] transition">
+                Log In
+              </button>
+              <button id="tabSignupBtn" onclick="switchAuthTab('signup')" class="py-2.5 text-xs font-extrabold rounded-xl text-[var(--text-muted)] transition">
+                Create Account
               </button>
             </div>
 
-            <h2 id="goalTitleDisplay" class="text-xl font-extrabold text-slate-900 mb-1">
-              Walk 3,000 Steps a Day
-            </h2>
-            <p class="text-xs text-slate-500 mb-4">
-              Daily Target: <strong id="goalTargetDisplay" class="text-slate-800">3,000 steps</strong> • Missed EOD Penalty: <strong class="text-red-600">₹<span id="goalPenaltyDisplay">100</span></strong>
-            </p>
+            <div id="authAlert" class="hidden mb-4 p-3 rounded-xl text-xs font-bold border"></div>
 
-            <!-- Quick Increase Target Buttons -->
-            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200/80 mb-4">
-              <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Quick Increase Daily Target
+            <!-- LOGIN FORM -->
+            <form id="loginForm" class="space-y-4">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Username</label>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-2.5 text-[var(--text-muted)] font-mono font-bold">@</span>
+                  <input id="loginUsername" type="text" required placeholder="your_username"
+                    class="w-full pl-8 pr-4 py-2.5 rounded-xl bento-surface text-sm font-semibold focus:outline-none focus:border-[#C8F904]" />
+                </div>
               </div>
-              <div class="flex flex-wrap gap-2">
-                <button onclick="bumpGoalTarget(500)" class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 hover:border-indigo-500 text-xs font-bold text-slate-700 hover:text-indigo-600 transition shadow-2xs">
-                  +500
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Password</label>
+                <input id="loginPassword" type="password" required placeholder="Enter password"
+                  class="w-full px-3.5 py-2.5 rounded-xl bento-surface text-sm font-semibold focus:outline-none focus:border-[#C8F904]" />
+              </div>
+
+              <button type="submit" class="w-full py-3 rounded-xl bg-[#C8F904] hover:opacity-95 text-[#0B0C0E] font-extrabold text-sm transition">
+                Enter Arena →
+              </button>
+            </form>
+
+            <!-- SIGNUP FORM -->
+            <form id="signupForm" class="hidden space-y-4">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Display Name</label>
+                <input id="signupDisplayName" type="text" required placeholder="e.g. Chintan"
+                  class="w-full px-3.5 py-2.5 rounded-xl bento-surface text-sm font-semibold focus:outline-none focus:border-[#C8F904]" />
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Username</label>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-2.5 text-[var(--text-muted)] font-mono font-bold">@</span>
+                  <input id="signupUsername" type="text" required placeholder="chintan"
+                    class="w-full pl-8 pr-4 py-2.5 rounded-xl bento-surface text-sm font-semibold focus:outline-none focus:border-[#C8F904]" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Password</label>
+                <input id="signupPassword" type="password" required placeholder="Create password"
+                  class="w-full px-3.5 py-2.5 rounded-xl bento-surface text-sm font-semibold focus:outline-none focus:border-[#C8F904]" />
+              </div>
+
+              <div class="pt-2 border-t border-[var(--border-subtle)]">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                  Opponent Username <span class="font-normal opacity-70">(Optional)</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-2.5 text-[var(--text-muted)] font-mono font-bold">@</span>
+                  <input id="signupFriendUsername" type="text" placeholder="partner_username"
+                    class="w-full pl-8 pr-4 py-2.5 rounded-xl bento-surface text-sm font-semibold focus:outline-none focus:border-[#C8F904]" />
+                </div>
+              </div>
+
+              <button type="submit" class="w-full py-3 rounded-xl bg-[#C8F904] hover:opacity-95 text-[#0B0C0E] font-extrabold text-sm transition">
+                Create Account & Start
+              </button>
+            </form>
+
+            <!-- Quick Pick Accounts -->
+            <div class="mt-6 pt-5 border-t border-[var(--border-subtle)]">
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Quick Pick Player</span>
+                <span id="userCountBadge" class="text-[10px] font-mono text-[var(--text-muted)]">0 accounts</span>
+              </div>
+              <div id="cloudUsersList" class="flex flex-wrap gap-1.5 text-xs">
+                <span class="text-[var(--text-muted)] italic text-xs">Loading players...</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== DASHBOARD VIEWS ==================== -->
+        <div id="dashboardView" class="hidden">
+
+          <!-- ==================== TAB 1: OVERVIEW (CLEAN BENTO GRID) ==================== -->
+          <section id="tabPanel-overview" class="space-y-5">
+
+            <!-- TOP 4 KPI STRIP -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+              <!-- KPI 1: My Net Points -->
+              <div class="bento-card rounded-2xl p-4 sm:p-5">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-[var(--text-muted)]">Your Arena Score</span>
+                  <span class="w-6 h-6 rounded-full bg-[#C8F904]/15 text-[#C8F904] flex items-center justify-center text-xs font-bold">⚡</span>
+                </div>
+                <div id="kpiMyPoints" class="text-2xl sm:text-3xl font-extrabold font-mono tabular-nums tracking-tight">0</div>
+                <div class="mt-2 flex items-center gap-2 text-[11px]">
+                  <span id="kpiMyDiffPill" class="px-2 py-0.5 rounded-full font-bold bg-[#C8F904]/15 text-[#C8F904]">Tied</span>
+                  <span class="text-[var(--text-muted)] truncate">vs opponent</span>
+                </div>
+              </div>
+
+              <!-- KPI 2: Active Streak -->
+              <div class="bento-card rounded-2xl p-4 sm:p-5">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-[var(--text-muted)]">Current Streak</span>
+                  <span class="w-6 h-6 rounded-full bg-[#FCE354]/15 text-[#FCE354] flex items-center justify-center text-xs font-bold">🔥</span>
+                </div>
+                <div class="flex items-baseline gap-1.5">
+                  <span id="kpiMyStreak" class="text-2xl sm:text-3xl font-extrabold font-mono tabular-nums tracking-tight">0</span>
+                  <span class="text-xs font-bold text-[var(--text-muted)]">days</span>
+                </div>
+                <div id="kpiBestStreak" class="mt-2 text-[11px] font-semibold text-[var(--text-muted)]">
+                  Best record: 0 days
+                </div>
+              </div>
+
+              <!-- KPI 3: Win / Completion Rate -->
+              <div class="bento-card rounded-2xl p-4 sm:p-5">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-[var(--text-muted)]">Completion Rate</span>
+                  <span class="w-6 h-6 rounded-full bg-[#6C8CFF]/15 text-[#6C8CFF] flex items-center justify-center text-xs font-bold">✓</span>
+                </div>
+                <div id="kpiCompletionRate" class="text-2xl sm:text-3xl font-extrabold font-mono tabular-nums tracking-tight">0%</div>
+                <div id="kpiDaysBreakdown" class="mt-2 text-[11px] font-semibold text-[var(--text-muted)]">
+                  0 hit • 0 missed
+                </div>
+              </div>
+
+              <!-- KPI 4: Daily Stakes -->
+              <div class="bento-card rounded-2xl p-4 sm:p-5">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-[var(--text-muted)]">Daily Stake</span>
+                  <button onclick="switchMainTab('settings')" class="w-6 h-6 rounded-full bento-surface flex items-center justify-center text-xs hover:border-[#C8F904]" title="Edit Goal">✎</button>
+                </div>
+                <div id="kpiStakeValue" class="text-2xl sm:text-3xl font-extrabold font-mono tabular-nums tracking-tight text-[#FCE354]">±1,000</div>
+                <div id="kpiGoalShort" class="mt-2 text-[11px] font-semibold text-[var(--text-muted)] truncate">
+                  Target: 3,000 steps
+                </div>
+              </div>
+            </div>
+
+            <!-- MAIN BENTO ROW: 3 FOCUSED CARDS -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+              <!-- CARD 1: TODAY'S PROGRESS RING (LIME HERO CARD) -->
+              <div class="lg:col-span-5 card-lime rounded-3xl p-6 flex flex-col justify-between shadow-lg relative overflow-hidden">
+                <!-- Header -->
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest opacity-70">Today's Target</span>
+                    <h3 id="goalTitleDisplay" class="text-lg sm:text-xl font-extrabold tracking-tight leading-snug mt-0.5">
+                      Walk 3,000 Steps a Day
+                    </h3>
+                  </div>
+                  <button onclick="toggleCustomLogDrawer()" class="w-8 h-8 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center font-bold text-sm transition" title="Enter exact number">
+                    ✎
+                  </button>
+                </div>
+
+                <!-- Center: Radial Ring + Clean External Readout -->
+                <div class="my-5 flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-6">
+                  <!-- Radial SVG Ring: ONLY percentage inside -->
+                  <div class="relative w-36 h-36 shrink-0 flex items-center justify-center">
+                    <svg class="w-full h-full" viewBox="0 0 140 140">
+                      <circle cx="70" cy="70" r="56" stroke="rgba(11,12,14,0.14)" stroke-width="12" fill="transparent" />
+                      <circle id="todayRingCircle" class="progress-ring-circle" cx="70" cy="70" r="56"
+                        stroke="#0B0C0E" stroke-width="12" stroke-linecap="round" fill="transparent"
+                        stroke-dasharray="351.86" stroke-dashoffset="351.86" />
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                      <span id="todayRingPct" class="text-3xl font-extrabold font-mono tracking-tighter leading-none">0%</span>
+                      <span id="todayRingStateTag" class="mt-1 px-2 py-0.5 rounded-full bg-black/10 text-[9px] font-extrabold uppercase tracking-wider">
+                        In Play
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- External Numeric Readout -->
+                  <div class="flex flex-col items-center sm:items-start text-center sm:text-left">
+                    <div class="text-[10px] font-extrabold uppercase tracking-wider opacity-65 mb-0.5">
+                      Logged Today
+                    </div>
+                    <div id="todayCurrentNumBig" class="text-3xl sm:text-4xl font-extrabold font-mono tabular-nums tracking-tight leading-none">
+                      0
+                    </div>
+                    <div id="todayRingNumbers" class="text-xs font-extrabold font-mono opacity-75 mt-1">
+                      of 3,000 steps goal
+                    </div>
+                    <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/10 text-xs font-extrabold">
+                      <span id="todayRemainingLabel">3,000 steps to go</span>
+                      <span class="opacity-40">•</span>
+                      <span id="todayRewardBadge" class="font-mono">+1,000 PTS</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-2.5">
+                  <div class="grid grid-cols-3 gap-2">
+                    <button type="button" onclick="quickAddToday(500)" class="py-2.5 rounded-xl bg-black/10 hover:bg-black/20 font-extrabold font-mono text-xs transition active:scale-95">
+                      +500
+                    </button>
+                    <button type="button" onclick="quickAddToday(1000)" class="py-2.5 rounded-xl bg-black/10 hover:bg-black/20 font-extrabold font-mono text-xs transition active:scale-95">
+                      +1,000
+                    </button>
+                    <button type="button" onclick="quickCompleteToday()" class="py-2.5 rounded-xl bg-[#0B0C0E] text-[#C8F904] hover:opacity-90 font-extrabold text-xs transition active:scale-95 shadow-sm">
+                      ✓ Done
+                    </button>
+                  </div>
+
+                  <!-- Expandable Exact Number Input Drawer -->
+                  <form id="todayLogForm" class="hidden pt-2 flex gap-2">
+                    <input id="todayProgressInput" type="number" min="0" step="any" required placeholder="Exact number..."
+                      class="flex-1 px-3.5 py-2 rounded-xl bg-white/90 text-[#0B0C0E] font-mono font-bold text-xs focus:outline-none" />
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-[#0B0C0E] text-white font-extrabold text-xs">
+                      Save
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <!-- CARD 2: 1V1 ARENA STANDINGS -->
+              <div class="lg:col-span-4 bento-card card-pattern rounded-3xl p-6 flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                  <span class="px-3 py-1 rounded-full bento-surface text-[11px] font-bold">
+                    1v1 Arena
+                  </span>
+                  <button onclick="openVsModal()" class="w-8 h-8 rounded-full bento-surface hover:border-[#C8F904] flex items-center justify-center text-xs transition" title="Expand Full 1v1 Details">
+                    ↗
+                  </button>
+                </div>
+
+                <!-- Players Head-to-Head Summary -->
+                <div class="my-5 space-y-4">
+                  <!-- Player 1 (You) -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div id="vsMyAvatar" class="w-10 h-10 rounded-2xl bg-[#C8F904] text-[#0B0C0E] font-extrabold text-sm flex items-center justify-center shrink-0">
+                        Y
+                      </div>
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                          <span id="vsMyName" class="font-extrabold text-sm truncate">You</span>
+                          <span id="vsMyStreakPill" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-[#FCE354]">🔥 0</span>
+                        </div>
+                        <div id="vsMyTodayText" class="text-[11px] text-[var(--text-muted)] font-mono">Today: 0%</div>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div id="vsMyPts" class="text-lg font-extrabold font-mono tabular-nums text-[#C8F904]">0</div>
+                      <div class="text-[10px] font-mono text-[var(--text-muted)]">PTS</div>
+                    </div>
+                  </div>
+
+                  <!-- Minimal Tug-of-War Bar -->
+                  <div class="space-y-1.5">
+                    <div class="h-2.5 w-full rounded-full bento-surface overflow-hidden flex p-0.5 gap-0.5">
+                      <div id="tugMyBar" class="h-full bg-[#C8F904] rounded-full transition-all duration-500" style="width: 50%"></div>
+                      <div id="tugPartnerBar" class="h-full bg-[#6C8CFF] rounded-full transition-all duration-500" style="width: 50%"></div>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-mono text-[var(--text-muted)]">
+                      <span id="tugStatusText">Even Matchup</span>
+                      <span id="tugLeadDiff">0 PTS diff</span>
+                    </div>
+                  </div>
+
+                  <!-- Player 2 (Opponent) -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div id="vsPartnerAvatar" class="w-10 h-10 rounded-2xl bg-[#6C8CFF] text-[#0B0C0E] font-extrabold text-sm flex items-center justify-center shrink-0">
+                        ?
+                      </div>
+                      <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                          <span id="vsPartnerName" class="font-extrabold text-sm truncate">Opponent</span>
+                          <span id="vsPartnerStreakPill" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#6C8CFF]/15 text-[#6C8CFF]">🔥 0</span>
+                        </div>
+                        <div id="vsPartnerTodayText" class="text-[11px] text-[var(--text-muted)] font-mono">Today: 0%</div>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div id="vsPartnerPts" class="text-lg font-extrabold font-mono tabular-nums text-[#6C8CFF]">0</div>
+                      <div class="text-[10px] font-mono text-[var(--text-muted)]">PTS</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bottom Action Button -->
+                <div class="grid grid-cols-2 gap-2">
+                  <button onclick="openVsModal()" class="py-2.5 px-3 rounded-2xl bento-surface hover:border-[#C8F904] flex items-center justify-center gap-1.5 text-xs font-bold transition">
+                    <span>Full 1v1 Stats</span>
+                    <span>↗</span>
+                  </button>
+                  <button onclick="viewOpponentAchievements()" class="py-2.5 px-3 rounded-2xl bento-surface hover:border-[#6C8CFF] flex items-center justify-center gap-1.5 text-xs font-bold text-[#6C8CFF] transition">
+                    <span>🏅 Rival Badges</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- CARD 3: 7-DAY MOMENTUM & MINI CHART -->
+              <div class="lg:col-span-3 card-light rounded-3xl p-6 flex flex-col justify-between shadow-lg">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest opacity-60">Momentum</span>
+                    <h3 class="text-base font-extrabold tracking-tight">Last 7 Days</h3>
+                  </div>
+                  <button onclick="switchMainTab('history')" class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold hover:opacity-85 transition" title="Open Full Ledger">
+                    ↗
+                  </button>
+                </div>
+
+                <!-- Day Pill Selector Strip -->
+                <div id="weekPillStrip" class="grid grid-cols-7 gap-1 my-4">
+                  <!-- Populated by JS -->
+                </div>
+
+                <!-- Mini Vertical Bar Chart -->
+                <div id="weekMiniBars" class="h-24 flex items-end justify-between gap-1.5 pt-4 px-1 border-b border-black/10">
+                  <!-- Populated by JS -->
+                </div>
+
+                <!-- Bottom Summary Stat -->
+                <div class="pt-3 flex items-baseline justify-between">
+                  <div>
+                    <span id="weekHitCount" class="text-2xl font-extrabold font-mono tracking-tight">0/7</span>
+                    <span class="text-[11px] font-bold opacity-65 block">Days hit this week</span>
+                  </div>
+                  <span id="weekNetPts" class="text-xs font-mono font-extrabold px-2.5 py-1 rounded-full bg-black text-[#C8F904]">
+                    +0 PTS
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ==================== TAB 2: DAILY LEDGER (HISTORY TABLE) ==================== -->
+          <section id="tabPanel-history" class="hidden space-y-5">
+            <!-- 4 Colored Header Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+              <div class="bento-card rounded-2xl overflow-hidden">
+                <div class="bg-[#6C8CFF] text-[#0B0C0E] px-4 py-2 text-xs font-extrabold">Completed Days</div>
+                <div class="p-4 flex items-baseline justify-between">
+                  <span id="histCompletedNum" class="text-2xl font-extrabold font-mono">0</span>
+                  <span class="text-[11px] font-mono text-emerald-400">Hit target</span>
+                </div>
+              </div>
+
+              <div class="bento-card rounded-2xl overflow-hidden">
+                <div class="bg-[#FF7A59] text-[#0B0C0E] px-4 py-2 text-xs font-extrabold">Missed Days</div>
+                <div class="p-4 flex items-baseline justify-between">
+                  <span id="histMissedNum" class="text-2xl font-extrabold font-mono">0</span>
+                  <span class="text-[11px] font-mono text-red-400">Past EOD</span>
+                </div>
+              </div>
+
+              <div class="bento-card rounded-2xl overflow-hidden">
+                <div class="bg-[#FCE354] text-[#0B0C0E] px-4 py-2 text-xs font-extrabold">Your Earned PTS</div>
+                <div class="p-4 flex items-baseline justify-between">
+                  <span id="histEarnedPts" class="text-2xl font-extrabold font-mono">+0</span>
+                  <span class="text-[11px] font-mono text-[var(--text-muted)]">Gross</span>
+                </div>
+              </div>
+
+              <div class="bento-card rounded-2xl overflow-hidden">
+                <div class="bg-[#4ADE80] text-[#0B0C0E] px-4 py-2 text-xs font-extrabold">Best Streak</div>
+                <div class="p-4 flex items-baseline justify-between">
+                  <span id="histBestStreak" class="text-2xl font-extrabold font-mono">0d</span>
+                  <span class="text-[11px] font-mono text-emerald-400">All-time</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filter Bar + Ledger Table -->
+            <div class="bento-card rounded-3xl overflow-hidden">
+              <div class="p-4 sm:p-5 border-b border-[var(--border-subtle)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 class="text-base font-extrabold">Day-by-Day Record</h3>
+                  <p id="challengeStartRangeLabel" class="text-xs text-[var(--text-muted)]">Click any day to edit logged numbers</p>
+                </div>
+
+                <div class="inline-flex bento-surface p-1 rounded-xl self-start sm:self-auto">
+                  <button id="filterActiveBtn" onclick="setTableFilter('active')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#C8F904] text-[#0B0C0E] transition">
+                    All Days
+                  </button>
+                  <button id="filter7Btn" onclick="setTableFilter('7days')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--text-muted)] transition">
+                    Last 7 Days
+                  </button>
+                  <button id="filterMonthBtn" onclick="setTableFilter('month')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--text-muted)] transition">
+                    This Month
+                  </button>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-[var(--border-subtle)] text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                      <th class="py-3.5 px-5">Date</th>
+                      <th id="thMyName" class="py-3.5 px-4">You</th>
+                      <th id="thPartnerName" class="py-3.5 px-4">Opponent</th>
+                      <th class="py-3.5 px-4">Daily Points Impact</th>
+                      <th class="py-3.5 px-5 text-right">Edit</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dailyRecordsTbody" class="divide-y divide-[var(--border-subtle)] text-xs">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== TAB 3: ACHIEVEMENTS & LEAGUES ==================== -->
+          <section id="tabPanel-achievements" class="hidden space-y-5">
+
+            <!-- Player Switcher Header Bar -->
+            <div class="bento-card rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <span class="text-[10px] font-mono uppercase tracking-widest text-[var(--text-muted)]">Trophy Room Inspector</span>
+                <h3 id="achInspectorTitle" class="text-base font-extrabold">Viewing Your Achievements & League</h3>
+              </div>
+
+              <!-- Segmented Player Switcher -->
+              <div class="inline-flex bento-surface p-1 rounded-xl w-full sm:w-auto">
+                <button id="achSwitchMeBtn" onclick="switchAchievementPlayer('me')" class="flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-extrabold transition flex items-center justify-center gap-2">
+                  <span>👤</span>
+                  <span id="achSwitchMeLabel">You</span>
+                  <span id="achSwitchMeCount" class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-black/20">0/8</span>
                 </button>
-                <button onclick="bumpGoalTarget(1000)" class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 hover:border-indigo-500 text-xs font-bold text-slate-700 hover:text-indigo-600 transition shadow-2xs">
-                  +1,000
+                <button id="achSwitchPartnerBtn" onclick="switchAchievementPlayer('partner')" class="flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-extrabold transition flex items-center justify-center gap-2">
+                  <span>⚔️</span>
+                  <span id="achSwitchPartnerLabel">Opponent</span>
+                  <span id="achSwitchPartnerCount" class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-black/20">0/8</span>
                 </button>
-                <button onclick="openGoalModal()" class="px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-xs font-bold text-indigo-700 transition">
-                  Custom Target / Date
+              </div>
+            </div>
+
+            <!-- Top Rank Progression Card -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <div id="achHeroCard" class="lg:col-span-5 card-yellow rounded-3xl p-6 flex flex-col justify-between shadow-lg transition-colors">
+                <div class="flex items-center justify-between">
+                  <span id="achHeroOwnerTag" class="text-[10px] font-extrabold uppercase tracking-widest opacity-70">Your Current League</span>
+                  <span id="achRankTierBadge" class="px-2.5 py-0.5 rounded-full bg-black text-[#FCE354] text-[10px] font-mono font-bold">TIER 1</span>
+                </div>
+
+                <div class="my-4 flex items-center gap-4">
+                  <div id="achRankIcon" class="w-16 h-16 rounded-2xl bg-black/10 flex items-center justify-center text-4xl">
+                    🥉
+                  </div>
+                  <div>
+                    <h3 id="achRankName" class="text-2xl font-extrabold tracking-tight">Rookie I</h3>
+                    <p id="achNextRankText" class="text-xs font-bold opacity-75">3,000 PTS to Contender II</p>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex justify-between text-[11px] font-mono font-bold mb-1.5">
+                    <span id="achCurrentEarned">0 PTS Earned</span>
+                    <span id="achNextTarget">3,000 PTS</span>
+                  </div>
+                  <div class="h-2.5 w-full rounded-full bg-black/15 overflow-hidden">
+                    <div id="achProgressBar" class="h-full bg-[#0B0C0E] rounded-full transition-all duration-500" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- League Tier Ladder -->
+              <div class="lg:col-span-7 bento-card rounded-3xl p-6 flex flex-col justify-between">
+                <div>
+                  <h3 class="text-sm font-extrabold mb-1">Arena League Roadmap</h3>
+                  <p class="text-xs text-[var(--text-muted)] mb-4">Complete daily goals to earn +1,000 PTS and climb leagues.</p>
+                </div>
+                <div id="leagueLadderGrid" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 8 Duolingo-Style Achievement Badges Grid -->
+            <div class="bento-card rounded-3xl p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 id="badgesSectionTitle" class="text-base font-extrabold">Arena Badges</h3>
+                  <p id="badgesSectionSubtitle" class="text-xs text-[var(--text-muted)]">Unlocked automatically from logged performance</p>
+                </div>
+                <span id="achTotalUnlocked" class="px-3 py-1 rounded-full bento-surface text-xs font-mono font-bold text-[#C8F904]">
+                  0 / 8 Unlocked
+                </span>
+              </div>
+
+              <div id="badgesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </section>
+
+          <!-- ==================== TAB 4: GOAL & PARTNER SETTINGS ==================== -->
+          <section id="tabPanel-settings" class="hidden max-w-3xl space-y-5">
+            <!-- Connect / Change Opponent Card -->
+            <div class="bento-card rounded-3xl p-6">
+              <span class="text-[10px] font-mono uppercase tracking-widest text-[#C8F904]">1v1 Pairing</span>
+              <h3 class="text-lg font-extrabold mt-0.5 mb-1">Connect Opponent / Partner</h3>
+              <p id="settingsPartnerStatus" class="text-xs text-[var(--text-muted)] mb-4">
+                Link your partner's @username to share a live 1v1 scoreboard.
+              </p>
+
+              <form id="friendConnectForm" class="flex flex-col sm:flex-row gap-2.5">
+                <div class="relative flex-1">
+                  <span class="absolute left-3.5 top-2.5 text-[var(--text-muted)] font-mono font-bold">@</span>
+                  <input id="friendUsernameInput" type="text" required placeholder="partner_username"
+                    class="w-full pl-8 pr-4 py-2.5 rounded-xl bento-surface text-sm font-semibold focus:outline-none focus:border-[#C8F904]" />
+                </div>
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-[#C8F904] text-[#0B0C0E] font-extrabold text-xs transition">
+                  Link Opponent
                 </button>
-              </div>
+              </form>
             </div>
-          </div>
 
-          <!-- EOD Countdown Footer -->
-          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-            <span class="font-medium text-slate-500">Today's EOD Deadline (11:59 PM):</span>
-            <span id="eodCountdown" class="font-extrabold text-slate-900 bg-amber-50 border border-amber-200 text-amber-800 px-2.5 py-1 rounded-lg font-mono">
-              --h --m --s left
-            </span>
+            <!-- Configure Monthly Goal Card -->
+            <div class="bento-card rounded-3xl p-6">
+              <span class="text-[10px] font-mono uppercase tracking-widest text-[#FCE354]">Challenge Rules</span>
+              <h3 class="text-lg font-extrabold mt-0.5 mb-4">Configure Daily Goal & Points</h3>
+
+              <form id="editGoalForm" class="space-y-4">
+                <div>
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Goal Title</label>
+                  <input id="modalGoalTitle" type="text" required placeholder="e.g. Walk 3,000 Steps a Day"
+                    class="w-full px-3.5 py-2.5 rounded-xl bento-surface text-sm font-semibold focus:outline-none focus:border-[#C8F904]" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Daily Target Number</label>
+                    <input id="modalGoalTarget" type="number" min="1" step="any" required placeholder="3000"
+                      class="w-full px-3.5 py-2.5 rounded-xl bento-surface text-sm font-mono font-bold focus:outline-none focus:border-[#C8F904]" />
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Unit</label>
+                    <input id="modalGoalUnit" type="text" required placeholder="steps, km, mins..."
+                      class="w-full px-3.5 py-2.5 rounded-xl bento-surface text-sm font-semibold focus:outline-none focus:border-[#C8F904]" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Daily Stake (PTS)</label>
+                    <input id="modalGoalPenalty" type="number" min="100" step="100" required placeholder="1000"
+                      class="w-full px-3.5 py-2.5 rounded-xl bento-surface text-sm font-mono font-bold text-[#FCE354] focus:outline-none focus:border-[#C8F904]" />
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Challenge Start Date</label>
+                    <input id="modalStartDate" type="date" required
+                      class="w-full px-3.5 py-2.5 rounded-xl bento-surface text-sm font-mono font-semibold focus:outline-none focus:border-[#C8F904]" />
+                  </div>
+                </div>
+
+                <div class="pt-2 flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-[var(--text-muted)]">Quick Bump Target:</span>
+                    <button type="button" onclick="bumpGoalTarget(500)" class="px-2.5 py-1 rounded-lg bento-surface text-xs font-mono font-bold hover:border-[#C8F904]">+500</button>
+                    <button type="button" onclick="bumpGoalTarget(1000)" class="px-2.5 py-1 rounded-lg bento-surface text-xs font-mono font-bold hover:border-[#C8F904]">+1,000</button>
+                  </div>
+                  <button type="submit" class="px-6 py-2.5 rounded-xl bg-[#C8F904] text-[#0B0C0E] font-extrabold text-xs transition">
+                    Save Goal Settings
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+        </div>
+      </main>
+    </div>
+
+    <!-- ==================== MOBILE BOTTOM NAVIGATION ==================== -->
+    <nav id="mobileBottomNav" class="lg:hidden fixed bottom-0 inset-x-0 h-16 bg-[var(--bg-shell)] border-t border-[var(--border-subtle)] hidden grid-cols-4 z-40 px-2">
+      <button onclick="switchMainTab('overview')" id="mobNav-overview" class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold">
+        <span class="text-base">⊞</span>
+        <span>Overview</span>
+      </button>
+      <button onclick="switchMainTab('history')" id="mobNav-history" class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold">
+        <span class="text-base">☰</span>
+        <span>Ledger</span>
+      </button>
+      <button onclick="switchMainTab('achievements')" id="mobNav-achievements" class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold">
+        <span class="text-base">🏅</span>
+        <span>Badges</span>
+      </button>
+      <button onclick="switchMainTab('settings')" id="mobNav-settings" class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold">
+        <span class="text-base">🎯</span>
+        <span>Goal</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- ==================== MODAL 1: APP SETTINGS POPUP (THEME, SOUND & MASTER SETTINGS GATE) ==================== -->
+  <div id="settingsModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bento-card rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-xl bg-[#C8F904] text-[#0B0C0E] flex items-center justify-center text-sm font-extrabold">⚙️</span>
+          <div>
+            <h3 class="text-base font-extrabold">App Settings</h3>
+            <p class="text-[11px] text-[var(--text-muted)]">Preferences & Master Access</p>
           </div>
         </div>
-
-
-        <!-- RIGHT: LOG TODAY'S PROGRESS CARD (7 cols) -->
-        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">
-                Today's Check-In
-              </span>
-              <h3 id="todayDateLabel" class="text-lg font-extrabold text-slate-900 mt-1">
-                Today
-              </h3>
-            </div>
-            <div id="todayMyStatusBadge" class="px-3 py-1 rounded-full text-xs font-bold">
-              Checking...
-            </div>
-          </div>
-
-          <!-- Log Input & Quick Buttons -->
-          <form id="todayLogForm" class="flex flex-col sm:flex-row gap-2.5 mb-3">
-            <div class="relative flex-1">
-              <input id="todayProgressInput" type="number" min="0" step="any" required placeholder="Enter today's total (e.g. 3000)"
-                class="w-full px-4 py-3 rounded-xl border border-slate-300 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              <span id="todayUnitSuffix" class="absolute right-3.5 top-3.5 text-xs font-bold uppercase text-slate-400">steps</span>
-            </div>
-            <button type="submit" class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm transition whitespace-nowrap">
-              Save Today's Log
-            </button>
-          </form>
-
-          <!-- One-Tap Quick Add Buttons -->
-          <div class="flex flex-wrap items-center gap-2 mb-5">
-            <span class="text-xs font-semibold text-slate-400 mr-1">Quick Log:</span>
-            <button type="button" onclick="quickAddToday(500)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition">
-              +500
-            </button>
-            <button type="button" onclick="quickAddToday(1000)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition">
-              +1,000
-            </button>
-            <button type="button" onclick="quickCompleteToday()" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white transition">
-              ✓ Mark Today's Goal Done
-            </button>
-          </div>
-
-          <!-- Today's Live 1v1 Comparison Bars -->
-          <div class="space-y-3 pt-4 border-t border-slate-100">
-            <!-- My Bar -->
-            <div>
-              <div class="flex justify-between text-xs font-bold mb-1">
-                <span id="todayMeName" class="text-slate-800">You</span>
-                <span id="todayMeNumbers" class="text-slate-600">0 / 3,000 steps</span>
-              </div>
-              <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                <div id="todayMeBar" class="h-full bg-indigo-600 rounded-full transition-all duration-300" style="width: 0%"></div>
-              </div>
-            </div>
-
-            <!-- Partner Bar -->
-            <div>
-              <div class="flex justify-between text-xs font-bold mb-1">
-                <span id="todayPartnerName" class="text-slate-800">Competitor</span>
-                <span id="todayPartnerNumbers" class="text-slate-600">0 / 3,000 steps</span>
-              </div>
-              <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                <div id="todayPartnerBar" class="h-full bg-purple-600 rounded-full transition-all duration-300" style="width: 0%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
+        <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-full bento-surface flex items-center justify-center text-lg font-bold">&times;</button>
       </div>
 
-
-      <!-- 3. THE ₹100 VAULT SUMMARY (3 CARDS) -->
-      <div>
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-500">
-            The Penalty Vault (₹<span id="vaultHeaderRate">100</span> / Missed Day)
-          </h3>
-          <span id="challengeStartRangeLabel" class="text-xs font-medium text-slate-500"></span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <!-- Total Vault Pool -->
-          <div class="bg-slate-900 text-white rounded-2xl p-5 shadow-sm">
-            <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Total Vault Balance</div>
-            <div id="vaultTotalAmount" class="text-3xl font-extrabold tracking-tight text-amber-400">₹0</div>
-            <div id="vaultTotalSubtext" class="text-xs text-slate-300 mt-1.5">Combined penalties from missed days</div>
-          </div>
-
-          <!-- My Lost to Vault -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <div id="vaultMyLabel" class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">You Lost to Vault</div>
-            <div id="vaultMyAmount" class="text-3xl font-extrabold tracking-tight text-red-600">₹0</div>
-            <div id="vaultMySubtext" class="text-xs font-medium text-slate-500 mt-1.5">0 missed days • 0 completed</div>
-          </div>
-
-          <!-- Partner Lost to Vault -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <div id="vaultPartnerLabel" class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Competitor Lost to Vault</div>
-            <div id="vaultPartnerAmount" class="text-3xl font-extrabold tracking-tight text-red-600">₹0</div>
-            <div id="vaultPartnerSubtext" class="text-xs font-medium text-slate-500 mt-1.5">0 missed days • 0 completed</div>
-          </div>
-        </div>
-      </div>
-
-
-      <!-- 4. DAY-BY-DAY RECORD TABLE -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-5 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <!-- Preferences List -->
+      <div class="space-y-2.5">
+        <!-- Theme Switch -->
+        <div class="bento-surface rounded-2xl p-3.5 flex items-center justify-between">
           <div>
-            <h3 class="text-base font-extrabold text-slate-900">Day-by-Day Record</h3>
-            <p class="text-xs text-slate-500">Every past day below target automatically adds ₹<span id="tablePenaltyRate">100</span> to that person's Vault total.</p>
+            <div class="text-xs font-extrabold">Appearance Theme</div>
+            <div id="settingsThemeSubtext" class="text-[11px] text-[var(--text-muted)]">Deep Carbon Dark Mode</div>
           </div>
-
-          <!-- Filter Buttons -->
-          <div class="inline-flex bg-slate-100 p-1 rounded-xl self-start sm:self-auto">
-            <button id="filterActiveBtn" onclick="setTableFilter('active')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-2xs transition">
-              Since Start Date
-            </button>
-            <button id="filter7Btn" onclick="setTableFilter('7days')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition">
-              Last 7 Days
-            </button>
-            <button id="filterMonthBtn" onclick="setTableFilter('month')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition">
-              Full Month
-            </button>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                <th class="py-3.5 px-4 sm:px-6">Date</th>
-                <th id="thMyName" class="py-3.5 px-4">You</th>
-                <th id="thPartnerName" class="py-3.5 px-4">Competitor</th>
-                <th class="py-3.5 px-4">Vault Penalty</th>
-                <th class="py-3.5 px-4 sm:px-6 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody id="dailyRecordsTbody" class="divide-y divide-slate-200 text-sm">
-              <!-- Populated dynamically -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <!-- ==================== MODAL: EDIT MONTHLY GOAL ==================== -->
-  <div id="goalModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 max-w-md w-full p-6 shadow-xl">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-extrabold text-slate-900">Edit Monthly Goal</h3>
-        <button onclick="closeGoalModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
-      </div>
-
-      <form id="editGoalForm" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Goal Title</label>
-          <input id="modalGoalTitle" type="text" required placeholder="e.g. Walk 3,000 Steps a Day"
-            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Daily Target Number</label>
-            <input id="modalGoalTarget" type="number" min="1" step="any" required placeholder="3000"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Unit</label>
-            <input id="modalGoalUnit" type="text" required placeholder="steps, km, mins..."
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Penalty Per Missed Day (₹)</label>
-            <input id="modalGoalPenalty" type="number" min="1" required placeholder="100"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Challenge Start Date</label>
-            <input id="modalStartDate" type="date" required
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          </div>
-        </div>
-
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeGoalModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">
-            Cancel
+          <button id="themeToggleBtn" type="button" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/25 text-xs font-bold border border-[var(--border-subtle)] hover:border-[#C8F904] transition">
+            <span>☀️</span>
+            <div class="w-8 h-4 rounded-full bg-neutral-700 relative flex items-center p-0.5">
+              <div id="themeToggleKnob" class="w-3 h-3 rounded-full bg-[#FCE354] translate-x-4 transition-transform"></div>
+            </div>
+            <span>🌙</span>
           </button>
-          <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white shadow-sm">
-            Save Goal Changes
+        </div>
+
+        <!-- Sound SFX Switch -->
+        <div class="bento-surface rounded-2xl p-3.5 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-extrabold">Arena Sound Effects</div>
+            <div class="text-[11px] text-[var(--text-muted)]">Synth chimes on goal completion</div>
+          </div>
+          <button id="soundToggleBtn" type="button" class="px-3.5 py-1.5 rounded-xl bg-black/25 text-xs font-extrabold border border-[var(--border-subtle)] hover:border-[#C8F904] transition">
+            🔊 Sound On
           </button>
         </div>
-      </form>
+      </div>
+
+      <!-- MASTER SETTINGS GATE (PASSWORD PROTECTED POPUP LAUNCHER) -->
+      <div class="p-4 rounded-2xl bento-surface space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-sm">🛡️</span>
+            <span class="text-xs font-extrabold">Master Settings</span>
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-black/30 text-[#FCE354]">🔒 Password Required</span>
+        </div>
+        <p class="text-[11px] text-[var(--text-muted)] leading-relaxed">
+          Unlock the Master Settings console to delete users, clear individual user progress, or reset all progress.
+        </p>
+
+        <form id="unlockMasterSettingsForm" class="space-y-2.5">
+          <div class="flex gap-2">
+            <input id="masterSettingsPasswordInput" type="password" required placeholder="Enter master password..."
+              class="flex-1 px-3.5 py-2.5 rounded-xl bg-black/30 border border-[var(--border-subtle)] text-xs font-mono font-bold focus:outline-none focus:border-[#C8F904]" />
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-[#FCE354] hover:opacity-95 text-[#0B0C0E] font-extrabold text-xs transition whitespace-nowrap">
+              Unlock →
+            </button>
+          </div>
+          <div id="masterAuthError" class="hidden text-xs font-bold text-red-400"></div>
+        </form>
+      </div>
     </div>
   </div>
 
+  <!-- ==================== MODAL 1B: MASTER SETTINGS POPUP (UNLOCKED WITH ObiWan@18) ==================== -->
+  <div id="masterSettingsModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[60] hidden items-center justify-center p-4">
+    <div class="bento-card rounded-3xl max-w-2xl w-full p-6 shadow-2xl flex flex-col max-h-[88vh] border border-[#FCE354]/30">
+      <!-- Top Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-[var(--border-subtle)] shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-[#FCE354] text-[#0B0C0E] flex items-center justify-center text-base font-extrabold shadow-sm">
+            🛡️
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base sm:text-lg font-extrabold">Master Settings</h3>
+              <span class="text-[10px] font-mono font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
+                Unlocked
+              </span>
+            </div>
+            <p class="text-[11px] text-[var(--text-muted)]">Manage users, wipe individual logs, or reset all server progress</p>
+          </div>
+        </div>
+        <button onclick="closeMasterSettingsModal()" class="w-8 h-8 rounded-full bento-surface flex items-center justify-center text-lg font-bold hover:border-[#FCE354]">&times;</button>
+      </div>
 
-  <!-- ==================== MODAL: EDIT SPECIFIC DAY RECORD ==================== -->
-  <div id="editDayModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 max-w-sm w-full p-6 shadow-xl">
+      <!-- Status Feedback Banner -->
+      <div id="masterConsoleBanner" class="hidden mt-4 p-3 rounded-xl text-xs font-bold border shrink-0"></div>
+
+      <!-- Scrollable Content -->
+      <div class="flex-1 overflow-y-auto py-4 space-y-5 pr-1">
+
+        <!-- SECTION 1: MANAGE USERS & INDIVIDUAL PROGRESS -->
+        <div>
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="text-[11px] font-mono font-extrabold uppercase tracking-wider text-[var(--text-muted)]">
+              Registered Users (<span id="masterUsersCount">0</span>)
+            </span>
+            <span class="text-[11px] text-[var(--text-muted)]">Click an action twice to confirm</span>
+          </div>
+
+          <div id="masterUsersListContainer" class="space-y-2">
+            <!-- Populated dynamically by renderMasterSettingsList() -->
+          </div>
+        </div>
+
+        <!-- SECTION 2: GLOBAL DANGER ZONE (RESET ALL PROGRESS) -->
+        <div class="p-4 sm:p-5 rounded-2xl border border-red-500/35 bg-red-500/5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono font-extrabold uppercase tracking-widest text-red-400">
+              ⚠️ Global Master Reset
+            </span>
+            <span class="text-[10px] font-mono text-[var(--text-muted)]">Affects All Challenges</span>
+          </div>
+          <p class="text-xs text-[var(--text-muted)] leading-relaxed">
+            Wipes all logged daily progress for every user across the entire server and resets all challenge start dates to today (<span id="masterResetTodayLabel" class="font-mono text-[var(--text-main)]"></span>). User accounts remain intact.
+          </p>
+          <button type="button" id="globalResetAllBtn" onclick="handleGlobalMasterReset()"
+            class="w-full py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-extrabold text-xs transition shadow-sm">
+            ⚠️ Reset All Users' Progress & Restart Today
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="pt-3 border-t border-[var(--border-subtle)] flex items-center justify-between shrink-0">
+        <button onclick="backToAppSettingsFromMaster()" class="px-4 py-2 rounded-xl bento-surface text-xs font-bold hover:border-[#C8F904] transition">
+          ← Back to App Settings
+        </button>
+        <button onclick="closeMasterSettingsModal()" class="px-5 py-2 rounded-xl bg-[#C8F904] text-[#0B0C0E] text-xs font-extrabold transition">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: EXPANDED 1V1 HEAD-TO-HEAD BREAKDOWN ==================== -->
+  <div id="vsModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bento-card rounded-3xl max-w-lg w-full p-6 shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-[#C8F904]">Detailed Breakdown</span>
+          <h3 class="text-lg font-extrabold">1v1 Arena Comparison</h3>
+        </div>
+        <button onclick="closeVsModal()" class="w-8 h-8 rounded-full bento-surface flex items-center justify-center text-lg font-bold">&times;</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-5">
+        <!-- You Column -->
+        <div class="bento-surface rounded-2xl p-4 space-y-2.5 border-t-4 border-t-[#C8F904]">
+          <div class="flex items-center justify-between">
+            <div id="modalMyName" class="font-extrabold text-sm truncate">You</div>
+            <span id="modalMyRankBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-black/30 text-[#FCE354]">🥉 Rookie I</span>
+          </div>
+          <div id="modalMyNetPts" class="text-2xl font-extrabold font-mono text-[#C8F904]">0 PTS</div>
+          <div class="text-[11px] font-mono space-y-1 text-[var(--text-muted)] pt-2 border-t border-[var(--border-subtle)]">
+            <div class="flex justify-between"><span>Earned:</span><span id="modalMyEarned" class="text-emerald-400 font-bold">+0</span></div>
+            <div class="flex justify-between"><span>Penalties:</span><span id="modalMyLost" class="text-red-400 font-bold">-0</span></div>
+            <div class="flex justify-between"><span>Hit Days:</span><span id="modalMyHit" class="font-bold text-[var(--text-main)]">0</span></div>
+            <div class="flex justify-between"><span>Missed Days:</span><span id="modalMyMissed" class="font-bold text-[var(--text-main)]">0</span></div>
+            <div class="flex justify-between"><span>Best Streak:</span><span id="modalMyBestStreak" class="font-bold text-[#FCE354]">0d</span></div>
+            <div class="flex justify-between"><span>Badges:</span><span id="modalMyBadgesCount" class="font-bold text-[#C8F904]">0 / 8</span></div>
+          </div>
+        </div>
+
+        <!-- Opponent Column -->
+        <div class="bento-surface rounded-2xl p-4 space-y-2.5 border-t-4 border-t-[#6C8CFF]">
+          <div class="flex items-center justify-between">
+            <div id="modalPartnerName" class="font-extrabold text-sm truncate">Opponent</div>
+            <span id="modalPartnerRankBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-black/30 text-[#6C8CFF]">🥉 Rookie I</span>
+          </div>
+          <div id="modalPartnerNetPts" class="text-2xl font-extrabold font-mono text-[#6C8CFF]">0 PTS</div>
+          <div class="text-[11px] font-mono space-y-1 text-[var(--text-muted)] pt-2 border-t border-[var(--border-subtle)]">
+            <div class="flex justify-between"><span>Earned:</span><span id="modalPartnerEarned" class="text-emerald-400 font-bold">+0</span></div>
+            <div class="flex justify-between"><span>Penalties:</span><span id="modalPartnerLost" class="text-red-400 font-bold">-0</span></div>
+            <div class="flex justify-between"><span>Hit Days:</span><span id="modalPartnerHit" class="font-bold text-[var(--text-main)]">0</span></div>
+            <div class="flex justify-between"><span>Missed Days:</span><span id="modalPartnerMissed" class="font-bold text-[var(--text-main)]">0</span></div>
+            <div class="flex justify-between"><span>Best Streak:</span><span id="modalPartnerBestStreak" class="font-bold text-[#FCE354]">0d</span></div>
+            <div class="flex justify-between"><span>Badges:</span><span id="modalPartnerBadgesCount" class="font-bold text-[#6C8CFF]">0 / 8</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5">
+        <button onclick="closeVsModal(); viewOpponentAchievements();" class="py-2.5 rounded-xl bg-[#6C8CFF] text-[#0B0C0E] font-extrabold text-xs">
+          🏅 View Opponent's Badges
+        </button>
+        <button onclick="closeVsModal()" class="py-2.5 rounded-xl bento-surface font-extrabold text-xs">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: EDIT SPECIFIC DAY RECORD ==================== -->
+  <div id="editDayModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bento-card rounded-3xl max-w-sm w-full p-6 shadow-2xl">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="text-base font-extrabold text-slate-900">Update Day Progress</h3>
-          <p id="editDayDateSubtitle" class="text-xs text-slate-500"></p>
+          <h3 class="text-base font-extrabold">Edit Day Log</h3>
+          <p id="editDayDateSubtitle" class="text-xs font-mono text-[var(--text-muted)]"></p>
         </div>
-        <button onclick="closeEditDayModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        <button onclick="closeEditDayModal()" class="w-8 h-8 rounded-full bento-surface flex items-center justify-center text-lg font-bold">&times;</button>
       </div>
 
       <form id="editDayForm" class="space-y-4">
         <input type="hidden" id="editDayIsoInput" />
         <div>
-          <label id="editDayMyLabel" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Your Logged Progress</label>
+          <label id="editDayMyLabel" class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Your Progress</label>
           <input id="editDayMyValue" type="number" min="0" step="any" required
-            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            class="w-full px-3.5 py-2.5 rounded-xl bento-surface text-sm font-mono font-bold focus:outline-none focus:border-[#C8F904]" />
         </div>
 
         <div id="editDayPartnerContainer">
-          <label id="editDayPartnerLabel" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Partner's Logged Progress</label>
+          <label id="editDayPartnerLabel" class="block text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Opponent's Progress</label>
           <input id="editDayPartnerValue" type="number" min="0" step="any"
-            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            class="w-full px-3.5 py-2.5 rounded-xl bento-surface text-sm font-mono font-bold focus:outline-none focus:border-[#C8F904]" />
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-2">
-          <button type="button" onclick="closeEditDayModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">
+          <button type="button" onclick="closeEditDayModal()" class="px-4 py-2 rounded-xl bento-surface text-xs font-bold">
             Cancel
           </button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white">
-            Save Day
+          <button type="submit" class="px-5 py-2 rounded-xl bg-[#C8F904] text-[#0B0C0E] text-xs font-extrabold">
+            Save Log
           </button>
         </div>
       </form>
     </div>
   </div>
 
-
-  <!-- ==================== FIREBASE & APP LOGIC ==================== -->
+  <!-- ==================== FIREBASE & APPLICATION LOGIC ==================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -498,12 +1123,14 @@
       doc,
       setDoc,
       getDoc,
+      getDocs,
       updateDoc,
+      deleteDoc,
       onSnapshot
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // =========================================================================
-    // YOUR HARDCODED FIREBASE CONFIG (pacto-e939f)
+    // HARDCODED FIREBASE CONFIG (pacto-e939f)
     // =========================================================================
     const firebaseConfig = {
       apiKey: "AIzaSyBUKEBoyxtF5k9t2llCg2WiDZxacCkqPuY",
@@ -520,16 +1147,499 @@
     const db = getFirestore(app);
 
     // State
-    let allUsersMap = {};          // username -> userDoc
-    let currentUser = null;        // logged-in user object
-    let currentPact = null;        // active shared challenge document
-    let unsubscribePact = null;    // real-time listener for current pact
-    let tableFilter = 'active';    // 'active' | '7days' | 'month'
+    let allUsersMap = {};
+    let currentUser = null;
+    let currentPact = null;
+    let unsubscribePact = null;
+    let tableFilter = 'active';
+    let activeMainTab = 'overview';
+    let achievementSubPlayer = 'me'; // 'me' | 'partner'
+    let soundEnabled = localStorage.getItem('pacto_sound_v2') !== 'off';
+    let confirmActionState = {}; // holds 2-step confirmation keys for Master Settings
 
     const SESSION_KEY = 'pacto_logged_in_user_v1';
+    const THEME_KEY = 'pacto_theme_mode_v2';
 
     // =========================================================================
-    // DATE HELPERS (Local Timezone YYYY-MM-DD)
+    // ARENA LEAGUES & BADGE DEFINITIONS
+    // =========================================================================
+    const ARENA_LEAGUES = [
+      { name: "Rookie I", minPts: 0, icon: "🥉" },
+      { name: "Contender II", minPts: 3000, icon: "🥈" },
+      { name: "Vanguard III", minPts: 7000, icon: "🥇" },
+      { name: "Champion IV", minPts: 15000, icon: "💎" },
+      { name: "Obsidian V", minPts: 30000, icon: "👑" }
+    ];
+
+    const ARENA_BADGES = [
+      { id: "first_blood", name: "First Blood", desc: "Complete your first daily goal", icon: "⚡", target: 1, getVal: s => s.completedDays },
+      { id: "streak_3", name: "On Fire", desc: "Reach a 3-day streak", icon: "🔥", target: 3, getVal: s => s.bestStreak },
+      { id: "streak_7", name: "Unstoppable", desc: "Reach a 7-day streak", icon: "🚀", target: 7, getVal: s => s.bestStreak },
+      { id: "overdrive", name: "Overdrive", desc: "Log 150%+ of daily target in one day", icon: "💥", target: 150, getVal: s => Math.round(s.maxRatio * 100) },
+      { id: "pts_5k", name: "High Roller", desc: "Earn 5,000+ gross PTS", icon: "💰", target: 5000, getVal: s => s.earnedPts },
+      { id: "pts_15k", name: "Point Tycoon", desc: "Earn 15,000+ gross PTS", icon: "👑", target: 15000, getVal: s => s.earnedPts },
+      { id: "days_14", name: "Iron Discipline", desc: "Complete 14 total days", icon: "🛡️", target: 14, getVal: s => s.completedDays },
+      { id: "clean_week", name: "Untouchable", desc: "7+ completed days with 0 missed days", icon: "✨", target: 7, getVal: s => (s.missedDays === 0 ? s.completedDays : 0) }
+    ];
+
+    // =========================================================================
+    // THEME, SOUND & CELEBRATION ENGINE
+    // =========================================================================
+    function initThemeAndSound() {
+      const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+      setTheme(savedTheme);
+      updateSoundUI();
+    }
+
+    function setTheme(mode) {
+      const htmlEl = document.documentElement;
+      const knob = document.getElementById('themeToggleKnob');
+      const subtext = document.getElementById('settingsThemeSubtext');
+      if (mode === 'light') {
+        htmlEl.classList.remove('dark');
+        if (knob) knob.className = "w-3 h-3 rounded-full bg-white translate-x-0 transition-transform";
+        if (subtext) subtext.textContent = "Crisp Daylight Mode";
+        localStorage.setItem(THEME_KEY, 'light');
+      } else {
+        htmlEl.classList.add('dark');
+        if (knob) knob.className = "w-3 h-3 rounded-full bg-[#FCE354] translate-x-4 transition-transform";
+        if (subtext) subtext.textContent = "Deep Carbon Dark Mode";
+        localStorage.setItem(THEME_KEY, 'dark');
+      }
+    }
+
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setTheme(isDark ? 'light' : 'dark');
+      playSfx('tap');
+    });
+
+    function updateSoundUI() {
+      const btn = document.getElementById('soundToggleBtn');
+      if (btn) {
+        btn.textContent = soundEnabled ? '🔊 Sound On' : '🔇 Sound Muted';
+      }
+    }
+
+    document.getElementById('soundToggleBtn').addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      localStorage.setItem('pacto_sound_v2', soundEnabled ? 'on' : 'off');
+      updateSoundUI();
+      if (soundEnabled) playSfx('tap');
+    });
+
+    function playSfx(type) {
+      if (!soundEnabled) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+
+        if (type === 'tap') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(540, now);
+          osc.frequency.exponentialRampToValueAtTime(780, now + 0.06);
+          gain.gain.setValueAtTime(0.07, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.06);
+        } else if (type === 'win') {
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.075);
+            gain.gain.setValueAtTime(0.11, now + i * 0.075);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.075 + 0.24);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.075);
+            osc.stop(now + i * 0.075 + 0.24);
+          });
+        }
+      } catch (e) {}
+    }
+
+    function triggerCelebration() {
+      playSfx('win');
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 65,
+          spread: 70,
+          origin: { y: 0.65 },
+          colors: ['#C8F904', '#FCE354', '#6C8CFF', '#FFFFFF']
+        });
+      }
+    }
+
+    // =========================================================================
+    // APP SETTINGS MODAL & MASTER SETTINGS POPUP ("ObiWan@18")
+    // =========================================================================
+    window.openSettingsModal = function() {
+      document.getElementById('masterSettingsPasswordInput').value = '';
+      document.getElementById('masterAuthError').classList.add('hidden');
+      const modal = document.getElementById('settingsModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    window.closeSettingsModal = function() {
+      const modal = document.getElementById('settingsModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    // Unlock Master Settings Popup when "ObiWan@18" is entered
+    document.getElementById('unlockMasterSettingsForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pwd = document.getElementById('masterSettingsPasswordInput').value;
+      const errEl = document.getElementById('masterAuthError');
+
+      if (pwd !== 'ObiWan@18') {
+        errEl.textContent = "✗ Incorrect master password. Access denied.";
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      playSfx('tap');
+      document.getElementById('masterSettingsPasswordInput').value = '';
+      errEl.classList.add('hidden');
+      closeSettingsModal();
+      openMasterSettingsModal();
+    });
+
+    window.openMasterSettingsModal = function() {
+      confirmActionState = {};
+      document.getElementById('masterConsoleBanner').classList.add('hidden');
+      document.getElementById('masterResetTodayLabel').textContent = getTodayISO();
+      renderMasterSettingsList();
+      const modal = document.getElementById('masterSettingsModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    };
+
+    window.closeMasterSettingsModal = function() {
+      const modal = document.getElementById('masterSettingsModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.backToAppSettingsFromMaster = function() {
+      closeMasterSettingsModal();
+      openSettingsModal();
+    };
+
+    function showMasterBanner(msg, isSuccess = true) {
+      const banner = document.getElementById('masterConsoleBanner');
+      banner.classList.remove('hidden');
+      banner.className = isSuccess
+        ? "mt-4 p-3 rounded-xl text-xs font-bold border bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shrink-0"
+        : "mt-4 p-3 rounded-xl text-xs font-bold border bg-red-500/10 border-red-500/30 text-red-400 shrink-0";
+      banner.textContent = msg;
+    }
+
+    // Render list of all users inside Master Settings popup
+    function renderMasterSettingsList() {
+      const container = document.getElementById('masterUsersListContainer');
+      const countEl = document.getElementById('masterUsersCount');
+      if (!container) return;
+
+      const users = Object.values(allUsersMap).sort((a, b) => (a.username || '').localeCompare(b.username || ''));
+      if (countEl) countEl.textContent = users.length;
+
+      if (users.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 rounded-2xl bento-surface text-center text-xs text-[var(--text-muted)]">
+            No registered user accounts on the server.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = users.map(u => {
+        const uname = u.username;
+        const dName = u.displayName || uname;
+        const isMe = currentUser && currentUser.username === uname;
+        const partnerInfo = u.friendUsername ? `Paired with @${u.friendUsername}` : 'Solo (Unpaired)';
+
+        const clearKey = `clear__${uname}`;
+        const deleteKey = `delete__${uname}`;
+        const isConfirmingClear = !!confirmActionState[clearKey];
+        const isConfirmingDelete = !!confirmActionState[deleteKey];
+
+        return `
+          <div class="p-3.5 rounded-2xl bento-surface flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-9 h-9 rounded-xl ${isMe ? 'bg-[#C8F904] text-[#0B0C0E]' : 'bg-[#6C8CFF] text-[#0B0C0E]'} font-extrabold text-xs flex items-center justify-center shrink-0">
+                ${dName[0].toUpperCase()}
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-extrabold text-xs sm:text-sm truncate">${dName}</span>
+                  <span class="text-[11px] font-mono text-[var(--text-muted)]">@${uname}</span>
+                  ${isMe ? '<span class="text-[9px] font-mono font-extrabold uppercase px-1.5 py-0.5 rounded bg-[#C8F904]/20 text-[#C8F904]">You</span>' : ''}
+                </div>
+                <div class="text-[11px] text-[var(--text-muted)] font-mono truncate">${partnerInfo}</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <button type="button" onclick="handleClearUserProgress('${uname}')"
+                class="px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition ${
+                  isConfirmingClear
+                    ? 'bg-[#FCE354] text-[#0B0C0E] shadow-sm'
+                    : 'bg-black/25 hover:border-[#FCE354] border border-[var(--border-subtle)] text-[#FCE354]'
+                }">
+                ${isConfirmingClear ? '✓ Confirm Reset?' : '🧹 Reset Progress'}
+              </button>
+
+              <button type="button" onclick="handleDeleteUserAccount('${uname}')"
+                class="px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition ${
+                  isConfirmingDelete
+                    ? 'bg-red-500 text-white shadow-sm'
+                    : 'bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400'
+                }">
+                ${isConfirmingDelete ? '✓ Confirm Delete?' : '🗑️ Delete User'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Also update Global Reset button state
+      const globalBtn = document.getElementById('globalResetAllBtn');
+      if (globalBtn) {
+        if (confirmActionState['global_reset']) {
+          globalBtn.textContent = "✓ Click Again to Confirm Global Wipe of All Users";
+          globalBtn.className = "w-full py-3 rounded-xl bg-[#FCE354] text-[#0B0C0E] font-extrabold text-xs transition shadow-md";
+        } else {
+          globalBtn.textContent = "⚠️ Reset All Users' Progress & Restart Today";
+          globalBtn.className = "w-full py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-extrabold text-xs transition shadow-sm";
+        }
+      }
+    }
+
+    // 1. Clear an individual user's progress across all challenges
+    window.handleClearUserProgress = async function(username) {
+      const key = `clear__${username}`;
+      if (!confirmActionState[key]) {
+        confirmActionState = { [key]: true };
+        renderMasterSettingsList();
+        return;
+      }
+
+      confirmActionState = {};
+      renderMasterSettingsList();
+      showMasterBanner(`Scrubbing logged progress for @${username}...`, true);
+
+      try {
+        const challengesSnap = await getDocs(collection(db, 'pacto_challenges'));
+        const promises = [];
+
+        challengesSnap.forEach((docSnap) => {
+          const data = docSnap.data();
+          const logs = data.logs || {};
+          let modified = false;
+          const nextLogs = {};
+
+          Object.keys(logs).forEach(dateISO => {
+            const dayEntry = { ...(logs[dateISO] || {}) };
+            if (dayEntry[username] !== undefined) {
+              delete dayEntry[username];
+              modified = true;
+            }
+            if (Object.keys(dayEntry).length > 0) {
+              nextLogs[dateISO] = dayEntry;
+            }
+          });
+
+          if (modified) {
+            promises.push(
+              updateDoc(doc(db, 'pacto_challenges', docSnap.id), {
+                logs: nextLogs,
+                updatedAt: Date.now()
+              })
+            );
+          }
+        });
+
+        await Promise.all(promises);
+        playSfx('win');
+        showMasterBanner(`✓ Cleared all logged progress for @${username}.`, true);
+      } catch (err) {
+        showMasterBanner(`Error clearing @${username}'s progress: ` + err.message, false);
+      }
+    };
+
+    // 2. Delete an individual user account + unlink partner + scrub logs
+    window.handleDeleteUserAccount = async function(username) {
+      const key = `delete__${username}`;
+      if (!confirmActionState[key]) {
+        confirmActionState = { [key]: true };
+        renderMasterSettingsList();
+        return;
+      }
+
+      confirmActionState = {};
+      renderMasterSettingsList();
+      showMasterBanner(`Deleting user @${username} and unlinking challenges...`, true);
+
+      try {
+        const promises = [];
+
+        // A. Scrub user's logs from all challenges
+        const challengesSnap = await getDocs(collection(db, 'pacto_challenges'));
+        challengesSnap.forEach((docSnap) => {
+          const data = docSnap.data();
+          const logs = data.logs || {};
+          let modified = false;
+          const nextLogs = {};
+
+          Object.keys(logs).forEach(dateISO => {
+            const dayEntry = { ...(logs[dateISO] || {}) };
+            if (dayEntry[username] !== undefined) {
+              delete dayEntry[username];
+              modified = true;
+            }
+            if (Object.keys(dayEntry).length > 0) {
+              nextLogs[dateISO] = dayEntry;
+            }
+          });
+
+          if (modified) {
+            promises.push(
+              updateDoc(doc(db, 'pacto_challenges', docSnap.id), {
+                logs: nextLogs,
+                updatedAt: Date.now()
+              })
+            );
+          }
+        });
+
+        // B. Unlink any other user who had this user as friendUsername
+        Object.values(allUsersMap).forEach(otherUser => {
+          if (otherUser.username !== username && otherUser.friendUsername === username) {
+            const soloPactId = getPairPactId(otherUser.username, "");
+            promises.push(
+              updateDoc(doc(db, 'pacto_users', otherUser.username), {
+                friendUsername: null,
+                pactId: soloPactId
+              })
+            );
+          }
+        });
+
+        // C. Delete user document from pacto_users
+        promises.push(deleteDoc(doc(db, 'pacto_users', username)));
+
+        await Promise.all(promises);
+        playSfx('win');
+        showMasterBanner(`✓ Deleted user @${username} and cleaned up their records.`, true);
+
+        // If the admin deleted the currently logged-in account, log out cleanly
+        if (currentUser && currentUser.username === username) {
+          closeMasterSettingsModal();
+          performLogout();
+        }
+      } catch (err) {
+        showMasterBanner(`Error deleting @${username}: ` + err.message, false);
+      }
+    };
+
+    // 3. Global Master Reset (wipes all users' progress & restarts from today)
+    window.handleGlobalMasterReset = async function() {
+      if (!confirmActionState['global_reset']) {
+        confirmActionState = { global_reset: true };
+        renderMasterSettingsList();
+        return;
+      }
+
+      confirmActionState = {};
+      renderMasterSettingsList();
+      showMasterBanner("Wiping all challenge logs across the entire server...", true);
+
+      try {
+        const todayISO = getTodayISO();
+        const challengesSnap = await getDocs(collection(db, 'pacto_challenges'));
+        const promises = [];
+
+        challengesSnap.forEach((docSnap) => {
+          promises.push(
+            updateDoc(doc(db, 'pacto_challenges', docSnap.id), {
+              logs: {},
+              startDate: todayISO,
+              updatedAt: Date.now()
+            })
+          );
+        });
+
+        await Promise.all(promises);
+        playSfx('win');
+        showMasterBanner(`✓ Global Master Reset Complete! All users restarted from ${todayISO}.`, true);
+      } catch (err) {
+        showMasterBanner("Error resetting database: " + err.message, false);
+      }
+    };
+
+    // =========================================================================
+    // NAVIGATION TABS (OVERVIEW / HISTORY / ACHIEVEMENTS / SETTINGS)
+    // =========================================================================
+    const TAB_META = {
+      overview: { title: "Overview", subtitle: "Today's 1v1 progress & momentum" },
+      history: { title: "Daily Ledger", subtitle: "Complete day-by-day record & point history" },
+      achievements: { title: "Achievements & Leagues", subtitle: "Inspect your or your opponent's rank & badges" },
+      settings: { title: "Goal & Partner", subtitle: "Configure daily stakes and 1v1 opponent" }
+    };
+
+    window.switchMainTab = function(tabName) {
+      activeMainTab = tabName;
+      playSfx('tap');
+
+      ['overview', 'history', 'achievements', 'settings'].forEach(t => {
+        const panel = document.getElementById(`tabPanel-${t}`);
+        if (panel) panel.classList.toggle('hidden', t !== tabName);
+
+        const deskBtn = document.getElementById(`navBtn-${t}`);
+        if (deskBtn) {
+          if (t === tabName) {
+            deskBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-extrabold bg-[#C8F904] text-[#0B0C0E] shadow-sm transition";
+          } else {
+            deskBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 transition";
+          }
+        }
+
+        const mobBtn = document.getElementById(`mobNav-${t}`);
+        if (mobBtn) {
+          mobBtn.className = t === tabName
+            ? "flex flex-col items-center justify-center gap-0.5 text-[11px] font-extrabold text-[#C8F904]"
+            : "flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold text-[var(--text-muted)]";
+        }
+      });
+
+      const meta = TAB_META[tabName] || TAB_META.overview;
+      document.getElementById('topBarTitle').textContent = meta.title;
+      document.getElementById('topBarSubtitle').textContent = meta.subtitle;
+    };
+
+    window.switchAchievementPlayer = function(who) {
+      achievementSubPlayer = who;
+      playSfx('tap');
+      renderDashboard();
+    };
+
+    window.viewOpponentAchievements = function() {
+      achievementSubPlayer = 'partner';
+      switchMainTab('achievements');
+      renderDashboard();
+    };
+
+    // =========================================================================
+    // DATE & STREAK HELPERS
     // =========================================================================
     function getTodayISO() {
       const now = new Date();
@@ -567,31 +1677,118 @@
         goalTitle: "Walk 3,000 Steps a Day",
         goalTarget: 3000,
         goalUnit: "steps",
-        penaltyAmount: 100,
+        penaltyAmount: 1000,
         startDate: getTodayISO(),
         logs: {},
         updatedAt: Date.now()
       };
     }
 
-    // =========================================================================
-    // INITIALIZE CLOUD CONNECTION & USERS LISTENER
-    // =========================================================================
-    async function initCloud() {
-      // Attempt anonymous auth quietly (in case rules check request.auth != null)
-      try {
-        await signInAnonymously(auth);
-      } catch (err) {
-        console.warn("Anonymous auth note (optional if rules are open):", err.message);
+    function computeUserFullStats(username, logs, target, stakePts, activeDates, todayISO) {
+      if (!username) {
+        return {
+          completedDays: 0,
+          missedDays: 0,
+          earnedPts: 0,
+          lostPts: 0,
+          netPts: 0,
+          currentStreak: 0,
+          bestStreak: 0,
+          maxRatio: 0,
+          todayVal: 0,
+          rankIdx: 0,
+          rankObj: ARENA_LEAGUES[0],
+          unlockedCount: 0
+        };
       }
 
-      // Listen to all users in real time
+      let completedDays = 0;
+      let missedDays = 0;
+      let bestStreak = 0;
+      let runningStreak = 0;
+      let maxRatio = 0;
+
+      activeDates.forEach(dISO => {
+        const isPastDay = dISO < todayISO;
+        const val = logs?.[dISO]?.[username]?.value ?? 0;
+        if (target > 0) {
+          maxRatio = Math.max(maxRatio, val / target);
+        }
+
+        if (val >= target) {
+          completedDays++;
+          runningStreak++;
+          if (runningStreak > bestStreak) bestStreak = runningStreak;
+        } else if (isPastDay) {
+          missedDays++;
+          runningStreak = 0;
+        }
+      });
+
+      let currentStreak = 0;
+      for (let i = activeDates.length - 1; i >= 0; i--) {
+        const dISO = activeDates[i];
+        const val = logs?.[dISO]?.[username]?.value ?? 0;
+        if (dISO === todayISO) {
+          if (val >= target) currentStreak++;
+        } else {
+          if (val >= target) currentStreak++;
+          else break;
+        }
+      }
+
+      const earnedPts = completedDays * stakePts;
+      const lostPts = missedDays * stakePts;
+      const netPts = earnedPts - lostPts;
+      const todayVal = logs?.[todayISO]?.[username]?.value ?? 0;
+
+      let rankIdx = 0;
+      for (let i = ARENA_LEAGUES.length - 1; i >= 0; i--) {
+        if (earnedPts >= ARENA_LEAGUES[i].minPts) {
+          rankIdx = i;
+          break;
+        }
+      }
+
+      const statsObj = {
+        completedDays,
+        missedDays,
+        earnedPts,
+        lostPts,
+        netPts,
+        currentStreak,
+        bestStreak,
+        maxRatio,
+        todayVal,
+        rankIdx,
+        rankObj: ARENA_LEAGUES[rankIdx]
+      };
+
+      let unlockedCount = 0;
+      ARENA_BADGES.forEach(b => {
+        if (b.getVal(statsObj) >= b.target) unlockedCount++;
+      });
+      statsObj.unlockedCount = unlockedCount;
+
+      return statsObj;
+    }
+
+    // =========================================================================
+    // INITIALIZE FIREBASE CLOUD & REAL-TIME LISTENERS
+    // =========================================================================
+    async function initCloud() {
+      initThemeAndSound();
+
+      try {
+        await signInAnonymously(auth);
+      } catch (err) {}
+
       const usersCol = collection(db, 'pacto_users');
       onSnapshot(
         usersCol,
         (snapshot) => {
-          setSyncStatus(true, "Live Sync • pacto-e939f");
-          document.getElementById('dbErrorBanner').classList.add('hidden');
+          const dot = document.getElementById('syncDot');
+          if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-[#4ADE80]";
 
           const nextMap = {};
           snapshot.forEach((docSnap) => {
@@ -600,8 +1797,8 @@
           allUsersMap = nextMap;
 
           renderCloudUsersDirectory();
+          renderMasterSettingsList();
 
-          // Restore session or refresh current user if logged in
           const savedUsername = localStorage.getItem(SESSION_KEY);
           if (savedUsername && allUsersMap[savedUsername]) {
             const freshUser = allUsersMap[savedUsername];
@@ -620,30 +1817,12 @@
         },
         (error) => {
           console.error("Firestore Listener Error:", error);
-          setSyncStatus(false, "Database Permission / Setup Needed");
-          const banner = document.getElementById('dbErrorBanner');
-          const errText = document.getElementById('dbErrorText');
-          banner.classList.remove('hidden');
-          errText.innerHTML = `Firestore error (<code>${error.code}</code>). Make sure you clicked <strong>Create database</strong> under Firestore Database and published Rules: <code>allow read, write: if true;</code>`;
+          const dot = document.getElementById('syncDot');
+          if (dot) dot.className = "w-2.5 h-2.5 rounded-full bg-red-500";
         }
       );
     }
 
-    function setSyncStatus(isConnected, message) {
-      const dot = document.getElementById('syncDot');
-      const text = document.getElementById('syncText');
-      if (isConnected) {
-        dot.className = "w-2 h-2 rounded-full bg-emerald-500";
-        text.textContent = message;
-      } else {
-        dot.className = "w-2 h-2 rounded-full bg-red-500";
-        text.textContent = message;
-      }
-    }
-
-    // =========================================================================
-    // SUBSCRIBE TO ACTIVE 1v1 PACT DOCUMENT IN REAL TIME
-    // =========================================================================
     function subscribeToPact(pactId) {
       if (unsubscribePact) {
         unsubscribePact();
@@ -656,7 +1835,6 @@
           currentPact = docSnap.data();
           renderDashboard();
         } else if (currentUser) {
-          // Create default pact document in cloud
           const members = currentUser.friendUsername
             ? [currentUser.username, currentUser.friendUsername].sort()
             : [currentUser.username];
@@ -667,70 +1845,49 @@
     }
 
     // =========================================================================
-    // AUTHENTICATION: SIGN UP & LOG IN
+    // AUTHENTICATION: LOGIN / SIGNUP / LOGOUT
     // =========================================================================
     window.switchAuthTab = function(tab) {
       const loginForm = document.getElementById('loginForm');
       const signupForm = document.getElementById('signupForm');
       const tabLoginBtn = document.getElementById('tabLoginBtn');
       const tabSignupBtn = document.getElementById('tabSignupBtn');
-      hideAuthAlert();
+      document.getElementById('authAlert').classList.add('hidden');
 
       if (tab === 'login') {
         loginForm.classList.remove('hidden');
         signupForm.classList.add('hidden');
-        tabLoginBtn.className = "py-2.5 text-sm font-bold rounded-xl bg-white text-slate-900 shadow-sm transition";
-        tabSignupBtn.className = "py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-800 transition";
+        tabLoginBtn.className = "py-2.5 text-xs font-extrabold rounded-xl bg-[#C8F904] text-[#0B0C0E] transition";
+        tabSignupBtn.className = "py-2.5 text-xs font-extrabold rounded-xl text-[var(--text-muted)] transition";
       } else {
         signupForm.classList.remove('hidden');
         loginForm.classList.add('hidden');
-        tabSignupBtn.className = "py-2.5 text-sm font-bold rounded-xl bg-white text-slate-900 shadow-sm transition";
-        tabLoginBtn.className = "py-2.5 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-800 transition";
+        tabSignupBtn.className = "py-2.5 text-xs font-extrabold rounded-xl bg-[#C8F904] text-[#0B0C0E] transition";
+        tabLoginBtn.className = "py-2.5 text-xs font-extrabold rounded-xl text-[var(--text-muted)] transition";
       }
     };
 
-    function showAuthAlert(msg, isError = true) {
+    function showAuthAlert(msg) {
       const box = document.getElementById('authAlert');
       box.classList.remove('hidden');
-      if (isError) {
-        box.className = "mb-4 p-3 rounded-xl text-xs font-semibold border bg-red-50 border-red-200 text-red-700";
-      } else {
-        box.className = "mb-4 p-3 rounded-xl text-xs font-semibold border bg-emerald-50 border-emerald-200 text-emerald-700";
-      }
+      box.className = "mb-4 p-3 rounded-xl text-xs font-bold border bg-red-500/10 border-red-500/30 text-red-400";
       box.textContent = msg;
     }
 
-    function hideAuthAlert() {
-      document.getElementById('authAlert').classList.add('hidden');
-    }
-
-    // Handle Sign Up
     document.getElementById('signupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      hideAuthAlert();
-
       const displayName = document.getElementById('signupDisplayName').value.trim();
       const username = normalizeUsername(document.getElementById('signupUsername').value);
       const password = document.getElementById('signupPassword').value;
       let friendUsername = normalizeUsername(document.getElementById('signupFriendUsername').value);
 
-      if (!username) {
-        return showAuthAlert("Please enter a valid username (letters and numbers).");
-      }
-      if (friendUsername === username) {
-        friendUsername = "";
-      }
+      if (!username) return showAuthAlert("Please enter a valid username.");
+      if (friendUsername === username) friendUsername = "";
+      if (allUsersMap[username]) return showAuthAlert(`@${username} is already taken. Log in instead.`);
 
-      if (allUsersMap[username]) {
-        return showAuthAlert(`@${username} is already taken! Switch to the Log In tab.`);
-      }
-
-      // Check if someone else already listed this username as their friend
       if (!friendUsername) {
         const waitingPartner = Object.values(allUsersMap).find(u => u.friendUsername === username);
-        if (waitingPartner) {
-          friendUsername = waitingPartner.username;
-        }
+        if (waitingPartner) friendUsername = waitingPartner.username;
       }
 
       const pactId = getPairPactId(username, friendUsername);
@@ -744,10 +1901,7 @@
       };
 
       try {
-        // Save new user
         await setDoc(doc(db, 'pacto_users', username), newUserDoc);
-
-        // If friend already exists in cloud, link them back automatically
         if (friendUsername && allUsersMap[friendUsername]) {
           await updateDoc(doc(db, 'pacto_users', friendUsername), {
             friendUsername: username,
@@ -755,7 +1909,6 @@
           });
         }
 
-        // Ensure shared challenge doc exists
         const pactRef = doc(db, 'pacto_challenges', pactId);
         const pactSnap = await getDoc(pactRef);
         if (!pactSnap.exists()) {
@@ -772,21 +1925,14 @@
       }
     });
 
-    // Handle Log In
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      hideAuthAlert();
-
       const username = normalizeUsername(document.getElementById('loginUsername').value);
       const password = document.getElementById('loginPassword').value;
 
       const userDoc = allUsersMap[username];
-      if (!userDoc) {
-        return showAuthAlert(`Account @${username} not found. Click "Create Account" above!`);
-      }
-      if (userDoc.password !== password) {
-        return showAuthAlert("Incorrect password. Please try again.");
-      }
+      if (!userDoc) return showAuthAlert(`Account @${username} not found.`);
+      if (userDoc.password !== password) return showAuthAlert("Incorrect password.");
 
       localStorage.setItem(SESSION_KEY, username);
       currentUser = userDoc;
@@ -795,8 +1941,7 @@
       subscribeToPact(pactId);
     });
 
-    // Handle Log Out
-    document.getElementById('logoutBtn').addEventListener('click', () => {
+    function performLogout() {
       localStorage.removeItem(SESSION_KEY);
       currentUser = null;
       currentPact = null;
@@ -805,9 +1950,17 @@
         unsubscribePact = null;
       }
       document.getElementById('dashboardView').classList.add('hidden');
-      document.getElementById('navUserSection').classList.add('hidden');
+      document.getElementById('appSidebar').classList.add('hidden');
+      document.getElementById('appSidebar').classList.remove('lg:flex');
+      document.getElementById('mobileBottomNav').classList.add('hidden');
+      document.getElementById('mobileBottomNav').classList.remove('grid');
+      document.getElementById('topBarRight').classList.add('hidden');
       document.getElementById('authView').classList.remove('hidden');
-    });
+      document.getElementById('topBarTitle').textContent = "Overview";
+      document.getElementById('topBarSubtitle').textContent = "Sign in to access your 1v1 Arena";
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', performLogout);
 
     function renderCloudUsersDirectory() {
       const container = document.getElementById('cloudUsersList');
@@ -816,14 +1969,14 @@
       badge.textContent = `${users.length} ${users.length === 1 ? 'account' : 'accounts'}`;
 
       if (users.length === 0) {
-        container.innerHTML = `<span class="text-slate-400 italic">No accounts created yet. Create the first one!</span>`;
+        container.innerHTML = `<span class="text-[var(--text-muted)] italic text-xs">No players yet. Create the first account!</span>`;
         return;
       }
 
       container.innerHTML = users.map(u => `
         <button type="button" onclick="prefillLogin('${u.username}')"
-          class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200 font-semibold text-slate-700 transition">
-          ${u.displayName} <span class="text-slate-400">@${u.username}</span>
+          class="px-2.5 py-1.5 rounded-xl bento-surface hover:border-[#C8F904] font-bold text-xs transition">
+          ${u.displayName} <span class="text-[var(--text-muted)] font-mono">@${u.username}</span>
         </button>
       `).join('');
     }
@@ -837,15 +1990,28 @@
     function showDashboardView() {
       document.getElementById('authView').classList.add('hidden');
       document.getElementById('dashboardView').classList.remove('hidden');
-      const navUser = document.getElementById('navUserSection');
-      navUser.classList.remove('hidden');
-      navUser.classList.add('flex');
+
+      const sidebar = document.getElementById('appSidebar');
+      sidebar.classList.remove('hidden');
+      sidebar.classList.add('lg:flex');
+
+      const mobNav = document.getElementById('mobileBottomNav');
+      mobNav.classList.remove('hidden');
+      mobNav.classList.add('grid');
+
+      const topBarRight = document.getElementById('topBarRight');
+      topBarRight.classList.remove('hidden');
+      topBarRight.classList.add('flex');
+
       document.getElementById('navDisplayName').textContent = currentUser.displayName;
       document.getElementById('navUsername').textContent = `@${currentUser.username}`;
+      document.getElementById('sidebarAvatar').textContent = (currentUser.displayName || currentUser.username || 'U')[0].toUpperCase();
+
+      switchMainTab(activeMainTab);
     }
 
     // =========================================================================
-    // CONNECT / PAIR WITH FRIEND
+    // CONNECT OPPONENT & LOGGING ACTIONS
     // =========================================================================
     document.getElementById('friendConnectForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -853,14 +2019,13 @@
 
       const friendUsername = normalizeUsername(document.getElementById('friendUsernameInput').value);
       if (!friendUsername || friendUsername === currentUser.username) {
-        alert("Please enter your partner or friend's @username (not your own).");
+        alert("Please enter your opponent's @username.");
         return;
       }
 
       const newPactId = getPairPactId(currentUser.username, friendUsername);
       const oldLogs = currentPact?.logs || {};
 
-      // Check if target shared pact already exists
       const pactRef = doc(db, 'pacto_challenges', newPactId);
       const existingSnap = await getDoc(pactRef);
 
@@ -877,13 +2042,11 @@
         await setDoc(pactRef, basePact);
       }
 
-      // Update my user profile
       await updateDoc(doc(db, 'pacto_users', currentUser.username), {
         friendUsername,
         pactId: newPactId
       });
 
-      // If partner already created their account, link them to the exact same pactId
       if (allUsersMap[friendUsername]) {
         await updateDoc(doc(db, 'pacto_users', friendUsername), {
           friendUsername: currentUser.username,
@@ -893,14 +2056,14 @@
 
       document.getElementById('friendUsernameInput').value = '';
       subscribeToPact(newPactId);
+      switchMainTab('overview');
     });
 
-    // =========================================================================
-    // LOGGING TODAY'S PROGRESS & UPDATING GOALS
-    // =========================================================================
     async function saveUserProgressForDate(dateISO, username, numericValue) {
       if (!currentPact || !currentUser) return;
       const cleanVal = Math.max(0, Number(numericValue) || 0);
+      const target = Number(currentPact.goalTarget) || 3000;
+      const prevVal = currentPact.logs?.[dateISO]?.[username]?.value || 0;
 
       const updatedLogs = { ...(currentPact.logs || {}) };
       const dayEntry = { ...(updatedLogs[dateISO] || {}) };
@@ -910,6 +2073,12 @@
       };
       updatedLogs[dateISO] = dayEntry;
 
+      if (username === currentUser.username && prevVal < target && cleanVal >= target) {
+        triggerCelebration();
+      } else {
+        playSfx('tap');
+      }
+
       const pactRef = doc(db, 'pacto_challenges', currentPact.pactId);
       await updateDoc(pactRef, {
         logs: updatedLogs,
@@ -917,14 +2086,21 @@
       });
     }
 
-    // Form submit for today's progress
+    window.toggleCustomLogDrawer = function() {
+      const form = document.getElementById('todayLogForm');
+      form.classList.toggle('hidden');
+      if (!form.classList.contains('hidden')) {
+        document.getElementById('todayProgressInput').focus();
+      }
+    };
+
     document.getElementById('todayLogForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const val = Number(document.getElementById('todayProgressInput').value);
       await saveUserProgressForDate(getTodayISO(), currentUser.username, val);
+      document.getElementById('todayLogForm').classList.add('hidden');
     });
 
-    // Quick +500 / +1000 buttons
     window.quickAddToday = async function(delta) {
       if (!currentPact || !currentUser) return;
       const todayISO = getTodayISO();
@@ -934,7 +2110,6 @@
       await saveUserProgressForDate(todayISO, currentUser.username, nextVal);
     };
 
-    // Quick Mark Goal Done button
     window.quickCompleteToday = async function() {
       if (!currentPact || !currentUser) return;
       const todayISO = getTodayISO();
@@ -945,9 +2120,9 @@
       await saveUserProgressForDate(todayISO, currentUser.username, nextVal);
     };
 
-    // Quick bump goal target (+500 / +1000)
     window.bumpGoalTarget = async function(delta) {
       if (!currentPact) return;
+      playSfx('tap');
       const nextTarget = (Number(currentPact.goalTarget) || 3000) + delta;
       const unit = currentPact.goalUnit || 'steps';
       let nextTitle = currentPact.goalTitle;
@@ -962,28 +2137,6 @@
       });
     };
 
-    // =========================================================================
-    // GOAL EDIT MODAL
-    // =========================================================================
-    window.openGoalModal = function() {
-      if (!currentPact) return;
-      document.getElementById('modalGoalTitle').value = currentPact.goalTitle || "Walk 3,000 Steps a Day";
-      document.getElementById('modalGoalTarget').value = currentPact.goalTarget || 3000;
-      document.getElementById('modalGoalUnit').value = currentPact.goalUnit || "steps";
-      document.getElementById('modalGoalPenalty').value = currentPact.penaltyAmount || 100;
-      document.getElementById('modalStartDate').value = currentPact.startDate || getTodayISO();
-
-      const modal = document.getElementById('goalModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    };
-
-    window.closeGoalModal = function() {
-      const modal = document.getElementById('goalModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    };
-
     document.getElementById('editGoalForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!currentPact) return;
@@ -991,7 +2144,7 @@
       const goalTitle = document.getElementById('modalGoalTitle').value.trim();
       const goalTarget = Math.max(1, Number(document.getElementById('modalGoalTarget').value) || 3000);
       const goalUnit = document.getElementById('modalGoalUnit').value.trim() || 'steps';
-      const penaltyAmount = Math.max(1, Number(document.getElementById('modalGoalPenalty').value) || 100);
+      const penaltyAmount = Math.max(100, Number(document.getElementById('modalGoalPenalty').value) || 1000);
       const startDate = document.getElementById('modalStartDate').value || getTodayISO();
 
       const pactRef = doc(db, 'pacto_challenges', currentPact.pactId);
@@ -1004,12 +2157,24 @@
         updatedAt: Date.now()
       });
 
-      closeGoalModal();
+      playSfx('tap');
+      switchMainTab('overview');
     });
 
     // =========================================================================
-    // EDIT SPECIFIC DAY MODAL
+    // MODALS: 1V1 DETAILS & DAY EDIT
     // =========================================================================
+    window.openVsModal = function() {
+      const m = document.getElementById('vsModal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    };
+    window.closeVsModal = function() {
+      const m = document.getElementById('vsModal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    };
+
     window.openEditDayModal = function(dateISO) {
       if (!currentPact || !currentUser) return;
       const myUsername = currentUser.username;
@@ -1055,17 +2220,11 @@
       const updatedLogs = { ...(currentPact.logs || {}) };
       const dayEntry = { ...(updatedLogs[dateISO] || {}) };
 
-      dayEntry[currentUser.username] = {
-        value: myVal,
-        updatedAt: Date.now()
-      };
+      dayEntry[currentUser.username] = { value: myVal, updatedAt: Date.now() };
 
       if (partnerUsername) {
         const pVal = Math.max(0, Number(document.getElementById('editDayPartnerValue').value) || 0);
-        dayEntry[partnerUsername] = {
-          value: pVal,
-          updatedAt: Date.now()
-        };
+        dayEntry[partnerUsername] = { value: pVal, updatedAt: Date.now() };
       }
 
       updatedLogs[dateISO] = dayEntry;
@@ -1076,16 +2235,14 @@
         updatedAt: Date.now()
       });
 
+      playSfx('tap');
       closeEditDayModal();
     });
 
-    // =========================================================================
-    // TABLE FILTER CONTROLS
-    // =========================================================================
     window.setTableFilter = function(mode) {
       tableFilter = mode;
-      const activeClass = "px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-2xs transition";
-      const inactiveClass = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+      const activeClass = "px-3 py-1.5 rounded-lg text-xs font-bold bg-[#C8F904] text-[#0B0C0E] transition";
+      const inactiveClass = "px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--text-muted)] transition";
 
       document.getElementById('filterActiveBtn').className = mode === 'active' ? activeClass : inactiveClass;
       document.getElementById('filter7Btn').className = mode === '7days' ? activeClass : inactiveClass;
@@ -1095,7 +2252,7 @@
     };
 
     // =========================================================================
-    // RENDER FULL DASHBOARD, VAULT PENALTIES & DAILY RECORD TABLE
+    // MASTER DASHBOARD RENDER
     // =========================================================================
     function renderDashboard() {
       if (!currentUser || !currentPact) return;
@@ -1106,209 +2263,357 @@
       const partnerUserDoc = partnerUsername ? allUsersMap[partnerUsername] : null;
       const partnerName = partnerUserDoc
         ? partnerUserDoc.displayName
-        : (partnerUsername ? `@${partnerUsername}` : "No Partner Connected");
+        : (partnerUsername ? `@${partnerUsername}` : "No Opponent");
 
       const target = Number(currentPact.goalTarget) || 3000;
       const unit = currentPact.goalUnit || "steps";
-      const penaltyRate = Number(currentPact.penaltyAmount) || 100;
+      let stakePts = Number(currentPact.penaltyAmount) || 1000;
+      if (stakePts === 100) stakePts = 1000;
+
       const startDate = currentPact.startDate || getTodayISO();
       const todayISO = getTodayISO();
+      const logs = currentPact.logs || {};
 
-      // 1. Matchup Header
-      const headline = document.getElementById('matchupHeadline');
-      const subtext = document.getElementById('matchupSubtext');
-      if (partnerUsername) {
-        headline.innerHTML = `${myName} <span class="text-indigo-600 font-normal">vs</span> ${partnerName}`;
-        subtext.textContent = partnerUserDoc
-          ? `Connected with @${partnerUsername} • Real-time sync active`
-          : `Paired with @${partnerUsername} (Waiting for @${partnerUsername} to create their account)`;
-      } else {
-        headline.textContent = `${myName} (Solo Mode — Add your friend on the right!)`;
-        subtext.textContent = `Enter your girlfriend's or competitor's @username to link your 1v1 Vault.`;
+      // Populate Settings Form Inputs if not focused
+      if (document.activeElement?.id !== 'modalGoalTitle') {
+        document.getElementById('modalGoalTitle').value = currentPact.goalTitle || "Walk 3,000 Steps a Day";
+        document.getElementById('modalGoalTarget').value = target;
+        document.getElementById('modalGoalUnit').value = unit;
+        document.getElementById('modalGoalPenalty').value = stakePts;
+        document.getElementById('modalStartDate').value = startDate;
       }
+      document.getElementById('settingsPartnerStatus').textContent = partnerUsername
+        ? `Currently paired with ${partnerName} (@${partnerUsername}). Enter a new username below to switch.`
+        : `Not paired yet. Enter your opponent's @username below to link your 1v1 scoreboard.`;
 
-      // 2. Goal Summary
-      document.getElementById('goalTitleDisplay').textContent = currentPact.goalTitle || "Walk 3,000 Steps a Day";
-      document.getElementById('goalTargetDisplay').textContent = `${target.toLocaleString()} ${unit}`;
-      document.getElementById('goalPenaltyDisplay').textContent = penaltyRate;
-      document.getElementById('vaultHeaderRate').textContent = penaltyRate;
-      document.getElementById('tablePenaltyRate').textContent = penaltyRate;
-      document.getElementById('todayUnitSuffix').textContent = unit;
+      // Compute Full Stats for Both Players
+      const activeDates = getDateRangeArray(startDate, todayISO);
+      const myStats = computeUserFullStats(myUsername, logs, target, stakePts, activeDates, todayISO);
+      const partnerStats = computeUserFullStats(partnerUsername, logs, target, stakePts, activeDates, todayISO);
 
-      // 3. Today's Check-In Card
-      document.getElementById('todayDateLabel').textContent = `Today — ${formatReadableDate(todayISO)}`;
-      const myTodayVal = currentPact.logs?.[todayISO]?.[myUsername]?.value ?? 0;
-      const partnerTodayVal = partnerUsername ? (currentPact.logs?.[todayISO]?.[partnerUsername]?.value ?? 0) : 0;
-
-      const inputEl = document.getElementById('todayProgressInput');
-      if (document.activeElement !== inputEl) {
-        inputEl.value = myTodayVal > 0 ? myTodayVal : '';
-      }
-
-      const myTodayDone = myTodayVal >= target;
-      const statusBadge = document.getElementById('todayMyStatusBadge');
-      if (myTodayDone) {
-        statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800";
-        statusBadge.textContent = "✓ You Completed Today's Goal!";
-      } else {
-        statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800";
-        statusBadge.textContent = `${Math.max(0, target - myTodayVal).toLocaleString()} ${unit} remaining before EOD`;
-      }
-
-      // Today 1v1 Bars
+      const myTodayVal = myStats.todayVal;
+      const partnerTodayVal = partnerStats.todayVal;
       const myPct = Math.min(100, Math.round((myTodayVal / target) * 100));
       const partnerPct = Math.min(100, Math.round((partnerTodayVal / target) * 100));
 
-      document.getElementById('todayMeName').textContent = `${myName} (You)`;
-      document.getElementById('todayMeNumbers').textContent = `${myTodayVal.toLocaleString()} / ${target.toLocaleString()} ${unit} (${myPct}%)`;
-      document.getElementById('todayMeBar').style.width = `${myPct}%`;
-      document.getElementById('todayMeBar').className = `h-full rounded-full transition-all duration-300 ${myTodayDone ? 'bg-emerald-600' : 'bg-indigo-600'}`;
+      // Header Pills
+      document.getElementById('headerStreakNum').textContent = myStats.currentStreak;
+      document.getElementById('headerPointsNum').textContent = (myStats.netPts >= 0 ? '+' : '') + myStats.netPts.toLocaleString();
+      document.getElementById('sidebarRankText').textContent = myStats.rankObj.name;
+      document.getElementById('navBadgeCount').textContent = `${myStats.unlockedCount}/${ARENA_BADGES.length}`;
 
-      document.getElementById('todayPartnerName').textContent = partnerUsername ? partnerName : "Competitor (Not linked)";
-      document.getElementById('todayPartnerNumbers').textContent = partnerUsername
-        ? `${partnerTodayVal.toLocaleString()} / ${target.toLocaleString()} ${unit} (${partnerPct}%)`
+      // 1. TOP 4 KPI CARDS
+      document.getElementById('kpiMyPoints').textContent = `${myStats.netPts >= 0 ? '+' : ''}${myStats.netPts.toLocaleString()}`;
+      const diffPts = myStats.netPts - partnerStats.netPts;
+      const diffPill = document.getElementById('kpiMyDiffPill');
+      if (!partnerUsername || diffPts === 0) {
+        diffPill.className = "px-2 py-0.5 rounded-full font-bold bg-white/10 text-[var(--text-main)]";
+        diffPill.textContent = "Even";
+      } else if (diffPts > 0) {
+        diffPill.className = "px-2 py-0.5 rounded-full font-bold bg-[#4ADE80]/20 text-[#4ADE80]";
+        diffPill.textContent = `+${diffPts.toLocaleString()} ahead`;
+      } else {
+        diffPill.className = "px-2 py-0.5 rounded-full font-bold bg-[#FF7A59]/20 text-[#FF7A59]";
+        diffPill.textContent = `${diffPts.toLocaleString()} behind`;
+      }
+
+      document.getElementById('kpiMyStreak').textContent = myStats.currentStreak;
+      document.getElementById('kpiBestStreak').textContent = `Best record: ${myStats.bestStreak} days`;
+
+      const totalEvaluated = myStats.completedDays + myStats.missedDays;
+      const winRate = totalEvaluated > 0 ? Math.round((myStats.completedDays / totalEvaluated) * 100) : (myTodayVal >= target ? 100 : 0);
+      document.getElementById('kpiCompletionRate').textContent = `${winRate}%`;
+      document.getElementById('kpiDaysBreakdown').textContent = `${myStats.completedDays} hit • ${myStats.missedDays} missed`;
+
+      document.getElementById('kpiStakeValue').textContent = `±${stakePts.toLocaleString()}`;
+      document.getElementById('kpiGoalShort').textContent = `Target: ${target.toLocaleString()} ${unit}`;
+
+      // 2. CARD 1: TODAY'S TARGET RADIAL RING
+      document.getElementById('goalTitleDisplay').textContent = currentPact.goalTitle || "Walk 3,000 Steps a Day";
+      document.getElementById('todayRingPct').textContent = `${myPct}%`;
+      document.getElementById('todayCurrentNumBig').textContent = myTodayVal.toLocaleString();
+      document.getElementById('todayRingNumbers').textContent = `of ${target.toLocaleString()} ${unit} goal`;
+
+      const circumference = 2 * Math.PI * 56;
+      const offset = circumference - (myPct / 100) * circumference;
+      document.getElementById('todayRingCircle').style.strokeDashoffset = offset;
+
+      const remaining = Math.max(0, target - myTodayVal);
+      const stateTag = document.getElementById('todayRingStateTag');
+      if (myTodayVal >= target) {
+        stateTag.textContent = "✓ Complete";
+        document.getElementById('todayRemainingLabel').textContent = "✓ Target Complete!";
+        document.getElementById('todayRewardBadge').textContent = `+${stakePts.toLocaleString()} PTS Locked`;
+      } else {
+        stateTag.textContent = "In Play";
+        document.getElementById('todayRemainingLabel').textContent = `${remaining.toLocaleString()} ${unit} left`;
+        document.getElementById('todayRewardBadge').textContent = `+${stakePts.toLocaleString()} PTS`;
+      }
+
+      // 3. CARD 2: 1V1 ARENA STANDINGS
+      document.getElementById('vsMyAvatar').textContent = myName[0].toUpperCase();
+      document.getElementById('vsMyName').textContent = myName;
+      document.getElementById('vsMyStreakPill').textContent = `🔥 ${myStats.currentStreak}`;
+      document.getElementById('vsMyTodayText').textContent = `Today: ${myPct}% (${myTodayVal.toLocaleString()})`;
+      document.getElementById('vsMyPts').textContent = `${myStats.netPts >= 0 ? '+' : ''}${myStats.netPts.toLocaleString()}`;
+
+      document.getElementById('vsPartnerAvatar').textContent = partnerUsername ? partnerName[0].toUpperCase() : '?';
+      document.getElementById('vsPartnerName').textContent = partnerName;
+      document.getElementById('vsPartnerStreakPill').textContent = `🔥 ${partnerStats.currentStreak}`;
+      document.getElementById('vsPartnerTodayText').textContent = partnerUsername
+        ? `Today: ${partnerPct}% (${partnerTodayVal.toLocaleString()})`
+        : `Not connected`;
+      document.getElementById('vsPartnerPts').textContent = partnerUsername
+        ? `${partnerStats.netPts >= 0 ? '+' : ''}${partnerStats.netPts.toLocaleString()}`
         : `—`;
-      document.getElementById('todayPartnerBar').style.width = partnerUsername ? `${partnerPct}%` : '0%';
-      document.getElementById('todayPartnerBar').className = `h-full rounded-full transition-all duration-300 ${partnerTodayVal >= target ? 'bg-emerald-600' : 'bg-purple-600'}`;
 
-      // 4. Calculate Vault Penalties from Challenge Start Date up to Today
-      const activeDates = getDateRangeArray(startDate, todayISO);
-      let myMissedDays = 0;
-      let myCompletedDays = 0;
-      let partnerMissedDays = 0;
-      let partnerCompletedDays = 0;
+      let myShare = 50;
+      if (partnerUsername && diffPts !== 0) {
+        myShare = Math.min(88, Math.max(12, Math.round(50 + (diffPts / (stakePts * 4)) * 50)));
+      }
+      document.getElementById('tugMyBar').style.width = `${myShare}%`;
+      document.getElementById('tugPartnerBar').style.width = `${100 - myShare}%`;
+      document.getElementById('tugStatusText').textContent = !partnerUsername
+        ? "Solo Mode"
+        : (diffPts === 0 ? "Tied Game" : (diffPts > 0 ? `${myName} Leading` : `${partnerName} Leading`));
+      document.getElementById('tugLeadDiff').textContent = `${Math.abs(diffPts).toLocaleString()} PTS diff`;
 
-      activeDates.forEach(dISO => {
-        const isPastDay = dISO < todayISO;
-        const mVal = currentPact.logs?.[dISO]?.[myUsername]?.value ?? 0;
-        const pVal = partnerUsername ? (currentPact.logs?.[dISO]?.[partnerUsername]?.value ?? 0) : 0;
+      // Populate Expanded 1v1 Modal
+      document.getElementById('modalMyName').textContent = `${myName} (You)`;
+      document.getElementById('modalMyRankBadge').textContent = `${myStats.rankObj.icon} ${myStats.rankObj.name}`;
+      document.getElementById('modalMyNetPts').textContent = `${myStats.netPts >= 0 ? '+' : ''}${myStats.netPts.toLocaleString()} PTS`;
+      document.getElementById('modalMyEarned').textContent = `+${myStats.earnedPts.toLocaleString()}`;
+      document.getElementById('modalMyLost').textContent = `-${myStats.lostPts.toLocaleString()}`;
+      document.getElementById('modalMyHit').textContent = myStats.completedDays;
+      document.getElementById('modalMyMissed').textContent = myStats.missedDays;
+      document.getElementById('modalMyBestStreak').textContent = `${myStats.bestStreak}d`;
+      document.getElementById('modalMyBadgesCount').textContent = `${myStats.unlockedCount} / ${ARENA_BADGES.length}`;
 
-        if (mVal >= target) {
-          myCompletedDays++;
-        } else if (isPastDay) {
-          myMissedDays++;
-        }
+      document.getElementById('modalPartnerName').textContent = partnerName;
+      document.getElementById('modalPartnerRankBadge').textContent = `${partnerStats.rankObj.icon} ${partnerStats.rankObj.name}`;
+      document.getElementById('modalPartnerNetPts').textContent = partnerUsername ? `${partnerStats.netPts >= 0 ? '+' : ''}${partnerStats.netPts.toLocaleString()} PTS` : '—';
+      document.getElementById('modalPartnerEarned').textContent = `+${partnerStats.earnedPts.toLocaleString()}`;
+      document.getElementById('modalPartnerLost').textContent = `-${partnerStats.lostPts.toLocaleString()}`;
+      document.getElementById('modalPartnerHit').textContent = partnerStats.completedDays;
+      document.getElementById('modalPartnerMissed').textContent = partnerStats.missedDays;
+      document.getElementById('modalPartnerBestStreak').textContent = `${partnerStats.bestStreak}d`;
+      document.getElementById('modalPartnerBadgesCount').textContent = `${partnerStats.unlockedCount} / ${ARENA_BADGES.length}`;
 
-        if (partnerUsername) {
-          if (pVal >= target) {
-            partnerCompletedDays++;
-          } else if (isPastDay) {
-            partnerMissedDays++;
-          }
-        }
-      });
+      // 4. CARD 3: 7-DAY MOMENTUM STRIP & MINI BARS
+      const last7Chrono = getLastNDays(7).reverse();
+      let weekHits = 0;
+      let weekMissed = 0;
 
-      const myPenaltyTotal = myMissedDays * penaltyRate;
-      const partnerPenaltyTotal = partnerMissedDays * penaltyRate;
-      const totalVaultPool = myPenaltyTotal + partnerPenaltyTotal;
+      document.getElementById('weekPillStrip').innerHTML = last7Chrono.map(dISO => {
+        const [y, m, d] = dISO.split('-').map(Number);
+        const dayObj = new Date(y, m - 1, d);
+        const wShort = dayObj.toLocaleDateString('en-IN', { weekday: 'narrow' });
+        const val = logs?.[dISO]?.[myUsername]?.value ?? 0;
+        const hit = val >= target;
+        const isToday = dISO === todayISO;
+        const isPast = dISO >= startDate && dISO < todayISO;
 
-      document.getElementById('challengeStartRangeLabel').textContent = `Tracking since ${formatReadableDate(startDate)}`;
-      document.getElementById('vaultTotalAmount').textContent = `₹${totalVaultPool.toLocaleString('en-IN')}`;
-      document.getElementById('vaultTotalSubtext').textContent = `${myMissedDays + partnerMissedDays} total missed days × ₹${penaltyRate}`;
+        if (hit) weekHits++;
+        else if (isPast) weekMissed++;
 
-      document.getElementById('vaultMyLabel').textContent = `${myName} (You) Lost to Vault`;
-      document.getElementById('vaultMyAmount').textContent = `₹${myPenaltyTotal.toLocaleString('en-IN')}`;
-      document.getElementById('vaultMySubtext').textContent = `${myMissedDays} missed • ${myCompletedDays} completed`;
+        let pillStyle = "bg-black/5 text-black/60";
+        if (hit) pillStyle = "bg-[#0B0C0E] text-[#C8F904] font-extrabold shadow-sm";
+        else if (isToday) pillStyle = "bg-[#FCE354] text-[#0B0C0E] font-extrabold ring-2 ring-black/20";
+        else if (isPast) pillStyle = "bg-[#FF7A59]/25 text-red-900";
 
-      document.getElementById('vaultPartnerLabel').textContent = `${partnerName} Lost to Vault`;
-      document.getElementById('vaultPartnerAmount').textContent = `₹${partnerPenaltyTotal.toLocaleString('en-IN')}`;
-      document.getElementById('vaultPartnerSubtext').textContent = partnerUsername
-        ? `${partnerMissedDays} missed • ${partnerCompletedDays} completed`
-        : `Connect a friend to track their penalties`;
+        return `
+          <button onclick="openEditDayModal('${dISO}')" class="py-2 rounded-xl flex flex-col items-center justify-center transition ${pillStyle}" title="${dISO}: ${val.toLocaleString()} ${unit}">
+            <span class="text-[9px] uppercase opacity-70">${wShort}</span>
+            <span class="text-xs font-mono font-bold mt-0.5">${d}</span>
+          </button>
+        `;
+      }).join('');
 
-      // 5. Render Day-by-Day Table
+      document.getElementById('weekMiniBars').innerHTML = last7Chrono.map(dISO => {
+        const val = logs?.[dISO]?.[myUsername]?.value ?? 0;
+        const pct = Math.min(100, Math.max(12, Math.round((val / target) * 100)));
+        const hit = val >= target;
+        const isToday = dISO === todayISO;
+        const barColor = hit ? 'bg-[#0B0C0E]' : (isToday ? 'bg-black/50' : 'bg-black/20');
+        return `
+          <div class="flex-1 h-full flex items-end justify-center">
+            <div class="w-full rounded-t-lg transition-all duration-500 ${barColor}" style="height: ${pct}%" title="${dISO}: ${val.toLocaleString()} ${unit}"></div>
+          </div>
+        `;
+      }).join('');
+
+      const weekPts = (weekHits - weekMissed) * stakePts;
+      document.getElementById('weekHitCount').textContent = `${weekHits}/7`;
+      document.getElementById('weekNetPts').textContent = `${weekPts >= 0 ? '+' : ''}${weekPts.toLocaleString()} PTS`;
+
+      // 5. TAB 2: DAILY LEDGER TABLE
+      document.getElementById('histCompletedNum').textContent = myStats.completedDays;
+      document.getElementById('histMissedNum').textContent = myStats.missedDays;
+      document.getElementById('histEarnedPts').textContent = `+${myStats.earnedPts.toLocaleString()}`;
+      document.getElementById('histBestStreak').textContent = `${myStats.bestStreak}d`;
+
+      document.getElementById('challengeStartRangeLabel').textContent = `Tracking since ${formatReadableDate(startDate)} • Click any row to edit`;
       document.getElementById('thMyName').textContent = `${myName} (You)`;
       document.getElementById('thPartnerName').textContent = partnerName;
 
       let displayDates = [];
-      if (tableFilter === 'active') {
-        displayDates = [...activeDates].reverse(); // newest first
-      } else if (tableFilter === '7days') {
-        displayDates = getLastNDays(7);
-      } else {
-        displayDates = getCurrentMonthDaysUpToToday();
-      }
+      if (tableFilter === 'active') displayDates = [...activeDates].reverse();
+      else if (tableFilter === '7days') displayDates = getLastNDays(7);
+      else displayDates = getCurrentMonthDaysUpToToday();
 
-      const tbody = document.getElementById('dailyRecordsTbody');
-      tbody.innerHTML = displayDates.map(dISO => {
+      document.getElementById('dailyRecordsTbody').innerHTML = displayDates.map(dISO => {
         const isToday = dISO === todayISO;
-        const isBeforeStart = dISO < startDate;
-        const isPastChallengeDay = dISO >= startDate && dISO < todayISO;
-
-        const mVal = currentPact.logs?.[dISO]?.[myUsername]?.value ?? 0;
-        const pVal = partnerUsername ? (currentPact.logs?.[dISO]?.[partnerUsername]?.value ?? 0) : 0;
-
+        const isPast = dISO >= startDate && dISO < todayISO;
+        const mVal = logs?.[dISO]?.[myUsername]?.value ?? 0;
+        const pVal = partnerUsername ? (logs?.[dISO]?.[partnerUsername]?.value ?? 0) : 0;
         const mDone = mVal >= target;
         const pDone = partnerUsername && pVal >= target;
 
-        // Status badges for Me
-        let myBadgeHtml = '';
-        if (mDone) {
-          myBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">✓ ${mVal.toLocaleString()} ${unit}</span>`;
-        } else if (isToday) {
-          myBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-800">${mVal.toLocaleString()} / ${target.toLocaleString()} (In Progress)</span>`;
-        } else if (isPastChallengeDay) {
-          myBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-100 text-red-700">✗ ${mVal.toLocaleString()} (Missed)</span>`;
-        } else {
-          myBadgeHtml = `<span class="text-xs text-slate-400">${mVal.toLocaleString()} ${unit}</span>`;
-        }
+        const mBadge = mDone
+          ? `<span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#4ADE80]/15 text-[#4ADE80]">✓ ${mVal.toLocaleString()}</span>`
+          : (isToday
+              ? `<span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#FCE354]/15 text-[#FCE354]">${mVal.toLocaleString()} / ${target.toLocaleString()}</span>`
+              : `<span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#FF7A59]/15 text-[#FF7A59]">✗ ${mVal.toLocaleString()}</span>`);
 
-        // Status badges for Partner
-        let partnerBadgeHtml = '<span class="text-xs text-slate-400">—</span>';
+        let pBadge = `<span class="text-[var(--text-muted)]">—</span>`;
         if (partnerUsername) {
-          if (pDone) {
-            partnerBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">✓ ${pVal.toLocaleString()} ${unit}</span>`;
-          } else if (isToday) {
-            partnerBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-800">${pVal.toLocaleString()} / ${target.toLocaleString()} (In Progress)</span>`;
-          } else if (isPastChallengeDay) {
-            partnerBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-100 text-red-700">✗ ${pVal.toLocaleString()} (Missed)</span>`;
-          } else {
-            partnerBadgeHtml = `<span class="text-xs text-slate-400">${pVal.toLocaleString()} ${unit}</span>`;
-          }
+          pBadge = pDone
+            ? `<span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#4ADE80]/15 text-[#4ADE80]">✓ ${pVal.toLocaleString()}</span>`
+            : (isToday
+                ? `<span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#FCE354]/15 text-[#FCE354]">${pVal.toLocaleString()} / ${target.toLocaleString()}</span>`
+                : `<span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-[#FF7A59]/15 text-[#FF7A59]">✗ ${pVal.toLocaleString()}</span>`);
         }
 
-        // Vault Penalty Breakdown for this Row
-        let penaltyPills = [];
-        if (isPastChallengeDay) {
-          if (!mDone) {
-            penaltyPills.push(`<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-50 text-red-700 border border-red-200">${myName}: +₹${penaltyRate}</span>`);
-          }
-          if (partnerUsername && !pDone) {
-            penaltyPills.push(`<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-50 text-red-700 border border-red-200">${partnerName}: +₹${penaltyRate}</span>`);
-          }
-        }
+        const pills = [];
+        if (mDone) pills.push(`<span class="text-[11px] font-mono font-bold text-[#4ADE80]">You +${stakePts}</span>`);
+        else if (isPast) pills.push(`<span class="text-[11px] font-mono font-bold text-[#FF7A59]">You -${stakePts}</span>`);
 
-        let penaltyCellHtml = '';
-        if (isBeforeStart) {
-          penaltyCellHtml = `<span class="text-xs text-slate-400">Before start date</span>`;
-        } else if (isToday) {
-          penaltyCellHtml = `<span class="text-xs font-semibold text-slate-500">EOD Active</span>`;
-        } else if (penaltyPills.length === 0) {
-          penaltyCellHtml = `<span class="text-xs font-bold text-emerald-700">₹0 (Both Safe)</span>`;
-        } else {
-          penaltyCellHtml = `<div class="flex flex-wrap gap-1">${penaltyPills.join('')}</div>`;
+        if (partnerUsername) {
+          if (pDone) pills.push(`<span class="text-[11px] font-mono font-bold text-[#6C8CFF]">${partnerName} +${stakePts}</span>`);
+          else if (isPast) pills.push(`<span class="text-[11px] font-mono font-bold text-[#FF7A59]">${partnerName} -${stakePts}</span>`);
         }
 
         return `
-          <tr class="${isToday ? 'bg-indigo-50/40' : 'hover:bg-slate-50'}">
-            <td class="py-3.5 px-4 sm:px-6 whitespace-nowrap">
-              <div class="font-bold text-slate-900 flex items-center gap-2">
-                ${formatReadableDate(dISO)}
-                ${isToday ? '<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-600 text-white">Today</span>' : ''}
+          <tr class="hover:bg-white/[0.02] transition">
+            <td class="py-3.5 px-5 whitespace-nowrap">
+              <div class="font-bold flex items-center gap-2">
+                <span>${formatReadableDate(dISO)}</span>
+                ${isToday ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-[#C8F904] text-[#0B0C0E]">Today</span>' : ''}
               </div>
-              <div class="text-[11px] text-slate-400">${dISO}</div>
+              <div class="text-[10px] font-mono text-[var(--text-muted)]">${dISO}</div>
             </td>
-            <td class="py-3.5 px-4 whitespace-nowrap">${myBadgeHtml}</td>
-            <td class="py-3.5 px-4 whitespace-nowrap">${partnerBadgeHtml}</td>
-            <td class="py-3.5 px-4">${penaltyCellHtml}</td>
-            <td class="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap">
-              <button onclick="openEditDayModal('${dISO}')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition">
-                Edit Log
+            <td class="py-3.5 px-4 whitespace-nowrap">${mBadge}</td>
+            <td class="py-3.5 px-4 whitespace-nowrap">${pBadge}</td>
+            <td class="py-3.5 px-4 whitespace-nowrap space-x-3">${pills.join('') || '<span class="text-[var(--text-muted)]">In Play</span>'}</td>
+            <td class="py-3.5 px-5 text-right whitespace-nowrap">
+              <button onclick="openEditDayModal('${dISO}')" class="px-3 py-1.5 rounded-xl bento-surface hover:border-[#C8F904] text-[11px] font-bold transition">
+                Edit
               </button>
             </td>
           </tr>
         `;
       }).join('');
+
+      // 6. TAB 3: ACHIEVEMENTS & LEAGUES
+      const isInspectingPartner = achievementSubPlayer === 'partner' && !!partnerUsername;
+      const targetStats = isInspectingPartner ? partnerStats : myStats;
+      const targetDisplayName = isInspectingPartner ? partnerName : `${myName} (You)`;
+
+      document.getElementById('achSwitchMeLabel').textContent = `${myName} (You)`;
+      document.getElementById('achSwitchMeCount').textContent = `${myStats.unlockedCount}/${ARENA_BADGES.length}`;
+      document.getElementById('achSwitchPartnerLabel').textContent = partnerUsername ? partnerName : "No Opponent";
+      document.getElementById('achSwitchPartnerCount').textContent = `${partnerStats.unlockedCount}/${ARENA_BADGES.length}`;
+
+      const meBtn = document.getElementById('achSwitchMeBtn');
+      const partBtn = document.getElementById('achSwitchPartnerBtn');
+      if (!isInspectingPartner) {
+        meBtn.className = "flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-extrabold bg-[#C8F904] text-[#0B0C0E] transition flex items-center justify-center gap-2";
+        partBtn.className = "flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-extrabold text-[var(--text-muted)] hover:text-[var(--text-main)] transition flex items-center justify-center gap-2";
+      } else {
+        partBtn.className = "flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-extrabold bg-[#6C8CFF] text-[#0B0C0E] transition flex items-center justify-center gap-2";
+        meBtn.className = "flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs font-extrabold text-[var(--text-muted)] hover:text-[var(--text-main)] transition flex items-center justify-center gap-2";
+      }
+
+      document.getElementById('achInspectorTitle').textContent = isInspectingPartner
+        ? `Inspecting ${partnerName}'s Trophy Room & League`
+        : `Viewing Your Trophy Room & League`;
+      document.getElementById('achHeroOwnerTag').textContent = isInspectingPartner
+        ? `${partnerName}'s Current League`
+        : `Your Current League`;
+
+      const curLeague = targetStats.rankObj;
+      const nextLeague = ARENA_LEAGUES[targetStats.rankIdx + 1] || null;
+
+      document.getElementById('achRankTierBadge').textContent = `TIER ${targetStats.rankIdx + 1}`;
+      document.getElementById('achRankIcon').textContent = curLeague.icon;
+      document.getElementById('achRankName').textContent = curLeague.name;
+      document.getElementById('achCurrentEarned').textContent = `${targetStats.earnedPts.toLocaleString()} PTS Earned`;
+
+      if (nextLeague) {
+        const span = nextLeague.minPts - curLeague.minPts;
+        const prog = targetStats.earnedPts - curLeague.minPts;
+        const lPct = Math.min(100, Math.max(0, Math.round((prog / span) * 100)));
+        document.getElementById('achNextRankText').textContent = `${Math.max(0, nextLeague.minPts - targetStats.earnedPts).toLocaleString()} PTS to ${nextLeague.name}`;
+        document.getElementById('achNextTarget').textContent = `${nextLeague.minPts.toLocaleString()} PTS`;
+        document.getElementById('achProgressBar').style.width = `${lPct}%`;
+      } else {
+        document.getElementById('achNextRankText').textContent = `Maximum Arena League Reached!`;
+        document.getElementById('achNextTarget').textContent = `MAX`;
+        document.getElementById('achProgressBar').style.width = `100%`;
+      }
+
+      document.getElementById('leagueLadderGrid').innerHTML = ARENA_LEAGUES.map((lg, idx) => {
+        const unlocked = targetStats.earnedPts >= lg.minPts;
+        const isCurrent = idx === targetStats.rankIdx;
+        return `
+          <div class="p-3.5 rounded-2xl border text-center transition ${
+            isCurrent
+              ? 'border-[#C8F904] bg-[#C8F904]/10'
+              : (unlocked ? 'bento-surface opacity-90' : 'bento-surface opacity-35')
+          }">
+            <div class="text-2xl mb-1">${lg.icon}</div>
+            <div class="text-xs font-extrabold truncate">${lg.name}</div>
+            <div class="text-[10px] font-mono text-[var(--text-muted)] mt-0.5">${lg.minPts.toLocaleString()} PTS</div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('badgesSectionTitle').textContent = `${targetDisplayName} — Arena Badges`;
+      document.getElementById('badgesSectionSubtitle').textContent = isInspectingPartner
+        ? `Live badge progress calculated from ${partnerName}'s daily logs`
+        : `Unlocked automatically from your logged performance`;
+
+      document.getElementById('badgesGrid').innerHTML = ARENA_BADGES.map(b => {
+        const curVal = b.getVal(targetStats);
+        const unlocked = curVal >= b.target;
+        const pct = Math.min(100, Math.round((curVal / b.target) * 100));
+
+        return `
+          <div class="p-4 rounded-2xl border transition flex flex-col justify-between ${
+            unlocked ? 'border-[#C8F904]/50 bg-[#C8F904]/[0.06]' : 'bento-surface opacity-55'
+          }">
+            <div>
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="w-10 h-10 rounded-xl bento-surface flex items-center justify-center text-xl">${b.icon}</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                  unlocked ? 'bg-[#C8F904] text-[#0B0C0E]' : 'bg-black/20 text-[var(--text-muted)]'
+                }">
+                  ${unlocked ? 'UNLOCKED' : `${pct}%`}
+                </span>
+              </div>
+              <h4 class="text-sm font-extrabold">${b.name}</h4>
+              <p class="text-[11px] text-[var(--text-muted)] mt-0.5">${b.desc}</p>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-[var(--border-subtle)]">
+              <div class="h-1.5 w-full rounded-full bg-black/25 overflow-hidden">
+                <div class="h-full ${unlocked ? 'bg-[#C8F904]' : 'bg-[#6C8CFF]'} rounded-full" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('achTotalUnlocked').textContent = `${targetStats.unlockedCount} / ${ARENA_BADGES.length} Unlocked`;
     }
 
     // =========================================================================
@@ -1320,13 +2625,10 @@
       const [ey, em, ed] = endISO.split('-').map(Number);
       let cur = new Date(sy, sm - 1, sd);
       const end = new Date(ey, em - 1, ed);
-
-      if (cur > end) {
-        return [endISO];
-      }
+      if (cur > end) return [endISO];
 
       let safety = 0;
-      while (cur <= end && safety < 120) {
+      while (cur <= end && safety < 3650) {
         const y = cur.getFullYear();
         const m = String(cur.getMonth() + 1).padStart(2, '0');
         const d = String(cur.getDate()).padStart(2, '0');
@@ -1357,7 +2659,7 @@
     }
 
     // =========================================================================
-    // LIVE EOD COUNTDOWN TIMER
+    // LIVE EOD COUNTDOWN CLOCK
     // =========================================================================
     function updateEodClock() {
       const now = new Date();
@@ -1369,7 +2671,7 @@
 
       const el = document.getElementById('eodCountdown');
       if (el) {
-        el.textContent = `${String(hrs).padStart(2, '0')}h ${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s left`;
+        el.textContent = `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
       }
     }
     setInterval(updateEodClock, 1000);
