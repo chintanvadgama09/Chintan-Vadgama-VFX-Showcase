@@ -49,45 +49,178 @@
 
   /* ==================== CONTEXTUAL SENTENCE & DEFINITION ENGINE ==================== */
 
+  function hashString(str) {
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      hash ^= str.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193);
+    }
+    return hash >>> 0;
+  }
+
   function guessPartOfSpeech(word) {
     const w = word.toLowerCase();
-    if (w.endsWith('tion') || w.endsWith('ment') || w.endsWith('ness') || w.endsWith('ity') || w.endsWith('ance') || w.endsWith('ence')) return 'noun';
-    if (w.endsWith('ous') || w.endsWith('able') || w.endsWith('ible') || w.endsWith('ive') || w.endsWith('ful') || w.endsWith('ic') || w.endsWith('al')) return 'adjective';
+    if (w.endsWith('tion') || w.endsWith('sion') || w.endsWith('ment') || w.endsWith('ness') || w.endsWith('ity') || w.endsWith('ance') || w.endsWith('ence') || w.endsWith('ism') || w.endsWith('ist') || w.endsWith('ship') || w.endsWith('tude') || w.endsWith('logy')) return 'noun';
+    if (w.endsWith('ous') || w.endsWith('ious') || w.endsWith('able') || w.endsWith('ible') || w.endsWith('ive') || w.endsWith('ful') || w.endsWith('ic') || w.endsWith('ical') || w.endsWith('al') || w.endsWith('ary') || w.endsWith('ant') || w.endsWith('ent')) return 'adjective';
     if (w.endsWith('ly')) return 'adverb';
-    if (w.endsWith('ize') || w.endsWith('ate') || w.endsWith('ify')) return 'verb';
+    if (w.endsWith('ize') || w.endsWith('ise') || w.endsWith('ate') || w.endsWith('ify') || w.endsWith('en') || w.endsWith('ish')) return 'verb';
     return 'noun';
+  }
+
+  function synthesizeLexicalDefinition(word, pos) {
+    const w = word.toLowerCase();
+    if (w.endsWith('tion') || w.endsWith('sion')) {
+      return `The action, process, or resulting state of ${w.replace(/(tion|sion)$/, '')}ing or establishing this condition.`;
+    }
+    if (w.endsWith('ity') || w.endsWith('ness')) {
+      return `The state, quality, or essential degree of being ${w.replace(/(ity|ness)$/, '')} or exhibiting such nature.`;
+    }
+    if (w.endsWith('ment')) {
+      return `The concrete manifestation, action, or resulting outcome of ${w.replace(/ment$/, '')}ing.`;
+    }
+    if (w.endsWith('ance') || w.endsWith('ence')) {
+      return `The state, quality, or continuous circumstance of ${w.replace(/(ance|ence)$/, '')}ing.`;
+    }
+    if (w.endsWith('ous') || w.endsWith('ious')) {
+      return `Possessing, characterized by, or exhibiting the notable qualities of ${w.replace(/(ous|ious)$/, '')}.`;
+    }
+    if (w.endsWith('able') || w.endsWith('ible')) {
+      return `Capable of being, suitable for, or worthy of being ${w.replace(/(able|ible)$/, '')}ed.`;
+    }
+    if (w.endsWith('ive')) {
+      return `Tending to, performing the function of, or characterized by ${w.replace(/ive$/, '')}ing.`;
+    }
+    if (w.endsWith('ize') || w.endsWith('ise')) {
+      return `To cause, transform into, or subject to the condition of ${w.replace(/(ize|ise)$/, '')}.`;
+    }
+    if (w.endsWith('ate') && pos === 'verb') {
+      return `To produce, develop, or bring into a state associated with ${w.replace(/ate$/, '')}.`;
+    }
+    if (w.endsWith('ly') && pos === 'adverb') {
+      return `In a manner marked by or characteristic of being ${w.replace(/ly$/, '')}.`;
+    }
+    if (pos === 'adjective') {
+      return `Characterized by, pertaining to, or displaying the distinctive qualities of ${w}.`;
+    }
+    if (pos === 'verb') {
+      return `To engage in, produce, or carry out the action or practice of ${w}.`;
+    }
+    return `An evocative term denoting the essential quality, manifestation, or entity of ${w}.`;
   }
 
   function generateContextualSentences(word, pos) {
     const w = word.toLowerCase();
-    const cap = w.charAt(0).toUpperCase() + w.slice(1);
+    const h = hashString(w);
 
-    if (pos === 'adjective') {
-      return [
-        `The professor remarked on how ${w} the student's analytical approach was.`,
-        `In classical literature, authors often depict such moments as profoundly ${w}.`,
-        `${cap} qualities are rare to find, yet they make a lasting impression on everyone.`
-      ];
-    } else if (pos === 'verb') {
-      return [
-        `Scholars and researchers frequently endeavor to ${w} these intricate dynamics.`,
-        `It requires patience and disciplined effort to ${w} effectively under pressure.`,
-        `They made every possible attempt to ${w} the situation before matters escalated.`
-      ];
-    } else if (pos === 'adverb') {
-      return [
-        `She articulated her argument ${w}, holding the audience's complete attention.`,
-        `The project continued ${w} despite the unexpected challenges they faced.`,
-        `He examined each detail ${w}, ensuring nothing was overlooked or left to chance.`
-      ];
-    } else {
-      // default: noun
-      return [
-        `Understanding the true significance of ${w} requires careful study and reflection.`,
-        `The concept of ${w} has intrigued thinkers and philosophers across generations.`,
-        `Their community placed great value on ${w}, considering it essential for growth.`
-      ];
+    const NOUN_TEMPLATES = [
+      `Scholars have long examined how ${w} shapes cultural attitudes toward authority and progress.`,
+      `The archival records suggest that ${w} was a central tenet of their founding philosophy.`,
+      `In periods of dramatic social transformation, the pursuit of ${w} often takes center stage.`,
+      `Her latest monograph presents an insightful critique of ${w} in modern democratic societies.`,
+      `The sudden collapse of negotiations revealed just how fragile ${w} had been all along.`,
+      `Generations of legal theorists have debated the exact boundaries between justice and ${w}.`,
+      `Without a steady commitment to ${w}, institutional credibility can erode with astonishing speed.`,
+      `The memoirs chronicle an arduous journey marked by resilience, sacrifice, and enduring ${w}.`,
+      `Key historians argue that the renaissance of civic engagement was fundamentally fueled by ${w}.`,
+      `A nuanced appreciation of ${w} enables analysts to anticipate complex geopolitical shifts.`,
+      `Throughout classical literature, poets frequently evoked ${w} as a symbol of unattainable grace.`,
+      `The committee highlighted a troubling deficit of ${w} within contemporary organizational governance.`,
+      `Far from being an abstract ideal, ${w} proved to be a practical necessity during the crisis.`,
+      `Witnesses recalled how an overwhelming atmosphere of ${w} settled over the courtroom that evening.`,
+      `Scientific inquiry into ${w} has unlocked remarkable breakthroughs across multiple disciplines.`,
+      `By cultivating a culture of ${w}, the academy fostered groundbreaking intellectual achievements.`,
+      `The documentary illuminates the quiet dignity and relentless ${w} of everyday working families.`,
+      `Philosophers from Aristotle to Kant have grappled with the moral implications surrounding ${w}.`,
+      `The delicate balance between economic pragmatism and ${w} remains an urgent policy challenge.`,
+      `He approached the subject with an uncommon degree of ${w}, earning widespread acclaim from his peers.`
+    ];
+
+    const ADJ_TEMPLATES = [
+      `Critics praised the director's ${w} storytelling, which balanced subtle wit with profound melancholy.`,
+      `Even during intense cross-examination, her demeanor remained remarkably ${w} and composed.`,
+      `The architectural design features a distinctly ${w} aesthetic, melding traditional stone with sleek glass.`,
+      `His ${w} observations during the symposium challenged several entrenched academic orthodoxies.`,
+      `The diplomatic delegation adopted a cautious, ${w} posture during the bilateral treaty talks.`,
+      `In retrospect, their ${w} calculations underestimated the logistical hurdles of the expedition.`,
+      `She has a uniquely ${w} talent for transforming convoluted data sets into compelling visual narratives.`,
+      `The landscape appeared eerily ${w} under the twilight of an oncoming autumn storm.`,
+      `Reviewers were quick to laud the author's ${w} prose and evocative character development.`,
+      `Such ${w} measures were deemed indispensable in curbing the spread of the economic crisis.`,
+      `The laboratory results yielded unexpectedly ${w} findings that spurred a fresh line of inquiry.`,
+      `An inherently ${w} temperament helped him navigate the volatile dynamics of city politics.`,
+      `Her ${w} rebuttal systematically dismantled every point raised by the opposing counsel.`,
+      `The novel captures that fleeting, ${w} moment when youth confronts the compromises of adulthood.`,
+      `Historians noted that the regime maintained its authority through a deceptively ${w} facade.`,
+      `Behind his seemingly ${w} exterior lay an astonishing reservoir of courage and determination.`,
+      `The expedition required an exceptionally ${w} navigator capable of interpreting shifting arctic ice.`,
+      `Her ${w} intervention averted what could have been a catastrophic breakdown in communication.`,
+      `The symposium concluded with a series of ${w} reflections on the future of generative intelligence.`,
+      `A remarkably ${w} blend of humor and pathos elevated the performance into something unforgettable.`
+    ];
+
+    const VERB_TEMPLATES = [
+      `Historians continue to debate the circumstances that led the empire to ${w} its overseas territories.`,
+      `It takes rigorous discipline and years of laboratory practice to ${w} such microscopic specimens.`,
+      `The reform coalition sought to ${w} systemic inefficiencies across every tier of municipal bureaucracy.`,
+      `Rather than conform to expectations, the visionary chose to ${w} conventions at every opportunity.`,
+      `Diplomats met in secret to determine how best to ${w} escalating hostilities along the frontier.`,
+      `The principal objective was to ${w} public trust before rolling out the next phase of the project.`,
+      `Researchers designed the study specifically to ${w} the subtle mechanisms governing circadian rhythms.`,
+      `She refused to let skepticism ${w} her determination to finish the groundbreaking manuscript.`,
+      `Financial regulators stepped in to ${w} unchecked speculative trading before market volatility peaked.`,
+      `Modern software architectures must ${w} massive volumes of concurrent transactions seamlessly.`,
+      `The community organized workshops to help local entrepreneurs ${w} sustainable business practices.`,
+      `He strove to ${w} the delicate nuances of the original Greek text in his modern translation.`,
+      `Activists campaigned vigorously to ${w} policies that disproportionately affected vulnerable families.`,
+      `Few contemporary leaders possess the rhetorical charisma required to ${w} divided factions.`,
+      `The team had to ${w} complex engineering constraints without compromising on structural safety.`,
+      `Her keynote address sought to ${w} the next generation of climate scientists and environmental advocates.`,
+      `They worked late into the night to ${w} the discrepancy between the ledger and the actual reserves.`,
+      `The committee recommended decisive steps to ${w} redundant protocols across the department.`,
+      `Philosophers frequently return to this thought experiment to ${w} fundamental ethical assumptions.`,
+      `The artist sought to ${w} the fleeting interplay between light, shadow, and architectural form.`
+    ];
+
+    const ADV_TEMPLATES = [
+      `She delivered her rebuttal ${w}, leaving no doubt as to the strength of her legal position.`,
+      `The clockwork mechanism functioned ${w}, having been calibrated by generations of master horologists.`,
+      `He approached the delicate diplomatic mission ${w}, aware of the volatile geopolitical stakes.`,
+      `The narrative shifts ${w} between historical documentation and intimate personal confession.`,
+      `The data was ${w} verified against three independent satellite telemetry feeds.`,
+      `They navigated the mountain pass ${w}, mindful of the loose scree and fading twilight.`,
+      `The conductor led the orchestra ${w}, drawing an exquisite emotional depth from the strings.`,
+      `Her argument unfolded ${w}, systematically addressing each counterpoint with poise and rigor.`,
+      `The legislation was drafted ${w} to prevent potential loopholes from undermining its intent.`,
+      `He observed the courtroom proceedings ${w}, taking meticulous notes in the margins of his ledger.`,
+      `The expedition advanced ${w} across the frozen tundra, battling subzero winds at every mile.`,
+      `The newly appointed committee moved ${w} to implement the most critical audit recommendations.`,
+      `Her influence on the team's culture was felt ${w}, transforming collaboration across all projects.`,
+      `The novel's central mystery is ${w} revealed through alternating diary entries and letters.`,
+      `He defended his philosophical thesis ${w} against rigorous probing from the examining board.`,
+      `The restoration team worked ${w} to preserve the delicate fourteenth-century frescoes.`
+    ];
+
+    let pool = NOUN_TEMPLATES;
+    if (pos === 'adjective') pool = ADJ_TEMPLATES;
+    else if (pos === 'verb') pool = VERB_TEMPLATES;
+    else if (pos === 'adverb') pool = ADV_TEMPLATES;
+
+    const len = pool.length;
+    const i1 = h % len;
+    const i2 = (Math.floor(h / 7) + 5) % len;
+    const i3 = (Math.floor(h / 31) + 11) % len;
+
+    const indices = [i1];
+    if (!indices.includes(i2)) indices.push(i2);
+    else indices.push((i2 + 1) % len);
+
+    let third = i3;
+    while (indices.includes(third)) {
+      third = (third + 1) % len;
     }
+    indices.push(third);
+
+    return indices.map(idx => pool[idx]);
   }
 
   /* ==================== INFINITE WORD FETCHER & RESOLVER ==================== */
@@ -195,7 +328,7 @@
       word: key,
       phonetic: `/${key}/`,
       pos: pos,
-      definitions: [`A significant term in the English lexicon meaning or pertaining to ${key}.`],
+      definitions: [synthesizeLexicalDefinition(key, pos)],
       synonyms: [],
       antonyms: [],
       examples: examples,
@@ -207,25 +340,41 @@
     return wordObj;
   }
 
-  /* ==================== 17,000+ WORD RANDOM SHUFFLER ==================== */
+  /* ==================== MULTI-TIER PRIORITY SHUFFLER ==================== */
 
-  let shuffleDeck = [];
+  let curatedDeck = [];
+  let catalogDeck = [];
 
   function replenishDeck() {
-    shuffleDeck = CATALOG.map((_, idx) => idx);
-    // Fisher-Yates shuffle across all 17,000+ words
-    for (let i = shuffleDeck.length - 1; i > 0; i--) {
+    // 1. Curated master bank deck (all 450+ rich words loaded first!)
+    curatedDeck = CURATED_BANK.map(w => w.word);
+    for (let i = curatedDeck.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [shuffleDeck[i], shuffleDeck[j]] = [shuffleDeck[j], shuffleDeck[i]];
+      [curatedDeck[i], curatedDeck[j]] = [curatedDeck[j], curatedDeck[i]];
+    }
+
+    // 2. Full catalog deck for endless discovery
+    // Exclude curated words to prevent immediate repeats
+    const curatedSet = new Set(curatedDeck.map(w => w.toLowerCase()));
+    catalogDeck = CATALOG.filter(w => !curatedSet.has(w.toLowerCase()));
+    for (let i = catalogDeck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [catalogDeck[i], catalogDeck[j]] = [catalogDeck[j], catalogDeck[i]];
     }
   }
 
   function getRandomWordFromCatalog() {
-    if (shuffleDeck.length === 0) {
-      replenishDeck();
+    // Priority: Draw from rich curated bank first!
+    if (curatedDeck.length > 0) {
+      return curatedDeck.pop();
     }
-    const idx = shuffleDeck.pop();
-    return CATALOG[idx];
+    // If curated deck exhausted, draw from catalog
+    if (catalogDeck.length > 0) {
+      return catalogDeck.pop();
+    }
+    // If both empty, replenish and draw
+    replenishDeck();
+    return curatedDeck.length > 0 ? curatedDeck.pop() : (CATALOG[0] || 'ephemeral');
   }
 
   /* ==================== LEVEL & TITLE SYSTEM ==================== */
@@ -623,13 +772,13 @@
       dom.speakExamplesBtn.classList.remove('speaking');
       dom.speakExamplesBtn.innerHTML = `
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-        Read Aloud
+        <span>Read Aloud</span>
       `;
     }
   }
 
   function playPronunciation(wordObj) {
-    if (isSpeakingWord) {
+    if (isSpeakingWord || (activeAudio && !activeAudio.paused) || (window.speechSynthesis && window.speechSynthesis.speaking && isSpeakingWord)) {
       stopAllSpeech();
       triggerHaptic('light');
       return;
@@ -666,7 +815,7 @@
   }
 
   function toggleReadExamples() {
-    if (isSpeakingExamples) {
+    if (isSpeakingExamples || (window.speechSynthesis && window.speechSynthesis.speaking && isSpeakingExamples)) {
       stopAllSpeech();
       triggerHaptic('light');
       return;
@@ -680,7 +829,7 @@
     dom.speakExamplesBtn.classList.add('speaking');
     dom.speakExamplesBtn.innerHTML = `
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-      Stop Reading
+      <span>Stop Reading</span>
     `;
 
     const text = currentWord.examples.join('. ');
@@ -689,7 +838,7 @@
       dom.speakExamplesBtn.classList.remove('speaking');
       dom.speakExamplesBtn.innerHTML = `
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-        Read Aloud
+        <span>Read Aloud</span>
       `;
     });
 

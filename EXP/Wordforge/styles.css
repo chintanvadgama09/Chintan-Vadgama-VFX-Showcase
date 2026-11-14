@@ -432,34 +432,65 @@ body.no-scroll {
   pointer-events: none;
 }
 
-.record-examples-btn {
+.examples-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+  align-items: center;
+}
+
+.example-action-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--sp-2);
-  margin-top: var(--sp-2);
-  padding: var(--sp-2) var(--sp-4);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  color: var(--c-text-muted);
-  border: 1px solid var(--c-border);
+  height: 34px;
+  padding: 0 var(--sp-3);
   border-radius: var(--r-full);
+  border: 1px solid var(--c-border);
+  font-family: var(--f-body);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-wide);
   background: var(--c-bg-raised);
+  color: var(--c-text-secondary);
   transition: all var(--dur-normal) var(--ease-out);
   cursor: pointer;
+  white-space: nowrap;
 }
+
+.example-action-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  fill: currentColor;
+  pointer-events: none;
+}
+
+.speak-examples-btn:hover {
+  border-color: var(--c-accent);
+  color: var(--c-accent);
+  background: var(--c-accent-dim);
+}
+
+.speak-examples-btn.speaking {
+  color: var(--c-bg);
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+}
+
 .record-examples-btn:hover {
   color: var(--c-error);
   border-color: var(--c-error);
   background: var(--c-error-dim);
 }
+
 .record-examples-btn.recording {
   color: #fff;
   background: var(--c-error);
   border-color: var(--c-error);
   animation: recordPulse 1.2s ease infinite;
-}
-.record-examples-btn svg {
-  pointer-events: none;
 }
 
 /* Speech Result Feedback */
@@ -524,12 +555,16 @@ body.no-scroll {
 
 .the-word {
   font-family: var(--f-display);
-  font-size: var(--fs-4xl);
+  font-size: clamp(2rem, 5.5vw, 3.5rem);
   font-weight: var(--fw-regular);
   letter-spacing: var(--ls-tight);
   color: var(--c-text);
-  line-height: 1.1;
+  line-height: 1.15;
   animation: wordReveal var(--dur-slow) var(--ease-spring) both;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  max-width: 100%;
 }
 
 .phonetic {
@@ -636,30 +671,6 @@ body.no-scroll {
   margin-bottom: var(--sp-3);
 }
 
-.speak-examples-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: var(--sp-1) var(--sp-3);
-  border-radius: var(--r-full);
-  border: 1px solid var(--c-border);
-  font-size: var(--fs-xs);
-  color: var(--c-text-secondary);
-  background: var(--c-bg-raised);
-  transition: all var(--dur-fast);
-  cursor: pointer;
-}
-.speak-examples-btn:hover {
-  border-color: var(--c-accent);
-  color: var(--c-accent);
-  background: var(--c-accent-dim);
-}
-.speak-examples-btn svg {
-  width: 14px;
-  height: 14px;
-  fill: currentColor;
-  pointer-events: none;
-}
 
 .example-list {
   list-style: none;
@@ -1704,8 +1715,11 @@ body.no-scroll {
   }
 
   .stat-lbl {
-    font-size: 0.52rem;
+    font-size: 0.62rem;
     letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .xp-bar-wrapper {
@@ -1731,8 +1745,10 @@ body.no-scroll {
 
   /* Dramatic Hero Word on Mobile */
   .the-word {
-    font-size: 2.6rem;
-    line-height: 1.1;
+    font-size: clamp(1.85rem, 8vw, 2.6rem);
+    line-height: 1.15;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .phonetic {
@@ -1761,7 +1777,7 @@ body.no-scroll {
     position: sticky;
     bottom: 0;
     background: var(--c-bg-card);
-    padding: var(--sp-3) var(--card-padding);
+    padding: var(--sp-3) 0 0 0;
     margin-top: var(--sp-3);
     border-top: 1px solid var(--c-border);
     z-index: var(--z-sticky);
@@ -1771,6 +1787,24 @@ body.no-scroll {
   .btn {
     padding: 11px 14px;
     font-size: 0.88rem;
+  }
+
+  @media (max-width: 380px) {
+    .card-actions {
+      flex-direction: column;
+      gap: var(--sp-2);
+    }
+    .examples-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .example-action-btn {
+      width: 100%;
+      justify-content: center;
+    }
+    .stat-lbl {
+      font-size: 0.56rem;
+    }
   }
 
   .quiz-prompt {
