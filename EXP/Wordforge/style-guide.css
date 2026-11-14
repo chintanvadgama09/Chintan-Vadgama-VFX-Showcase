@@ -1,0 +1,247 @@
+/* ============================================================
+   WORDFORGE — STYLE GUIDE
+   ============================================================
+   Change values here to re-theme the entire application.
+   No component-level styles live in this file.
+   ============================================================ */
+
+/* ---------- Fonts ---------- */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+
+  /* -------- Color Palette -------- */
+  --c-bg:             #0b0b0d;
+  --c-bg-raised:      #131316;
+  --c-bg-card:        #19191d;
+  --c-bg-elevated:    #222228;
+  --c-bg-input:       #1e1e23;
+  --c-bg-overlay:     rgba(0, 0, 0, 0.65);
+
+  --c-border:         rgba(255, 255, 255, 0.06);
+  --c-border-hover:   rgba(255, 255, 255, 0.12);
+  --c-border-accent:  rgba(212, 168, 67, 0.35);
+
+  --c-text:           #ede9e3;
+  --c-text-secondary: #8c8c92;
+  --c-text-muted:     #55555a;
+  --c-text-inverse:   #0b0b0d;
+
+  --c-accent:         #d4a843;
+  --c-accent-hover:   #e0ba5a;
+  --c-accent-dim:     rgba(212, 168, 67, 0.12);
+  --c-accent-glow:    rgba(212, 168, 67, 0.25);
+
+  --c-success:        #4ade80;
+  --c-success-dim:    rgba(74, 222, 128, 0.12);
+  --c-error:          #f87171;
+  --c-error-dim:      rgba(248, 113, 113, 0.12);
+  --c-warning:        #fbbf24;
+  --c-info:           #60a5fa;
+
+  /* -------- Typography -------- */
+  --f-display:        'DM Serif Display', Georgia, 'Times New Roman', serif;
+  --f-body:           'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --f-mono:           'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+
+  --fs-xs:            0.7rem;
+  --fs-sm:            0.8rem;
+  --fs-base:          0.925rem;
+  --fs-md:            1.05rem;
+  --fs-lg:            1.3rem;
+  --fs-xl:            1.75rem;
+  --fs-2xl:           2.25rem;
+  --fs-3xl:           3rem;
+  --fs-4xl:           3.75rem;
+
+  --fw-regular:       400;
+  --fw-medium:        500;
+  --fw-semibold:      600;
+  --fw-bold:          700;
+
+  --lh-tight:         1.2;
+  --lh-normal:        1.5;
+  --lh-relaxed:       1.7;
+
+  --ls-tight:         -0.02em;
+  --ls-normal:        0;
+  --ls-wide:          0.05em;
+  --ls-wider:         0.1em;
+
+  /* -------- Spacing Scale -------- */
+  --sp-1:             4px;
+  --sp-2:             8px;
+  --sp-3:             12px;
+  --sp-4:             16px;
+  --sp-5:             20px;
+  --sp-6:             24px;
+  --sp-8:             32px;
+  --sp-10:            40px;
+  --sp-12:            48px;
+  --sp-16:            64px;
+  --sp-20:            80px;
+
+  /* -------- Border Radius -------- */
+  --r-sm:             3px;
+  --r-md:             6px;
+  --r-lg:             10px;
+  --r-xl:             16px;
+  --r-full:           9999px;
+
+  /* -------- Shadows -------- */
+  --shadow-xs:        0 1px 2px rgba(0,0,0,0.25);
+  --shadow-sm:        0 2px 4px rgba(0,0,0,0.3);
+  --shadow-md:        0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg:        0 8px 24px rgba(0,0,0,0.4);
+  --shadow-xl:        0 16px 48px rgba(0,0,0,0.5);
+  --shadow-accent:    0 0 20px rgba(212,168,67,0.15);
+  --shadow-glow:      0 0 40px rgba(212,168,67,0.2);
+
+  /* -------- Motion / Easing -------- */
+  --ease-out:         cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-out:      cubic-bezier(0.42, 0, 0.58, 1);
+  --ease-spring:      cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce:      cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+  --dur-fast:         120ms;
+  --dur-normal:       250ms;
+  --dur-slow:         400ms;
+  --dur-slower:       600ms;
+  --dur-slowest:      900ms;
+
+  /* -------- Z-Index Scale -------- */
+  --z-base:           1;
+  --z-dropdown:       100;
+  --z-sticky:         200;
+  --z-overlay:        500;
+  --z-modal:          600;
+  --z-toast:          700;
+  --z-tooltip:        800;
+
+  /* -------- Layout -------- */
+  --max-w:            680px;
+  --header-h:         56px;
+  --card-padding:     var(--sp-8);
+}
+
+/* ---------- Base Reset ---------- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--f-body);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+  color: var(--c-text);
+  background-color: var(--c-bg);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color var(--dur-slow) var(--ease-out), color var(--dur-slow) var(--ease-out);
+}
+
+a {
+  color: var(--c-accent);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  outline: none;
+}
+
+input, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--c-text);
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-3);
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+input:focus, textarea:focus {
+  border-color: var(--c-accent);
+}
+
+::selection {
+  background: var(--c-accent-dim);
+  color: var(--c-accent);
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--c-border-hover);
+  border-radius: var(--r-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-text-muted);
+}
+
+
+/* ============================================================
+   LIGHT THEME OVERRIDE
+   ============================================================
+   Toggle with data-theme="light" on <html>.
+   All component colors automatically update.
+   ============================================================ */
+
+[data-theme="light"] {
+  --c-bg:             #f4f2ed;
+  --c-bg-raised:      #ffffff;
+  --c-bg-card:        #ffffff;
+  --c-bg-elevated:    #e9e7e2;
+  --c-bg-input:       #f0ede8;
+  --c-bg-overlay:     rgba(0, 0, 0, 0.25);
+
+  --c-border:         rgba(0, 0, 0, 0.08);
+  --c-border-hover:   rgba(0, 0, 0, 0.16);
+  --c-border-accent:  rgba(170, 130, 30, 0.3);
+
+  --c-text:           #1a1a1d;
+  --c-text-secondary: #52525a;
+  --c-text-muted:     #9a9a9f;
+  --c-text-inverse:   #ffffff;
+
+  --c-accent:         #b08820;
+  --c-accent-hover:   #9a7618;
+  --c-accent-dim:     rgba(176, 136, 32, 0.09);
+  --c-accent-glow:    rgba(176, 136, 32, 0.15);
+
+  --c-success-dim:    rgba(34, 160, 60, 0.09);
+  --c-error-dim:      rgba(220, 50, 50, 0.09);
+
+  --shadow-xs:        0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm:        0 2px 4px rgba(0,0,0,0.06);
+  --shadow-md:        0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg:        0 8px 24px rgba(0,0,0,0.1);
+  --shadow-xl:        0 16px 48px rgba(0,0,0,0.12);
+  --shadow-accent:    0 0 20px rgba(176,136,32,0.08);
+  --shadow-glow:      0 0 40px rgba(176,136,32,0.1);
+}
+
+/* Smooth transitions for theme switching */
+*, *::before, *::after {
+  transition: background-color var(--dur-normal) var(--ease-out), border-color var(--dur-normal) var(--ease-out);
+}

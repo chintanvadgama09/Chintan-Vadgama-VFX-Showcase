@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WordForge — Build Your Vocabulary</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='18' width='100' height='100' fill='%23d4a843'/><text x='50%25' y='55%25' dominant-baseline='central' text-anchor='middle' font-size='56' font-family='Georgia' fill='%230b0b0d'>W</text></svg>">
+  <link rel="stylesheet" href="style-guide.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ========== HEADER ========== -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">W</div>
+        <h1 class="brand-name">WordForge</h1>
+      </div>
+      <div class="header-right">
+        <button class="settings-toggle" id="settingsToggle" title="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <button class="profile-toggle" id="profileToggle">
+          <span class="username-display" id="usernameDisplay">Guest</span>
+          <span class="level-pill" id="levelPill">Lv 1</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ========== STATS STRIP ========== -->
+    <div class="stats-strip">
+      <div class="stat-item">
+        <span class="stat-num" id="statWords">0</span>
+        <span class="stat-lbl">Words</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num" id="statXP">0</span>
+        <span class="stat-lbl">XP</span>
+      </div>
+      <div class="stat-item voice">
+        <span class="stat-num" id="statSpeaking">0</span>
+        <span class="stat-lbl">Voice Pts 🎙️</span>
+      </div>
+      <div class="stat-item streak">
+        <span class="stat-num" id="statStreak">0</span>
+        <span class="stat-lbl">Streak 🔥</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num" id="statAccuracy">—</span>
+        <span class="stat-lbl">Quiz %</span>
+      </div>
+    </div>
+
+    <!-- ========== XP BAR ========== -->
+    <div class="xp-bar-wrapper">
+      <div class="xp-bar">
+        <div class="xp-fill" id="xpFill"></div>
+      </div>
+      <span class="xp-text" id="xpText">0 / 100 XP</span>
+    </div>
+
+    <!-- ========== MODE TABS ========== -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="learn" id="tabLearn">Learn</button>
+      <button class="mode-tab" data-mode="quiz" id="tabQuiz">Quiz</button>
+    </div>
+
+    <!-- ========== LEARN MODE ========== -->
+    <section id="learnSection">
+      <!-- Search & Explore Bar -->
+      <div class="search-bar-wrap">
+        <div class="search-input-group">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="wordSearchInput" placeholder="Search or forge any of 17,000+ words..." autocomplete="off" spellcheck="false">
+          <button class="search-btn" id="wordSearchBtn">Explore</button>
+        </div>
+      </div>
+
+      <div class="word-card" id="wordCard">
+        <!-- Card Top -->
+        <div class="card-top">
+          <span class="pos-badge" id="posBadge">—</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="speak-btn" id="speakWordBtn" title="Listen to pronunciation">
+              <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            </button>
+            <button class="record-btn" id="recordWordBtn" title="Speak this word">
+              <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+            </button>
+          </div>
+        </div>
+        <!-- Word Speech Result -->
+        <div class="speech-result" id="wordSpeechResult">
+          <span class="speech-result-icon"></span>
+          <span class="speech-result-text"></span>
+          <span class="speech-result-pct"></span>
+        </div>
+
+        <!-- Word Display -->
+        <div class="word-body">
+          <h2 class="the-word" id="theWord">WordForge</h2>
+          <p class="phonetic" id="phonetic">Press "Next Word" to begin</p>
+        </div>
+
+        <div class="card-divider"></div>
+
+        <!-- Definition -->
+        <div class="definition-section">
+          <div class="section-label">Definition</div>
+          <p class="definition-text" id="definitionText">Your vocabulary journey starts here. Hit the button below to discover a new word!</p>
+        </div>
+
+        <!-- Synonyms & Antonyms -->
+        <div class="relations-grid">
+          <div class="relation-col">
+            <h4 class="section-label">Synonyms</h4>
+            <div class="tag-list" id="synonymsList">
+              <span class="no-data">—</span>
+            </div>
+          </div>
+          <div class="relation-col">
+            <h4 class="section-label">Antonyms</h4>
+            <div class="tag-list" id="antonymsList">
+              <span class="no-data">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Examples -->
+        <div class="examples-section">
+          <div class="section-label">Examples</div>
+          <ul class="example-list" id="exampleList">
+            <li class="example-item">Ready to learn something new?</li>
+          </ul>
+          <button class="speak-examples-btn" id="speakExamplesBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+            Read Aloud
+          </button>
+          <button class="record-examples-btn" id="recordExamplesBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+            Speak Sentence
+          </button>
+          <!-- Sentence Speech Result -->
+          <div class="speech-result" id="sentenceSpeechResult">
+            <span class="speech-result-icon"></span>
+            <span class="speech-result-text"></span>
+            <span class="speech-result-pct"></span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card-actions">
+          <button class="btn btn-learned" id="learnedBtn">&#10003; I Know This</button>
+          <button class="btn btn-next" id="nextBtn">Next Word →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== QUIZ MODE ========== -->
+    <section id="quizSection" class="hidden">
+      <div class="quiz-card" id="quizCard"></div>
+    </section>
+
+    <!-- ========== PROFILE PANEL OVERLAY ========== -->
+    <div class="panel-overlay" id="panelOverlay"></div>
+
+    <!-- ========== PROFILE PANEL ========== -->
+    <aside class="profile-panel" id="profilePanel">
+      <div class="panel-header">
+        <h2 class="panel-title">Profile</h2>
+        <button class="panel-close" id="panelClose">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="panel-body">
+        <!-- Username -->
+        <div class="panel-section">
+          <div class="panel-section-title">Username</div>
+          <div class="panel-input-group">
+            <input type="text" id="usernameInput" placeholder="Enter your name" maxlength="24" autocomplete="off" spellcheck="false">
+            <button class="save-btn" id="saveUsernameBtn">Save</button>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="panel-section">
+          <div class="panel-section-title">Statistics</div>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <span class="profile-stat-val" id="pStatXP">0</span>
+              <span class="profile-stat-lbl">Total XP</span>
+            </div>
+            <div class="profile-stat">
+              <span class="profile-stat-val" id="pStatLevel">1</span>
+              <span class="profile-stat-lbl">Level</span>
+            </div>
+            <div class="profile-stat">
+              <span class="profile-stat-val" id="pStatWords">0</span>
+              <span class="profile-stat-lbl">Learned</span>
+            </div>
+            <div class="profile-stat">
+              <span class="profile-stat-val" id="pStatSpeaking">0</span>
+              <span class="profile-stat-lbl">Voice Pts</span>
+            </div>
+            <div class="profile-stat">
+              <span class="profile-stat-val" id="pStatStreak">0</span>
+              <span class="profile-stat-lbl">Best Streak</span>
+            </div>
+            <div class="profile-stat">
+              <span class="profile-stat-val" id="pStatQuizzes">0</span>
+              <span class="profile-stat-lbl">Quizzes</span>
+            </div>
+            <div class="profile-stat">
+              <span class="profile-stat-val" id="pStatAccuracy">—</span>
+              <span class="profile-stat-lbl">Accuracy</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Title -->
+        <div class="panel-section">
+          <div class="panel-section-title">Title</div>
+          <div class="level-pill" style="align-self:flex-start;font-size:0.8rem;padding:4px 14px;" id="pTitle">Novice</div>
+        </div>
+
+        <!-- Achievements -->
+        <div class="panel-section">
+          <div class="panel-section-title">Achievements</div>
+          <div class="achievements-grid" id="achievementsGrid"></div>
+        </div>
+
+        <!-- Learned Words -->
+        <div class="panel-section">
+          <div class="panel-section-title">Learned Words</div>
+          <div class="learned-words-list" id="learnedWordsList">
+            <span class="no-data">No words learned yet</span>
+          </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="panel-section">
+          <div class="panel-section-title">Data</div>
+          <div class="data-actions">
+            <button class="data-btn danger" id="resetBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+              Reset All Progress
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========== SETTINGS PANEL ========== -->
+    <aside class="settings-panel" id="settingsPanel">
+      <div class="panel-header">
+        <h2 class="panel-title">Settings</h2>
+        <button class="panel-close" id="settingsClose">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="panel-body">
+
+        <!-- Theme -->
+        <div class="panel-section">
+          <div class="panel-section-title">Appearance</div>
+          <div class="theme-switch-row">
+            <span class="theme-switch-label"><span class="icon">🌙</span> Dark Mode</span>
+            <div class="toggle-track on" id="themeToggle">
+              <div class="toggle-knob"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Word Bank Info -->
+        <div class="panel-section">
+          <div class="panel-section-title">Word Bank & Offline Cache</div>
+          <div class="word-counter">
+            <strong id="wordBankCount">17,980+</strong> catalog words &nbsp;·&nbsp; <span id="cachedCount">0</span> cached offline
+          </div>
+          <button class="data-btn" id="precacheBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Pre-cache 20 Words for Offline
+          </button>
+        </div>
+
+        <!-- Keyboard Shortcuts -->
+        <div class="panel-section">
+          <div class="panel-section-title">Keyboard Shortcuts</div>
+          <div class="shortcuts-list">
+            <div class="shortcut-row"><span>Next word</span><span class="shortcut-key">N</span></div>
+            <div class="shortcut-row"><span>Mark learned</span><span class="shortcut-key">L</span></div>
+            <div class="shortcut-row"><span>Listen to word</span><span class="shortcut-key">S</span></div>
+            <div class="shortcut-row"><span>Read examples</span><span class="shortcut-key">R</span></div>
+            <div class="shortcut-row"><span>Close panel</span><span class="shortcut-key">Esc</span></div>
+          </div>
+        </div>
+
+        <!-- Import / Export -->
+        <div class="panel-section">
+          <div class="panel-section-title">Data</div>
+          <div class="data-actions">
+            <button class="data-btn" id="exportBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Export Progress (JSON)
+            </button>
+            <button class="data-btn" id="importBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              Import Progress (JSON)
+            </button>
+            <input type="file" accept=".json" class="hidden-input" id="importFileInput">
+          </div>
+        </div>
+
+        <!-- About -->
+        <div class="panel-section">
+          <div class="panel-section-title">About</div>
+          <p style="font-size:var(--fs-xs);color:var(--c-text-muted);line-height:1.6;">
+            <strong style="color:var(--c-text);">WordForge</strong> — Gamified vocabulary builder.<br>
+            Learn words, speak them aloud, quiz yourself, and track your progress. Export your data anytime for future login integration.
+          </p>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- ========== TOAST CONTAINER ========== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ========== LEVEL UP OVERLAY ========== -->
+    <div class="level-up-overlay" id="levelUpOverlay">
+      <div class="level-up-content">
+        <div class="level-up-badge" id="levelUpBadge">⚡</div>
+        <div class="level-up-text">Level Up!</div>
+        <div class="level-up-level" id="levelUpLevel">Level 2</div>
+        <div class="level-up-title" id="levelUpTitle">Apprentice</div>
+        <button class="level-up-dismiss" id="levelUpDismiss">Continue</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="word-catalog.js"></script>
+  <script src="words.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
