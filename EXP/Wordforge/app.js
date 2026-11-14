@@ -587,28 +587,74 @@
     }, 3200);
   }
 
-  /* ==================== AUDIO & TEXT TO SPEECH ==================== */
+  /* ==================== HAPTIC & TACTILE FEEDBACK ==================== */
+
+  function triggerHaptic(type = 'light') {
+    if ('vibrate' in navigator) {
+      try {
+        if (type === 'light') navigator.vibrate(12);
+        else if (type === 'medium') navigator.vibrate(25);
+        else if (type === 'success') navigator.vibrate([15, 40, 20]);
+      } catch (e) {}
+    }
+  }
+
+  /* ==================== AUDIO & TEXT TO SPEECH (STOP / PLAY TOGGLE) ==================== */
 
   let activeAudio = null;
+  let isSpeakingWord = false;
+  let isSpeakingExamples = false;
+
+  function stopAllSpeech() {
+    if (activeAudio) {
+      try {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+      } catch (e) {}
+      activeAudio = null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    isSpeakingWord = false;
+    isSpeakingExamples = false;
+    if (dom.speakWordBtn) dom.speakWordBtn.classList.remove('speaking');
+    if (dom.speakExamplesBtn) {
+      dom.speakExamplesBtn.classList.remove('speaking');
+      dom.speakExamplesBtn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+        Read Aloud
+      `;
+    }
+  }
 
   function playPronunciation(wordObj) {
+    if (isSpeakingWord) {
+      stopAllSpeech();
+      triggerHaptic('light');
+      return;
+    }
+
+    stopAllSpeech();
+    triggerHaptic('light');
+    isSpeakingWord = true;
     dom.speakWordBtn.classList.add('speaking');
 
     const done = () => {
+      isSpeakingWord = false;
       dom.speakWordBtn.classList.remove('speaking');
     };
 
     // If authentic audio URL is available, try playing MP3
     if (wordObj && wordObj.audioUrl) {
       try {
-        if (activeAudio) { activeAudio.pause(); activeAudio = null; }
         activeAudio = new Audio(wordObj.audioUrl);
         activeAudio.onended = done;
         activeAudio.onerror = () => {
-          speakTTS(wordObj.word, done);
+          if (isSpeakingWord) speakTTS(wordObj.word, done);
         };
         activeAudio.play().catch(() => {
-          speakTTS(wordObj.word, done);
+          if (isSpeakingWord) speakTTS(wordObj.word, done);
         });
         return;
       } catch (err) {
@@ -617,6 +663,40 @@
     }
 
     speakTTS(wordObj ? wordObj.word : '', done);
+  }
+
+  function toggleReadExamples() {
+    if (isSpeakingExamples) {
+      stopAllSpeech();
+      triggerHaptic('light');
+      return;
+    }
+
+    if (!currentWord || !currentWord.examples || !currentWord.examples.length) return;
+
+    stopAllSpeech();
+    triggerHaptic('light');
+    isSpeakingExamples = true;
+    dom.speakExamplesBtn.classList.add('speaking');
+    dom.speakExamplesBtn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      Stop Reading
+    `;
+
+    const text = currentWord.examples.join('. ');
+    speakTTS(text, () => {
+      isSpeakingExamples = false;
+      dom.speakExamplesBtn.classList.remove('speaking');
+      dom.speakExamplesBtn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+        Read Aloud
+      `;
+    });
+
+    state.speakCount++;
+    saveState();
+    addXP(REWARDS.SPEAK_EXAMPLE, dom.speakExamplesBtn);
+    checkAchievements();
   }
 
   function speakTTS(text, onEnd) {
@@ -629,7 +709,12 @@
     utterance.rate = 0.88;
     utterance.pitch = 1;
     utterance.lang = 'en-US';
-    if (onEnd) utterance.onend = onEnd;
+    utterance.onend = () => {
+      if (onEnd) onEnd();
+    };
+    utterance.onerror = () => {
+      if (onEnd) onEnd();
+    };
     window.speechSynthesis.speak(utterance);
   }
 
@@ -870,6 +955,7 @@
   async function showWord(targetWord) {
     if (!targetWord) return;
 
+    stopAllSpeech();
     dom.wordCard.classList.add('loading');
     hideSpeechFeedback(dom.wordSpeechResult);
     hideSpeechFeedback(dom.sentenceSpeechResult);
@@ -1208,43 +1294,94 @@
 
   /* ==================== PANELS (PROFILE & SETTINGS) ==================== */
 
+  function isAnyPanelOpen() {
+    return (
+      (dom.profilePanel && dom.profilePanel.classList.contains('open')) ||
+      (dom.settingsPanel && dom.settingsPanel.classList.contains('open'))
+    );
+  }
+
+  function syncScrollLock() {
+    if (isAnyPanelOpen()) {
+      document.body.classList.add('no-scroll');
+    } else {
+      document.body.classList.remove('no-scroll');
+    }
+  }
+
+  function syncToggleStates() {
+    const isProfOpen = dom.profilePanel && dom.profilePanel.classList.contains('open');
+    const isSetOpen = dom.settingsPanel && dom.settingsPanel.classList.contains('open');
+
+    if (dom.profileToggle) dom.profileToggle.classList.toggle('active', !!isProfOpen);
+    if (dom.settingsToggle) dom.settingsToggle.classList.toggle('active', !!isSetOpen);
+  }
+
   function openProfile() {
-    closeSettings();
-    dom.profilePanel.classList.add('open');
-    dom.panelOverlay.classList.add('open');
+    if (dom.settingsPanel) dom.settingsPanel.classList.remove('open');
+    if (dom.profilePanel) dom.profilePanel.classList.add('open');
+    if (dom.panelOverlay) dom.panelOverlay.classList.add('open');
+    syncToggleStates();
+    syncScrollLock();
     renderUI();
   }
 
   function closeProfile() {
-    dom.profilePanel.classList.remove('open');
-    if (!dom.settingsPanel.classList.contains('open')) {
-      dom.panelOverlay.classList.remove('open');
+    if (dom.profilePanel) dom.profilePanel.classList.remove('open');
+    if (!dom.settingsPanel || !dom.settingsPanel.classList.contains('open')) {
+      if (dom.panelOverlay) dom.panelOverlay.classList.remove('open');
+    }
+    syncToggleStates();
+    syncScrollLock();
+  }
+
+  function toggleProfile() {
+    if (dom.profilePanel && dom.profilePanel.classList.contains('open')) {
+      closeProfile();
+    } else {
+      openProfile();
     }
   }
 
   function openSettings() {
-    closeProfile();
-    dom.settingsPanel.classList.add('open');
-    dom.panelOverlay.classList.add('open');
+    if (dom.profilePanel) dom.profilePanel.classList.remove('open');
+    if (dom.settingsPanel) dom.settingsPanel.classList.add('open');
+    if (dom.panelOverlay) dom.panelOverlay.classList.add('open');
+    syncToggleStates();
+    syncScrollLock();
     renderUI();
   }
 
   function closeSettings() {
-    dom.settingsPanel.classList.remove('open');
-    if (!dom.profilePanel.classList.contains('open')) {
-      dom.panelOverlay.classList.remove('open');
+    if (dom.settingsPanel) dom.settingsPanel.classList.remove('open');
+    if (!dom.profilePanel || !dom.profilePanel.classList.contains('open')) {
+      if (dom.panelOverlay) dom.panelOverlay.classList.remove('open');
+    }
+    syncToggleStates();
+    syncScrollLock();
+  }
+
+  function toggleSettings() {
+    if (dom.settingsPanel && dom.settingsPanel.classList.contains('open')) {
+      closeSettings();
+    } else {
+      openSettings();
     }
   }
 
   function closeAllPanels() {
-    closeProfile();
-    closeSettings();
+    if (dom.profilePanel) dom.profilePanel.classList.remove('open');
+    if (dom.settingsPanel) dom.settingsPanel.classList.remove('open');
+    if (dom.panelOverlay) dom.panelOverlay.classList.remove('open');
+    syncToggleStates();
+    syncScrollLock();
   }
 
   /* ==================== EVENT LISTENERS ==================== */
 
   // Next Word (Draw from 17,000+ words)
   dom.nextBtn.addEventListener('click', () => {
+    triggerHaptic('light');
     const nextWord = getRandomWordFromCatalog();
     showWord(nextWord);
   });
@@ -1253,6 +1390,7 @@
   function executeSearch() {
     const term = dom.wordSearchInput.value.trim().toLowerCase();
     if (!term) return;
+    triggerHaptic('light');
     state.exploredCount = (state.exploredCount || 0) + 1;
     showWord(term);
     showToast(`🔍 Forged: "${term}"`);
@@ -1268,6 +1406,7 @@
   // Mark as Learned
   dom.learnedBtn.addEventListener('click', () => {
     if (!currentWord) return;
+    triggerHaptic('medium');
     const word = currentWord.word;
     if (!state.wordsLearned.includes(word)) {
       state.wordsLearned.push(word);
@@ -1286,7 +1425,7 @@
     checkAchievements();
   });
 
-  // Listen to word (Authentic Audio or TTS)
+  // Listen to word pronunciation (Plays or stops on tap)
   dom.speakWordBtn.addEventListener('click', () => {
     if (!currentWord) return;
     playPronunciation(currentWord);
@@ -1300,33 +1439,57 @@
 
   // Speak word into microphone
   dom.recordWordBtn.addEventListener('click', () => {
+    triggerHaptic('light');
     startWordRecording();
   });
 
-  // Read examples aloud (TTS)
+  // Read examples aloud (TTS toggle play/stop on tap)
   dom.speakExamplesBtn.addEventListener('click', () => {
-    if (!currentWord || !currentWord.examples.length) return;
-    dom.speakExamplesBtn.classList.add('speaking');
-    const text = currentWord.examples.join('. ');
-    speakTTS(text, () => {
-      dom.speakExamplesBtn.classList.remove('speaking');
-    });
-    state.speakCount++;
-    saveState();
-    addXP(REWARDS.SPEAK_EXAMPLE, dom.speakExamplesBtn);
-    checkAchievements();
+    toggleReadExamples();
   });
 
   // Speak sentence into microphone
   dom.recordExamplesBtn.addEventListener('click', () => {
+    triggerHaptic('light');
     startSentenceRecording();
   });
+
+  // Touch Swipe Gesture on Word Card (Left swipe: Next Word, Right swipe: Mark Learned)
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  dom.wordCard.addEventListener('touchstart', (e) => {
+    if (e.changedTouches && e.changedTouches[0]) {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }
+  }, { passive: true });
+
+  dom.wordCard.addEventListener('touchend', (e) => {
+    if (!e.changedTouches || !e.changedTouches[0]) return;
+    const diffX = touchStartX - e.changedTouches[0].screenX;
+    const diffY = touchStartY - e.changedTouches[0].screenY;
+
+    if (Math.abs(diffX) > 65 && Math.abs(diffX) > Math.abs(diffY) * 1.4) {
+      if (diffX > 0) {
+        // Swiped Left -> Next Word
+        triggerHaptic('light');
+        dom.nextBtn.click();
+      } else {
+        // Swiped Right -> Toggle Learned
+        triggerHaptic('medium');
+        dom.learnedBtn.click();
+      }
+    }
+  }, { passive: true });
 
   // Mode Tabs
   dom.tabLearn.addEventListener('click', () => switchMode('learn'));
   dom.tabQuiz.addEventListener('click', () => switchMode('quiz'));
 
   function switchMode(mode) {
+    stopAllSpeech();
+    triggerHaptic('light');
     dom.tabLearn.classList.toggle('active', mode === 'learn');
     dom.tabQuiz.classList.toggle('active', mode === 'quiz');
     dom.learnSection.classList.toggle('hidden', mode !== 'learn');
@@ -1336,11 +1499,31 @@
   }
 
   // Panel Toggles
-  dom.profileToggle.addEventListener('click', openProfile);
-  dom.panelClose.addEventListener('click', closeProfile);
-  dom.settingsToggle.addEventListener('click', openSettings);
-  dom.settingsClose.addEventListener('click', closeSettings);
-  dom.panelOverlay.addEventListener('click', closeAllPanels);
+  dom.profileToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleProfile();
+  });
+  dom.panelClose.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeProfile();
+  });
+  dom.settingsToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleSettings();
+  });
+  dom.settingsClose.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeSettings();
+  });
+  dom.panelOverlay.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeAllPanels();
+  });
 
   // Theme Toggle
   dom.themeToggle.addEventListener('click', () => {
@@ -1465,6 +1648,17 @@
 
   // Keyboard Shortcuts
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (isAnyPanelOpen() || (dom.levelUpOverlay && dom.levelUpOverlay.classList.contains('show'))) {
+        e.preventDefault();
+        closeAllPanels();
+        if (dom.levelUpOverlay) dom.levelUpOverlay.classList.remove('show');
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
+        return;
+      }
+    }
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (e.key === 'n' || e.key === 'N' || e.key === ' ') {
       e.preventDefault();
@@ -1482,10 +1676,6 @@
     if (e.key === '/' || e.key === 'f' || e.key === 'F') {
       e.preventDefault();
       dom.wordSearchInput.focus();
-    }
-    if (e.key === 'Escape') {
-      closeAllPanels();
-      dom.levelUpOverlay.classList.remove('show');
     }
   });
 
